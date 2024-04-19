@@ -95,7 +95,7 @@ end
 
 local ui = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
-local Window = ui:MakeWindow({Name = "Ultimate Town Sandbox", HidePremium = false, SaveConfig = true, ConfigFolder = "utsScript", IntroEnabled = false, CloseCallback = whenClosing()})
+local Window = ui:MakeWindow({Name = "Ultimate Town Sandbox", HidePremium = false, SaveConfig = true, ConfigFolder = "utsScript", IntroEnabled = false})
 --[[
 local PlantsTab = Window:MakeTab({
 	Name = "Plants",
