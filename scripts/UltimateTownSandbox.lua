@@ -376,6 +376,7 @@ CharactersTab:AddToggle({
 	end
 })
 FarmingTab:AddLabel("Note: You can use \"db\" functions, but they are still in progress!")
+--[[ patched... again >:(
 FarmingTab:AddButton({
 	Name = "Loot all \"Lootable\" items",
 	Callback = function()
@@ -394,7 +395,7 @@ FarmingTab:AddButton({
 			end
 		end
 	end
-})
+})]]
 
 FarmingTab:AddSection({Name = "Jobs"})
 
