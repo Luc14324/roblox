@@ -8,8 +8,7 @@
 local Workspace = game.Workspace
 local RunService = game:GetService("RunService")
 local _delay = .1
---local IfHarvestLeaderboardSpamming = false
---local harvestTarget = 9000
+local Player = game.Players.LocalPlayer
 
 function getRoot(char)
 	local rootPart = char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
@@ -20,62 +19,14 @@ function isNumber(str)
 		return true
 	end
 end
---[[
-function getPlantsAvaliable(as, _return)
-	local avaliable = 0
-	local plants = Workspace.Plants:GetChildren()
-	local plants1 = {}
-	local IDontHaveEnoughTimeSoIUseThis = {}
-	for _, env in pairs(plants) do
-		table.insert(plants1, env)
-	end
-	for _, bush in pairs(plants1) do
-		if string.match(as, "flower") then
-			if bush:FindFirstChild("Color") then
-				if bush:FindFirstChild("Color").Transparency == 0 then
-					avaliable = avaliable + 1
-					table.insert(IDontHaveEnoughTimeSoIUseThis, bush)
-				end
-			end
-		elseif string.match(as, "bush") then
-			if bush:FindFirstChild("Berry") then
-				if bush:FindFirstChild("Berry").Transparency == 0 then
-					avaliable = avaliable + 1
-					table.insert(IDontHaveEnoughTimeSoIUseThis, bush)
-				end
-			end
-		elseif string.match(as, "plant") then
-			if bush:FindFirstChild("Color") then
-				if bush:FindFirstChild("Color").Transparency == 0 then
-					avaliable = avaliable + 1
-					table.insert(IDontHaveEnoughTimeSoIUseThis, bush)
-				end
-			elseif bush:FindFirstChild("Berry") then
-				if bush:FindFirstChild("Berry").Transparency == 0 then
-					avaliable = avaliable + 1
-					table.insert(IDontHaveEnoughTimeSoIUseThis, bush)
-				end
-			end
-		end
-	end
-	if string.match(_return, "number") then
-		return avaliable
-	elseif string.match(_return, "table") then
-		return IDontHaveEnoughTimeSoIUseThis
-	end
-end
-]]
+
 function tp(instance:Part)
 	local char = game.Players.LocalPlayer.Character
 	if char and getRoot(char) then
 		getRoot(char).CFrame = instance.CFrame
 	end
 end
---[[
-function whenClosing()
-	getgenv().ifautofarmworks = false
-end
-]]
+
 local GC = getconnections or get_signal_cons
 if GC then
 	for i,v in pairs(GC(game.Players.LocalPlayer.Idled)) do
@@ -110,6 +61,11 @@ local CharactersTab = Window:MakeTab({
 })
 local FarmingTab = Window:MakeTab({
 	Name = "Farming",
+	Icon = nil,
+	PremiumOnly = false
+})
+local WorldTab = Window:MakeTab({
+	Name = "World",
 	Icon = nil,
 	PremiumOnly = false
 })
@@ -376,26 +332,6 @@ CharactersTab:AddToggle({
 	end
 })
 FarmingTab:AddLabel("Note: You can use \"db\" functions, but they are still in progress!")
---[[ patched... again >:(
-FarmingTab:AddButton({
-	Name = "Loot all \"Lootable\" items",
-	Callback = function()
-		local trash:Part = Workspace.LootableItems:GetChildren()
-		for _,v in pairs(trash) do
-			local prompt = v:FindFirstChildOfClass("ProximityPrompt")
-			if prompt then
-				prompt.HoldDuration = 0
-				task.wait(_delay)
-				local char = game.Players.LocalPlayer.Character
-				if char and getRoot(char) then
-					tp(v)
-					task.wait(_delay)
-					fireproximityprompt(prompt)
-				end
-			end
-		end
-	end
-})]]
 
 FarmingTab:AddSection({Name = "Jobs"})
 
@@ -523,6 +459,65 @@ FarmingTab:AddToggle({
 	end    
 })
 
+WorldTab:AddSection({Name = "NPCs"})
+local npcs_selected:Instance
+local npcs_category_avaliable = {}
+for _,v in pairs(workspace.NPCs:GetChildren()) do
+	if #v:GetChildren() ~= 0 then
+		table.insert(npcs_category_avaliable, v.Name)
+	end
+end
+WorldTab:AddDropdown({
+	Name = "Select type - Kill NPCs",
+	Default = workspace.NPCs.SidewalkNPCs.Name,
+	Options = npcs_category_avaliable,
+	Callback = function(Value)
+		npcs_selected = workspace.NPCs:FindFirstChild(Value)
+	end
+})
+WorldTab:AddButton({
+	Name = "Kill NPCs",
+	Callback = function()
+		local can_pass = false
+		if Player.Character:FindFirstChild("Fists") then
+			for i, v in pairs(npcs_selected:GetChildren()) do
+				game:GetService("ReplicatedStorage").Events.Shoot:FireServer(v, 5000, "Head")
+			end
+			ui:MakeNotification({
+				Name = "Kill NPCs",
+				Content = "Done killing ".. npcs_selected.Name .." NPCs",
+				Image = nil,
+				Time = 3
+			})
+		else
+			game:GetService("ReplicatedStorage").Events.Unequip:FireServer()
+			game:GetService("ReplicatedStorage").Events.Equip:FireServer("Fists")
+			task.wait()
+			if Player.Backpack:FindFirstChild("Fists") then
+				can_pass = true
+			else
+				repeat
+					task.wait()
+					game:GetService("ReplicatedStorage").Events.Equip:FireServer("Fists")
+				until Player.Character:FindFirstChild("Fists")
+			end
+			if can_pass then
+				for i, v in pairs(npcs_selected:GetChildren()) do
+					game:GetService("ReplicatedStorage").Events.Shoot:FireServer(v, 5000, "Head")
+				end
+				ui:MakeNotification({
+					Name = "Kill NPCs",
+					Content = "Done killing ".. npcs_selected.Name .." NPCs",
+					Image = nil,
+					Time = 3
+				})
+				game:GetService("ReplicatedStorage").Events.Unequip:FireServer()
+			end
+		end
+	end
+})
+
+
 MoodTab:AddSection({Name = "General"})
 
 MoodTab:AddToggle({
@@ -534,7 +529,7 @@ MoodTab:AddToggle({
 		game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.EnergyVignette.Visible = Value
 		game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.HungerStatic.Visible = Value
 		game:GetService("Lighting").ThirstBlur.Enabled = Value 
-	
+
 	end    
 })
 
@@ -762,25 +757,7 @@ Settings:AddButton({
 	end
 })
 
-local Plants = PlantsTab:AddLabel("")
-
-task.spawn(function()
-	while task.wait() do
-		Plants:Set("Avaliable plants: ".. tostring(getPlantsAvaliable("plant", "number")))
-	end
-end)
-
 Settings:AddLabel("Script made by nick7 with <3")
 Settings:AddLabel("Using Orion UI library for this script.")
-if IfHarvestLeaderboardSpamming then
-	task.spawn(function()
-		while task.wait() do
-			local harvested = game:GetService("Players").LocalPlayer.PlayerGui.MainGUI.Inventory.Statistics.PlantsHarvested.Text
-			if tonumber((harvested):match("%d+")) >= harvestTarget then
-				game.Players.LocalPlayer:Kick("Harvest target reached: ".. harvested.." >= ".. harvestTarget)
-			end
-		end
-	end)
-end
 
 ui:Init()
