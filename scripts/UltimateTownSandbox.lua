@@ -5,6 +5,7 @@
 	ur exploit must support fireproximityprompt with getconnections.
 	use it, but carefully.
 ]]
+local ui = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local Workspace = game.Workspace
 local RunService = game:GetService("RunService")
 local _delay = .1
@@ -27,6 +28,13 @@ function tp(instance:Part)
 	end
 end
 
+function bring(instance:Part)
+	local char = game.Players.LocalPlayer.Character
+	if char and getRoot(char) then
+		instance.CFrame = getRoot(char).CFrame
+	end
+end
+
 local GC = getconnections or get_signal_cons
 if GC then
 	for i,v in pairs(GC(game.Players.LocalPlayer.Idled)) do
@@ -44,16 +52,7 @@ else
 	end)
 end
 
-local ui = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-
 local Window = ui:MakeWindow({Name = "Ultimate Town Sandbox", HidePremium = false, SaveConfig = true, ConfigFolder = "utsScript", IntroEnabled = false})
---[[
-local PlantsTab = Window:MakeTab({
-	Name = "Plants",
-	Icon = nil,
-	PremiumOnly = false
-})
-]]
 local CharactersTab = Window:MakeTab({
 	Name = "Character",
 	Icon = nil,
@@ -84,166 +83,12 @@ local Settings = Window:MakeTab({
 	Icon = nil,
 	PremiumOnly = false
 })
---[[
-PlantsTab:AddButton({
-	Name = "Sell all plants",
-	Callback = function()
-		local prox = Workspace.ShopItems.SellPlants.ProximityPrompt
-		prox.HoldDuration = 0
-		task.wait()
-		tp(Workspace.Waypoints.AllChars["Sell Plants"])
-		task.wait(_delay)
-		fireproximityprompt(prox)
-	end
+local CreditsTab = Window:MakeTab({
+	Name = "Credits",
+	Icon = nil,
+	PremiumOnly = false
 })
 
-local SectionBushes = PlantsTab:AddSection({Name = "Bushes"})
-
-local bushesAvaliable = PlantsTab:AddLabel("Avaliable bushes: ")
-
-task.spawn(function()
-	while task.wait() do
-		bushesAvaliable:Set("Avaliable bushes: ".. tostring(getPlantsAvaliable("bush", "number")))
-	end
-end)
-
-PlantsTab:AddButton({
-	Name = "Collect berries",
-	Callback = function()
-		local avaliable = getPlantsAvaliable("bush", "table")
-		for _, v in avaliable do
-			local sp:ProximityPrompt = v.Hitbox.SearchPrompt
-			local tp2 = v.Berry
-			sp.HoldDuration = 0
-			task.wait()
-			local char = game.Players.LocalPlayer.Character
-			if char and getRoot(char) then
-				tp(tp2)
-				task.wait(_delay)
-				fireproximityprompt(sp)
-			end
-		end
-	end
-})
-
-local SectionBushes = PlantsTab:AddSection({Name = "Flowers"})
-
-local flowersAvaliable = PlantsTab:AddLabel("Avaliable flowers: ")
-
-task.spawn(function()
-	while task.wait() do
-		flowersAvaliable:Set("Avaliable flowers: ".. tostring(getPlantsAvaliable("flower", "number")))
-	end
-end)
-
-PlantsTab:AddButton({
-	Name = "Collect flowers",
-	Callback = function()
-		local avaliable = getPlantsAvaliable("flower", "table")
-		for _, v in avaliable do
-			local sp:ProximityPrompt = v.Hitbox.SearchPrompt
-			local tp2 = v.Color
-			sp.HoldDuration = 0
-			task.wait()
-			local char = game.Players.LocalPlayer.Character
-			if char and getRoot(char) then
-				tp(tp2)
-				task.wait(_delay)
-				fireproximityprompt(sp)
-			end
-		end
-	end
-})
-
-local SectionAutofarm = PlantsTab:AddSection({Name = "Autofarm"})
-
-PlantsTab:AddLabel("Will automatically collect all plants and sell them")
-PlantsTab:AddLabel("Will sleep when no plants avaliable")
-
-task.spawn(function()
-	PlantsTab:AddToggle({
-		Name = "Toggle autofarm",
-		Default = false,
-		Save = true,
-		Flag = "Autofarm",
-		Callback = function(Value)
-			task.spawn(function()
-				if not getgenv().ifautofarmworks then
-					print("doesn't exists")
-				end
-				getgenv().ifautofarmworks = Value
-				while getgenv().ifautofarmworks do
-					game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-					task.wait()
-					local plantsinst = Workspace.Plants:GetChildren()
-					local plants = {}
-					for _, env in pairs(plantsinst) do
-						table.insert(plants, env)
-					end
-					local avaliable = {}
-					for _, bush in pairs(plants) do
-						if bush:FindFirstChild("Color") then
-							if bush:FindFirstChild("Color").Transparency == 0 then
-								table.insert(avaliable, bush)
-							end
-						elseif bush:FindFirstChild("Berry") then
-							if bush:FindFirstChild("Berry").Transparency == 0 then
-								table.insert(avaliable, bush)
-							end
-						end
-					end
-					for _, v in avaliable do
-						if getgenv().ifautofarmworks then
-							local sp:ProximityPrompt = v.Hitbox.SearchPrompt
-							local tp2 = v.Hitbox
-							sp.HoldDuration = 0
-							task.wait()
-							local char = game.Players.LocalPlayer.Character
-							if char and getRoot(char) then
-								tp(tp2)
-								task.wait(_delay)
-								fireproximityprompt(sp)
-							end
-						else
-							break
-						end
-					end
-					local prox = Workspace.ShopItems.SellPlants.ProximityPrompt
-					prox.HoldDuration = 0
-					task.wait()
-					tp(Workspace.Waypoints.AllChars["Sell Plants"])
-					task.wait(_delay)
-					fireproximityprompt(prox)
-					local _plantsAsNumber = getPlantsAvaliable("plant", "number")
-					if _plantsAsNumber == 0 then
-						task.wait()
-						_plantsAsNumber = getPlantsAvaliable("plant", "number")
-						local char = game.Players.LocalPlayer.Character
-						if char and getRoot(char) then
-							local all = Workspace:GetDescendants()
-							for _, v in pairs(all) do
-								if v:IsA("ProximityPrompt") then
-									if string.match(v.ObjectText, "Bed") then
-										tp(v.Parent)
-										task.wait(_delay)
-										fireproximityprompt(v)
-										while _plantsAsNumber == 0 and getgenv().ifautofarmworks do
-											task.wait(.1)
-											_plantsAsNumber = getPlantsAvaliable("plant", "number")
-										end
-										game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-										break
-									end
-								end
-							end
-						end
-					end
-				end
-			end)
-		end    
-	})
-end)
-]]
 local allCharacters = workspace.PlayableCharacters:GetChildren()
 local characterstbl = {}
 
@@ -303,12 +148,7 @@ CharactersTab:AddToggle({
 	Callback = function(Value)
 		_greet = Value
 		while _greet do
-			local args = {
-				[1] = workspace:WaitForChild("NPCs"):WaitForChild("Enemies"):WaitForChild("Bandit"),
-				[2] = "AddGreet"
-			}
-
-			game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("LootEvent"):FireServer(unpack(args))
+			game:GetService("ReplicatedStorage").Events.LootEvent:FireServer(workspace.NPCs.Enemies:FindFirstChild("Bandit"), "AddGreet")
 			task.wait()
 		end
 	end
@@ -321,22 +161,16 @@ CharactersTab:AddToggle({
 	Callback = function(Value)
 		_greet = Value
 		while _greet do
-			local args = {
-				[1] = workspace:WaitForChild("NPCs"):WaitForChild("Enemies"):WaitForChild("Bandit"),
-				[2] = "AddInsult"
-			}
-
-			game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("LootEvent"):FireServer(unpack(args))
+			game:GetService("ReplicatedStorage").Events.LootEvent:FireServer(workspace.NPCs.Enemies:FindFirstChild("Bandit"), "AddInsult")
 			task.wait()
 		end
 	end
 })
-FarmingTab:AddLabel("Note: You can use \"db\" functions, but they are still in progress!")
 
-FarmingTab:AddSection({Name = "Jobs"})
+FarmingTab:AddSection({Name = "Hospital"})
 
 FarmingTab:AddButton({
-	Name = "db1hos",
+	Name = "[BETA] Cure patients",
 	Callback = function()
 		local function get(item)
 			if item.ClassName == "Part" then
@@ -395,34 +229,9 @@ FarmingTab:AddButton({
 	end
 })
 
-FarmingTab:AddButton({
-	Name = "db2spills",
-	Callback = function()
-		local char = game.Players.LocalPlayer.Character
-		local mop = game:GetService("Workspace").JobParts.Hospital.Mop
-		local spills = workspace.JobParts.Spills:GetChildren()
-		if not char:FindFirstChild("Mop") then
-			repeat
-				tp(mop)
-				task.wait(_delay)
-				fireproximityprompt(mop.ProximityPrompt)
-				task.wait()
-			until char:FindFirstChild("Mop")
-		end
-		task.wait()
-		for _,v in pairs(spills) do
-			tp(v)
-			game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-			task.wait(_delay)
-			v.SpillPrompt.HoldDuration = 0
-			fireproximityprompt(v.SpillPrompt)
-			task.wait()
-		end
-	end
-})
 local _spillsauto = false
 FarmingTab:AddToggle({
-	Name = "db3spillsAuto",
+	Name = "Autofarm spills",
 	Default = false,
 	Callback = function(Value)
 		_spillsauto = Value
@@ -549,9 +358,11 @@ MoodTab:AddButton({
 			for _, v in pairs(all) do
 				if v:IsA("ProximityPrompt") then
 					if string.match(v.ObjectText, "Bed") then
-						tp(v.Parent)
-						task.wait(_delay)
-						fireproximityprompt(v)
+						repeat
+							tp(v.Parent)
+							task.wait(_delay)
+							fireproximityprompt(v)
+						until char.Sit
 						break
 					end
 				end
@@ -563,8 +374,17 @@ MoodTab:AddButton({
 MoodTab:AddButton({
 	Name = "+100 to every mood ($24.99)",
 	Callback = function()
-		game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("BuyConsumable"):FireServer("GhostBurger",game:GetService("ReplicatedStorage"):WaitForChild("GlobalVariables"):WaitForChild("FoodBuyPrices"):WaitForChild("BurgerPlace"))
-		game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("UseConsumable"):FireServer("GhostBurger")
+		if not Player.Backpack:FindFirstChild("GhostBurger") then
+			game:GetService("ReplicatedStorage").Events.BuyConsumable:FireServer("GhostBurger",game:GetService("ReplicatedStorage").GlobalVariables.FoodBuyPrices.BurgerPlace)
+		end
+		repeat
+			game:GetService("ReplicatedStorage").Events.Equip:FireServer("GhostBurger")
+			task.wait()
+		until Player.Character:FindFirstChild("GhostBurger")
+		repeat
+			game:GetService("ReplicatedStorage").Events.UseConsumable:FireServer("GhostBurger")
+			task.wait()
+		until not Player.Character:FindFirstChild("GhostBurger")
 	end
 })
 
@@ -757,7 +577,8 @@ Settings:AddButton({
 	end
 })
 
-Settings:AddLabel("Script made by nick7 with <3")
-Settings:AddLabel("Using Orion UI library for this script.")
+CreditsTab:AddLabel("Script made by nick7 with <3")
+CreditsTab:AddLabel("Join nick7 community - discord.gg/6tgCfU2fX8")
+CreditsTab:AddLabel("Using Orion UI library for this script.")
 
 ui:Init()
