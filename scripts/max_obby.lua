@@ -1,12 +1,10 @@
+getgenv().maxs_obby = {}
+getgenv().maxs_obby.Autofarm = getgenv().maxs_obby.Autofarm or true  
+
 function getRoot(char)
 	local rootPart = char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
 	return rootPart
 end
---------------
--- Gui to Lua
--- Version: 3.2
-
--- Instances:
 
 local auto = Instance.new("ScreenGui")
 local background = Instance.new("Frame")
@@ -21,8 +19,6 @@ local visual = Instance.new("Frame")
 local UICorner_3 = Instance.new("UICorner")
 local text = Instance.new("TextLabel")
 local UIStroke = Instance.new("UIStroke")
-
---Properties:
 
 auto.Name = "auto"
 auto.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -136,6 +132,7 @@ UIStroke.Parent = visual
 UIStroke.Color = Color3.new(1,1,1)
 UIStroke.Thickness = 2.9
 -------------------------------
+
 close.Activated:Connect(function()
 	auto:Destroy()
 end)
@@ -162,7 +159,7 @@ task.spawn(function()
 				end
 			end
 			task.wait()
-			game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Rebirth"):FireServer()
+			game:GetService("ReplicatedStorage").Remotes.Rebirth:FireServer()
 		end
 	end
 end)
