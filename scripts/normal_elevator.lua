@@ -2,6 +2,23 @@ local plr = game.Players.LocalPlayer
 local char = plr.Character
 local trigger = workspace.Lobby.Elevator.Trigger
 
+local GC = getconnections or get_signal_cons
+if GC then
+	for i,v in pairs(GC(game.Players.LocalPlayer.Idled)) do
+		if v["Disable"] then
+			v["Disable"](v)
+		elseif v["Disconnect"] then
+			v["Disconnect"](v)
+		end
+	end
+else
+	game.Players.LocalPlayer.Idled:Connect(function()
+		local VirtualUser = game:GetService("VirtualUser")
+		VirtualUser:CaptureController()
+		VirtualUser:ClickButton2(Vector2.new())
+	end)
+end
+
 function getRoot(char)
     char = char or plr.Character or plr.CharacterAdded:Wait()
     local rootPart = char:WaitForChild('HumanoidRootPart') or char:WaitForChild('Torso') or char:WaitForChild('UpperTorso')
@@ -20,19 +37,13 @@ folder.Name = "Cage (nick7hub)"
 local _color = Color3.fromRGB(79, 79, 79)
 local _offset = Vector3.new(math.random(-100000, 100000), math.random(-50,1500), math.random(-100000,100000))
 --+ Creating
-local parts = {}
 local floor = Instance.new("Part", folder)
 local wall1 = Instance.new("Part", folder)
 local wall2 = Instance.new("Part", folder)
 local wall3 = Instance.new("Part", folder)
 local wall4 = Instance.new("Part", folder)
 local ceiling = Instance.new("Part", folder)
-table.insert(parts, floor)
-table.insert(parts, wall1)
-table.insert(parts, wall2)
-table.insert(parts, wall3)
-table.insert(parts, wall4)
-table.insert(parts, ceiling)
+local parts = {floor,wall1,wall2,wall3,wall4,ceiling}
 --+ sum things
 for _,v in pairs(parts) do
 	v.Anchored = true
