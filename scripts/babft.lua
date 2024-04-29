@@ -38,6 +38,8 @@ Tab:AddSwitch("Autofarm", function(Value)
 			local stage = path["CaveStage" .. i]
 			local darknessPart = stage.DarknessPart
 			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = stage.DarknessPart.CFrame
+			game.Players.LocalPlayer.Character.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new(0,0,0)
+			game.Players.LocalPlayer.Character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
 			task.wait(2.5)
 		end
 		game:GetService("Workspace").Gravity = 196.1999969482422
