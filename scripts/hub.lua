@@ -1,4 +1,5 @@
 local id = game.PlaceId
+local notif = loadstring(game:HttpGet("https://raw.githubusercontent.com/laagginq/ui-libraries/main/dxhooknotify/src.lua", true))()
 function load(str)
     loadstring(game:HttpGet("https://raw.githubusercontent.com/WhateverNick7/roblox/main/scripts/"..str))()
 end
@@ -28,4 +29,10 @@ elseif id == 4104106043 then
 	game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = true
 elseif id == 537413528 then
     load("babft.lua")
+else
+    print("===")
+    warn("Game ("..game.PlaceId..") is not supported by nick7 hub!")
+    print("If game IS supported, create a ticket in our discord: discord.gg/6tgCfU2fX8")
+    print("===")
+    notif:Notify("nick7 hub","Game is not supported! Check \"/console\"",10)
 end
