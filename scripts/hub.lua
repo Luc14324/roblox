@@ -24,8 +24,9 @@ elseif id == 2537430692 then
 elseif id == 394773622 then
     game.Workspace.DoShopPurchase:InvokeServer(game.Players.LocalPlayer.leaderstats.Coins, -945986745698454679,"skill3")
 elseif id == 4104106043 then
-	game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.Lobby.Teleporters.Enter.CFrame;task.wait(.5)
-	game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = workspace.Lobby.SpawnLocation.CFrame
+    local space=game:GetService("Workspace")
+	game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = space.Lobby.Teleporters.Enter.CFrame;task.wait(.5)
+	game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = space.Lobby.SpawnLocation.CFrame
 	game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = true
 elseif id == 537413528 then
     load("babft.lua")
