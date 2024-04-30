@@ -20,7 +20,7 @@ elseif id == 230362888 then
 elseif id == 15410077867 then
     load("superhero_obby.lua")
 elseif id == 2537430692 then
-    load("bpn.lua")
+    load("bnp.lua")
 elseif id == 394773622 then
     game.Workspace.DoShopPurchase:InvokeServer(game.Players.LocalPlayer.leaderstats.Coins, -945986745698454679,"skill3")
 elseif id == 4104106043 then
