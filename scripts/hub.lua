@@ -30,6 +30,8 @@ elseif id == 4104106043 then
 	game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = true
 elseif id == 537413528 then
     load("babft.lua")
+elseif id == 3411100258 then
+    load("bordr_autofarm.lua")
 else
     print("===")
     warn("Game ("..game.PlaceId..") is not supported by nick7 hub!")

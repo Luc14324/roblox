@@ -48,12 +48,7 @@ local wall2 = Instance.new("Part", folder)
 local wall3 = Instance.new("Part", folder)
 local wall4 = Instance.new("Part", folder)
 local ceiling = Instance.new("Part", folder)
-table.insert(parts, floor)
-table.insert(parts, wall1)
-table.insert(parts, wall2)
-table.insert(parts, wall3)
-table.insert(parts, wall4)
-table.insert(parts, ceiling)
+local parts = {floor,wall1,wall2,wall3,wall4,ceiling}
 --+ sum things
 for _,v in pairs(parts) do
 	v.Anchored = true
