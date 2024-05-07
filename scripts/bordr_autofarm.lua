@@ -329,10 +329,10 @@ AdminCheck:OnChanged(function(Value)
 	getgenv().n7.saveable.check_admins = Value
     task.spawn(function()
 		task.wait(.1)
+		local warned = false
 		while getgenv().n7.saveable.check_admins do
             local plrs = game.Players:GetPlayers()
 			local code = 0
-			local warned = false
             for _,v in plrs do
                 local role = v:GetRoleInGroup(5069767)
                 local bad = {"Admin", "Trial Admin", "Head Admin"}
