@@ -5,8 +5,14 @@ end
 
 
 local GuiService = game:GetService("GuiService")
+local PathfindingService = game:GetService("PathfindingService")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
+local player = game.Players.LocalPlayer
+
+pcall(function()
+	game.Workspace.Map.Islands["Choosing Island"].peasant.Sign.Join.HoldDuration = 0
+end)
 
 local GC = getconnections or get_signal_cons
 if GC then
@@ -36,13 +42,34 @@ getgenv().n7 = {
 			link = "",
 			cfg = {
 				ping = "@everyone",
-				on_admin = true
+				on_admin = true,
+				on_sale = false
 			}
 		}
 	},
 	autofarm = false,
     cage = CFrame.new(0,0,0),
 }
+
+function SendMessage(message)
+	local url = getgenv().n7.saveable.webhook.link
+	if url ~= "" or url ~= " " then
+		local http = game:GetService("HttpService")
+		local headers = {
+			["Content-Type"] = "application/json"
+		}
+		local data = {
+			["content"] = message
+		}
+		local body = http:JSONEncode(data)
+		local response = request({
+			Url = url,
+			Method = "POST",
+			Headers = headers,
+			Body = body
+		})
+	end
+end
 
 pcall(function()
     if getfenv().isfile and getfenv().readfile and getfenv().isfile(string.format("%s.n7", game.GameId)) and getfenv().readfile(string.format("%s.n7", game.GameId)) then
@@ -153,7 +180,7 @@ local status = Farm:AddParagraph({
 FarmToggle:OnChanged(function(Value)
 	getgenv().n7.autofarm = Value
 	if getgenv().n7.autofarm then
-		if game.Players.LocalPlayer.leaderstats.coins.Value >= 50 then
+		if player.leaderstats.coins.Value >= 50 then
 			while getgenv().n7.autofarm do
 				local exp, tp = get_exp()
 				game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, true)
@@ -168,7 +195,7 @@ FarmToggle:OnChanged(function(Value)
 				if not getgenv().n7.autofarm then
 					break
 				end
-				local char = game.Players.LocalPlayer.Character
+				local char = player.Character
 				local pre = getRoot(char).CFrame
 				char:FindFirstChild("Humanoid").Sit = false
 				local of = Vector3.new(0,0,0)
@@ -183,17 +210,35 @@ FarmToggle:OnChanged(function(Value)
 				end
 				of = of +fs
                 if char and getRoot(char) then
-                    getRoot(char).CFrame = CFrame.new(of)
-					status:SetTitle("Teleported to selling point")
-                    task.wait(.25)
-                    game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, false)
-					status:SetTitle("Teleporting back")
-                    task.wait(.01)
-                    if getgenv().n7.saveable.use_cage then
-                        getRoot(char).CFrame = getgenv().n7.cage
-                    else
-                        getRoot(char).CFrame = pre
-                    end
+					pcall(function()
+						getRoot(char).CFrame = CFrame.new(of)
+						status:SetTitle("Teleported to selling point")
+						task.wait(.25)
+						local bef = player.leaderstats.coins.Value
+						game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, false)
+						if getgenv().n7.saveable.webhook.cfg.on_sale then
+							local aft_money = player.leaderstats.coins.Value
+							local function comma(Value) -- stolen from KDanHudds (YT)
+								local Number
+								local Formatted = Value
+								while true do
+									Formatted, Number = string.gsub(Formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+									if (Number == 0) then
+										break
+									end
+								end
+								return Formatted
+							end
+							SendMessage("[["..player.Name.."](<https://www.roblox.com/users/"..player.UserId..">)] Sold for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."`")
+						end
+						status:SetTitle("Teleporting back")
+						task.wait(.01)
+						if getgenv().n7.saveable.use_cage then
+							getRoot(char).CFrame = getgenv().n7.cage
+						else
+							getRoot(char).CFrame = pre
+						end
+					end)
                 else
                     Fluent:Notify({
                         Title = "nick7 hub | ERROR",
@@ -219,25 +264,40 @@ Farm:AddParagraph({
 	Content = "Don't do anything crazy with: your position and your tools\nAutofarm will remove tool from your hands (not from inventory)\nAutofarm will teleport you"
 })
 
-Webhook = Window:AddTab({Title = "Webhook", Icon = "bell"})
-function SendMessage(url, message)
-	if url ~= "" or url ~= " " then
-		local http = game:GetService("HttpService")
-		local headers = {
-			["Content-Type"] = "application/json"
-		}
-		local data = {
-			["content"] = message
-		}
-		local body = http:JSONEncode(data)
-		local response = request({
-			Url = url,
-			Method = "POST",
-			Headers = headers,
-			Body = body
-		})
+local UISection = Farm:AddSection("Misc")
+
+UISection:AddButton({
+	Title = "Become a peasant",
+	Description = "When you don't have control on movement",
+	Callback = function()
+		if player.Team == game.Teams:FindFirstChild("choosing") then
+			local char = player.Character
+			local root = char:FindFirstChild("HumanoidRootPart")
+			local sign = game.Workspace.Map.Islands["Choosing Island"].peasant.Sign
+			if char and char:FindFirstChild("Humanoid") then
+				local path = PathfindingService:CreatePath()
+				path:ComputeAsync(root.Position, sign.Position)
+				local waypoints = path:GetWaypoints()
+				for _,v in waypoints do
+					char:FindFirstChild("Humanoid"):MoveTo(v.Position)
+					char:FindFirstChild("Humanoid").MoveToFinished:Wait(.2)
+				end
+				pcall(function()
+					fireproximityprompt(game.Workspace.Map.Islands["Choosing Island"].peasant.Sign.Join, 1)
+				end)
+			end
+		else
+			Fluent:Notify({
+				Title = "nick7 hub | WARN",
+				Content = "For choosing team only!",
+				SubContent = "bordr autofarm",
+				Duration = 5
+			})
+		end
 	end
-end
+})
+
+Webhook = Window:AddTab({Title = "Webhook", Icon = "bell"})
 
 local UseWebhook = Webhook:AddToggle("UseWebhook", { Title = "Use webhook", Description = "Will message on selected event(-s)", Default = getgenv().n7.saveable.webhook.use})
 UseWebhook:OnChanged(function(Value)
@@ -260,7 +320,7 @@ Webhook:AddButton({
 	Title = "Test webhook",
 	Description = "Will send a test message to your webhook",
 	Callback = function()
-		SendMessage(getgenv().n7.saveable.webhook.link, "Message sent from `".. game.Players.LocalPlayer.Name.."`.")
+		SendMessage("Message sent from `".. player.Name.."`.")
 	end
 })
 
@@ -269,6 +329,11 @@ local UISection = Webhook:AddSection("Events")
 local EventAdmin = UISection:AddToggle("EventAdmin", { Title = "Admin join/exists", Description = "Will message when admin is on the server", Default = getgenv().n7.saveable.webhook.cfg.on_admin})
 EventAdmin:OnChanged(function(Value)
 	getgenv().n7.saveable.webhook.cfg.on_admin = Value
+end)
+
+local EventSale = UISection:AddToggle("EventSale", { Title = "Sale", Description = "Will message when you sell cargo (with autofarm)", Default = getgenv().n7.saveable.webhook.cfg.on_sale})
+EventSale:OnChanged(function(Value)
+	getgenv().n7.saveable.webhook.cfg.on_sale = Value
 end)
 
 local Settings = Window:AddTab({ Title = "Settings", Icon = "cog"})
@@ -338,7 +403,7 @@ AdminCheck:OnChanged(function(Value)
                 local bad = {"Admin", "Trial Admin", "Head Admin"}
                 for _,b in pairs(bad) do
                     if string.match(role, b) then
-                        game.Players.LocalPlayer:Kick("found admin. code: 1")
+                        player:Kick("found admin. code: 1")
 						code = 1
                     end
                 end
@@ -346,20 +411,20 @@ AdminCheck:OnChanged(function(Value)
                 local bad = {"Admin", "Head Admin", "Owner"}
                 for _,b in pairs(bad) do
                     if string.match(role, b) then
-                        game.Players.LocalPlayer:Kick("found admin. code: 2")
+                        player:Kick("found admin. code: 2")
 						code = 2
                     end
                 end
             end
             if game.Teams:FindFirstChild("admin") then
-                game.Players.LocalPlayer:Kick("found admin. code: 3")
+                player:Kick("found admin. code: 3")
 				code = 3
             end
 			if code ~= 0 then
 				if getgenv().n7.saveable.webhook.use then
 					if getgenv().n7.saveable.webhook.link ~= ""  or getgenv().n7.saveable.webhook.link ~= " " then
 						if not warned then
-							SendMessage(getgenv().n7.saveable.webhook.link, getgenv().n7.saveable.webhook.cfg.ping.." Admin joined the game! Kicked `"..game.Players.LocalPlayer.Name.."`. Code: ".. code)
+							SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Admin joined the game! Kicked `"..player.Name.."`. Code: ".. code)
 							warned = true
 						end
 					end
