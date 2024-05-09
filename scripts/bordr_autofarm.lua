@@ -389,50 +389,78 @@ UISection:AddButton({
 	end
 })
 
+local function check_1(plr)
+	local role = plr:GetRoleInGroup(5069767)
+	local bad = {"Admin", "Trial Admin", "Head Admin"}
+	for _,b in pairs(bad) do
+	if string.match(role, b) then
+		player:Kick("found admin. code: 1")
+			return true
+		end
+	end
+	return false
+end
+local function check_2(plr)
+	local role = plr:GetRoleInGroup(11566845)
+	local bad = {"Admin", "Head Admin", "Owner"}
+	for _,b in pairs(bad) do
+		if string.match(role, b) then
+			player:Kick("found admin. code: 2")
+			return true
+		end
+	end
+	return false
+end
+local function check_3()
+	if game.Teams:FindFirstChild("admin") then
+		player:Kick("found admin. code: 3")
+		return true
+	end
+	return false
+end
+
 local AdminCheck = UISection:AddToggle("AdminCheck", { Title = "Check for admins", Description = "Checks for admins while you play", Default = getgenv().n7.saveable.check_admins})
 AdminCheck:OnChanged(function(Value)
 	getgenv().n7.saveable.check_admins = Value
     task.spawn(function()
 		task.wait(.1)
 		local warned = false
-		while getgenv().n7.saveable.check_admins do
-            local plrs = game.Players:GetPlayers()
-			local code = 0
+		if getgenv().n7.saveable.check_admins then
+			local plrs = game.Players:GetPlayers()
+			local cb = false
             for _,v in plrs do
-                local role = v:GetRoleInGroup(5069767)
-                local bad = {"Admin", "Trial Admin", "Head Admin"}
-                for _,b in pairs(bad) do
-                    if string.match(role, b) then
-                        player:Kick("found admin. code: 1")
-						code = 1
-                    end
-                end
-                local role = v:GetRoleInGroup(11566845)
-                local bad = {"Admin", "Head Admin", "Owner"}
-                for _,b in pairs(bad) do
-                    if string.match(role, b) then
-                        player:Kick("found admin. code: 2")
-						code = 2
-                    end
-                end
+				if cb then
+					break
+				end
+                cb = check_1(v)
+				if not cb then
+					cb = check_2(v)
+				end
             end
-            if game.Teams:FindFirstChild("admin") then
-                player:Kick("found admin. code: 3")
-				code = 3
-            end
-			if code ~= 0 then
+			if not cb then
+				cb = check_3()
+			end
+			if cb then
 				if getgenv().n7.saveable.webhook.use then
 					if getgenv().n7.saveable.webhook.link ~= ""  or getgenv().n7.saveable.webhook.link ~= " " then
 						if not warned then
-							SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Admin joined the game! Kicked `"..player.Name.."`. Code: ".. code)
+							SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Admin joined the game! Kicked `"..player.Name.."`.")
 							warned = true
 						end
 					end
 				end
 			end
-            task.wait()
-        end
+		end
     end)
+end)
+
+game.Players.PlayerAdded:Connect(function(plr)
+	if getgenv().n7.saveable.check_admins then
+		check_1(plr)
+		check_2(plr)
+		check_3()
+	end
+	task.wait()
 end)
 
 local UISection = Settings:AddSection("UI")
