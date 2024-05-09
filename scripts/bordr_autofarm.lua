@@ -442,11 +442,9 @@ AdminCheck:OnChanged(function(Value)
 			end
 			if cb then
 				if getgenv().n7.saveable.webhook.use then
-					if getgenv().n7.saveable.webhook.link ~= ""  or getgenv().n7.saveable.webhook.link ~= " " then
-						if not warned then
-							SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Admin joined the game! Kicked `"..player.Name.."`.")
-							warned = true
-						end
+					if not warned then
+						SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Admin joined the game! Kicked `"..player.Name.."`.")
+						warned = true
 					end
 				end
 			end
@@ -456,9 +454,19 @@ end)
 
 game.Players.PlayerAdded:Connect(function(plr)
 	if getgenv().n7.saveable.check_admins then
-		check_1(plr)
-		check_2(plr)
-		check_3()
+		local cb = false
+		cb = check_1(plr)
+		if not cb then
+			cb = check_2(plr)
+		end
+		if not cb then
+			cb = check_3()
+		end
+		if cb then
+			if getgenv().n7.saveable.webhook.use then
+				SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Admin joined the game! Kicked `"..player.Name.."`.")
+			end
+		end
 	end
 	task.wait()
 end)
