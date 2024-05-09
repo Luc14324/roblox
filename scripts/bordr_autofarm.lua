@@ -443,7 +443,7 @@ AdminCheck:OnChanged(function(Value)
 			if cb then
 				if getgenv().n7.saveable.webhook.use then
 					if not warned then
-						SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Admin joined the game! Kicked `"..player.Name.."`.")
+						SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Admin **is on the server**! Kicked `"..player.Name.."`.")
 						warned = true
 					end
 				end
@@ -464,7 +464,7 @@ game.Players.PlayerAdded:Connect(function(plr)
 		end
 		if cb then
 			if getgenv().n7.saveable.webhook.use then
-				SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Admin joined the game! Kicked `"..player.Name.."`.")
+				SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Admin **joined** the server! Kicked `"..player.Name.."`.")
 			end
 		end
 	end
