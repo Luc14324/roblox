@@ -51,6 +51,18 @@ getgenv().n7 = {
     cage = CFrame.new(0,0,0),
 }
 
+-- Fetch the thumbnail
+
+function getAvatarUrl(user)
+	local thumbnail_request = string.format("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds=%d&size=48x48&format=png", user.UserId)
+	local response = request({
+		Url = thumbnail_request,
+		Method = "GET"
+	})
+	local b = response.Body
+	return b:match('"https:\/\/tr.rbxcdn.com\/.+["]'):gsub('"', "")
+end
+local local_pfp = getAvatarUrl(player)
 function SendMessage(message)
 	local url = getgenv().n7.saveable.webhook.link
 	if url ~= "" or url ~= " " then
@@ -59,8 +71,59 @@ function SendMessage(message)
 			["Content-Type"] = "application/json"
 		}
 		local data = {
-			["content"] = message
+			["content"] = message,
+			["username"] = player.Name,
+			["avatar_url"] = local_pfp
 		}
+		local body = http:JSONEncode(data)
+		local response = request({
+			Url = url,
+			Method = "POST",
+			Headers = headers,
+			Body = body
+		})
+	end
+end
+
+function SendWarn(admin, was)
+	local needEmbed = false
+	if admin ~= nil and admin ~= false then
+		needEmbed = true
+	end
+	local _was = "is on"
+	if was then
+		_was = "**is on**"
+	elseif not was then
+		_was = "**joined**"
+	end
+	local url = getgenv().n7.saveable.webhook.link
+	if url ~= "" or url ~= " " then
+		local http = game:GetService("HttpService")
+		local headers = {
+			["Content-Type"] = "application/json"
+		}
+		local data = {
+			["content"] = getgenv().n7.saveable.webhook.cfg.ping.." Admin ".._was.." the server! Kicked `"..player.Name.."`.",
+			["username"] = player.Name,
+			["avatar_url"] = local_pfp
+		}
+		if needEmbed then
+			data = {
+				["content"] = getgenv().n7.saveable.webhook.cfg.ping.." Admin ".._was.." the server! Kicked `"..player.Name.."`.",
+				["username"] = player.Name,
+				["avatar_url"] = local_pfp,
+				["embeds"] = {
+					{
+						["title"] = "Admin that joined",
+						["description"] = "Admins [profile](https://www.roblox.com/users/"..admin.UserId.."/profile)\nDisplay: "..admin.DisplayName.."\nUsername: "..admin.Name,
+						["color"] = 16711680,
+						["thumbnail"] = {
+						["url"] = getAvatarUrl(admin)
+						}
+					}
+				}
+			}
+		end
 		local body = http:JSONEncode(data)
 		local response = request({
 			Url = url,
@@ -177,6 +240,27 @@ local status = Farm:AddParagraph({
 	Title = "Autofarm status will be here", Content = ""
 })
 
+local function bar()
+	local coins = player.leaderstats.coins.Value
+	local cap = 500000
+	local gp_cap = player.Gamepasses:GetAttribute("CoinCap")
+	if gp_cap then
+		cap = 1000000
+	end
+	local empty_tile = "░"
+	local filled_tile = "█"
+	local percentage = coins / cap * 100
+	local bar = ""
+	for i = 1, 5 do
+		if percentage >= (i / 5) * 100 then
+			bar = bar .. filled_tile
+		else
+			bar = bar .. empty_tile
+		end
+	end
+	return "[ "..bar.." ] "..string.format(" %d%%", percentage)
+end
+
 FarmToggle:OnChanged(function(Value)
 	getgenv().n7.autofarm = Value
 	if getgenv().n7.autofarm then
@@ -229,7 +313,7 @@ FarmToggle:OnChanged(function(Value)
 								end
 								return Formatted
 							end
-							SendMessage("[["..player.Name.."](<https://www.roblox.com/users/"..player.UserId..">)] Sold for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."`")
+							SendMessage("[["..player.Name.."](<https://www.roblox.com/users/"..player.UserId..">)] Sold for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."` | Progress: "..bar())
 						end
 						status:SetTitle("Teleporting back")
 						task.wait(.01)
@@ -428,13 +512,23 @@ AdminCheck:OnChanged(function(Value)
 		if getgenv().n7.saveable.check_admins then
 			local plrs = game.Players:GetPlayers()
 			local cb = false
+			local code = false
+			local admin
             for _,v in plrs do
 				if cb then
 					break
 				end
                 cb = check_1(v)
+				if cb then
+					admin = v
+					code = true
+				end
 				if not cb then
 					cb = check_2(v)
+				end
+				if cb then
+					admin = v
+					code = true
 				end
             end
 			if not cb then
@@ -443,7 +537,7 @@ AdminCheck:OnChanged(function(Value)
 			if cb then
 				if getgenv().n7.saveable.webhook.use then
 					if not warned then
-						SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Admin **is on the server**! Kicked `"..player.Name.."`.")
+						SendWarn(admin, code)
 						warned = true
 					end
 				end
