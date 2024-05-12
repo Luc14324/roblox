@@ -43,7 +43,9 @@ getgenv().n7 = {
 			cfg = {
 				ping = "@everyone",
 				on_admin = true,
-				on_sale = false
+				on_sale = false,
+				on_cap = false,
+				on_cap_kick = false
 			}
 		}
 	},
@@ -251,8 +253,8 @@ local function bar()
 	local filled_tile = "█"
 	local percentage = coins / cap * 100
 	local bar = ""
-	for i = 1, 5 do
-		if percentage >= (i / 5) * 100 then
+	for i = 1, 7 do
+		if percentage >= (i / 7) * 100 then
 			bar = bar .. filled_tile
 		else
 			bar = bar .. empty_tile
@@ -266,6 +268,20 @@ FarmToggle:OnChanged(function(Value)
 	if getgenv().n7.autofarm then
 		if player.leaderstats.coins.Value >= 50 then
 			while getgenv().n7.autofarm do
+				if getgenv().n7.saveable.webhook.cfg.on_cap then
+					local coins = player.leaderstats.coins.Value
+					local gp_cap = player.Gamepasses:GetAttribute("CoinCap")
+					local cap = 500000
+					if gp_cap then
+						cap = 1000000
+					end
+					if coins > cap then
+						SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Hitted a coin cap!")
+						if getgenv().n7.saveable.webhook.cfg.on_cap_kick then
+							player:Kick("hitted coin cap.")
+						end
+					end
+				end
 				local exp, tp = get_exp()
 				game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, true)
 				for i=10,1,-1 do
@@ -313,7 +329,7 @@ FarmToggle:OnChanged(function(Value)
 								end
 								return Formatted
 							end
-							SendMessage("[["..player.Name.."](<https://www.roblox.com/users/"..player.UserId..">)] Sold for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."` | Progress: "..bar())
+							SendMessage("[[!](<https://www.roblox.com/users/"..player.UserId..">)] Sold for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."` | Progress: "..bar())
 						end
 						status:SetTitle("Teleporting back")
 						task.wait(.01)
@@ -400,6 +416,18 @@ Webhook:AddInput("WebhookLink", {
     end
 })
 
+Webhook:AddInput("WebhookPing", {
+    Title = "Mention text",
+    Description = "AKA ping",
+	Default = getgenv().n7.saveable.webhook.cfg.ping,
+    Numeric = false,
+    Finished = true,
+    Placeholder = "@everyone",
+    Callback = function(Value)
+        getgenv().n7.saveable.webhook.cfg.ping = Value
+    end
+})
+
 Webhook:AddButton({
 	Title = "Test webhook",
 	Description = "Will send a test message to your webhook",
@@ -418,6 +446,16 @@ end)
 local EventSale = UISection:AddToggle("EventSale", { Title = "Sale", Description = "Will message when you sell cargo (with autofarm)", Default = getgenv().n7.saveable.webhook.cfg.on_sale})
 EventSale:OnChanged(function(Value)
 	getgenv().n7.saveable.webhook.cfg.on_sale = Value
+end)
+
+local EventCap = UISection:AddToggle("EventCap", { Title = "Cap", Description = "Will message when autofarm hits money cap", Default = getgenv().n7.saveable.webhook.cfg.on_cap})
+EventCap:OnChanged(function(Value)
+	getgenv().n7.saveable.webhook.cfg.on_cap = Value
+end)
+
+local EventCapKick = UISection:AddToggle("EventCapKick", { Title = "(Cap) Kick after cap", Description = "Will kick you after autofarm hits money cap", Default = getgenv().n7.saveable.webhook.cfg.on_cap_kick})
+EventCapKick:OnChanged(function(Value)
+	getgenv().n7.saveable.webhook.cfg.on_cap_kick = Value
 end)
 
 local Settings = Window:AddTab({ Title = "Settings", Icon = "cog"})
