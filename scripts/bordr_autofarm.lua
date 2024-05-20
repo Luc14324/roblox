@@ -62,7 +62,7 @@ function getAvatarUrl(user)
 		Method = "GET"
 	})
 	local b = response.Body
-	return b:match('"https:\/\/tr.rbxcdn.com\/.+["]'):gsub('"', "")
+	return b:match('"https://tr.rbxcdn.com/.+["]'):gsub('"', "")
 end
 local local_pfp = getAvatarUrl(player)
 function SendMessage(message)
@@ -333,6 +333,8 @@ FarmToggle:OnChanged(function(Value)
 						end
 						status:SetTitle("Teleporting back")
 						task.wait(.01)
+						getRoot(char).AssemblyLinearVelocity = Vector3.new(0,0,0)
+						getRoot(char).AssemblyAngularVelocity = Vector3.new(0,0,0)
 						if getgenv().n7.saveable.use_cage then
 							getRoot(char).CFrame = getgenv().n7.cage
 						else
@@ -515,8 +517,8 @@ local function check_1(plr)
 	local role = plr:GetRoleInGroup(5069767)
 	local bad = {"Admin", "Trial Admin", "Head Admin"}
 	for _,b in pairs(bad) do
-	if string.match(role, b) then
-		player:Kick("found admin. code: 1")
+		if string.match(role, b) then
+			player:Kick("found admin. code: 1")
 			return true
 		end
 	end
@@ -563,10 +565,10 @@ AdminCheck:OnChanged(function(Value)
 				end
 				if not cb then
 					cb = check_2(v)
-				end
-				if cb then
-					admin = v
-					code = true
+					if cb then
+						admin = v
+						code = true
+					end
 				end
             end
 			if not cb then
@@ -587,6 +589,8 @@ end)
 game.Players.PlayerAdded:Connect(function(plr)
 	if getgenv().n7.saveable.check_admins then
 		local cb = false
+		local admin = plr
+		local code = false
 		cb = check_1(plr)
 		if not cb then
 			cb = check_2(plr)
@@ -596,7 +600,7 @@ game.Players.PlayerAdded:Connect(function(plr)
 		end
 		if cb then
 			if getgenv().n7.saveable.webhook.use then
-				SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Admin **joined** the server! Kicked `"..player.Name.."`.")
+				SendWarn(admin, code)
 			end
 		end
 	end
@@ -721,6 +725,18 @@ if getfenv().isfile and getfenv().readfile and getfenv().writefile and getfenv()
 		end
 	})
 end
+
+local Optimisation = Settings:AddSection("Optimisation")
+
+Optimisation:AddToggle("3DRendering", {
+	Title = "Toggle 3D rendering",
+	Description = "Makes your screen white, excluding GUIs",
+	Default = true,
+	Callback = function(Value)
+		RunService:Set3dRenderingEnabled(Value)
+	end
+})
+
 
 Credits = Window:AddTab({Title = "Credits", Icon = "person-standing"})
 Credits:AddParagraph({
