@@ -14,6 +14,18 @@ pcall(function()
 	game.Workspace.Map.Islands["Choosing Island"].peasant.Sign.Join.HoldDuration = 0
 end)
 
+
+do -- protection in case if wiggles is smarter than a rock
+	if getfenv().getconnections then
+		for _, Connection in next, getfenv().getconnections(game:GetService("ScriptContext").Error) do
+			Connection:Disable()
+		end
+		for _, Connection in next, getfenv().getconnections(game:GetService("LogService").MessageOut) do
+			Connection:Disable()
+		end
+	end
+end
+
 local GC = getconnections or get_signal_cons
 if GC then
 	for i,v in pairs(GC(game.Players.LocalPlayer.Idled)) do
@@ -52,9 +64,6 @@ getgenv().n7 = {
 	autofarm = false,
     cage = CFrame.new(0,0,0),
 }
-
--- Fetch the thumbnail
-
 function getAvatarUrl(user)
 	local thumbnail_request = string.format("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds=%d&size=48x48&format=png", user.UserId)
 	local response = request({
@@ -741,7 +750,7 @@ Optimisation:AddToggle("3DRendering", {
 Credits = Window:AddTab({Title = "Credits", Icon = "person-standing"})
 Credits:AddParagraph({
 	Title = "nick7 hub",
-	Content = "Main script was made by Stonifam\nUsing forked Fluent UI lib by @ttwiz_z"
+	Content = "Main script was made by Stonifam with ttwiz_zs help\nUsing forked Fluent UI lib by @ttwiz_z"
 })
 Credits:AddButton({
 	Title = "Copy discord invite",
