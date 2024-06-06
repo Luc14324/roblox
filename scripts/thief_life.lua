@@ -207,7 +207,7 @@ main:AddToggle({
 main:AddDropdown({
 	Name = "Farm with",
 	Default = "RareM4A1",
-	Options = {"VIPGlock17","VIPAK47","RareUZI","RareM4A1"},
+	Options = {"VIPGlock17","VIPAK47","RareM4A1"},
 	Callback = function(Value)
 		getgenv().n7tls.farmtab.farmw = Value
 	end    
