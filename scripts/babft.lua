@@ -15,7 +15,7 @@ else
 	end)
 end
 
-local library, imgui = loadstring(game:HttpGet("https://raw.githubusercontent.com/WhateverNick7/roblox/main/imgui.lua"))()
+local library, imgui = loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main/imgui.lua"))()
 
 getgenv().n7 = {
 	autofarm = false
@@ -47,7 +47,7 @@ Tab:AddSwitch("Autofarm", function(Value)
 			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").BoatStages.NormalStages.TheEnd.GoldenChest.Trigger.CFrame + Vector3.new(0, 20, 0)
 			task.wait(.5)
 		end
-		wait(14)
+		task.wait(14)
 		while true do
 			local h = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
 			if h then

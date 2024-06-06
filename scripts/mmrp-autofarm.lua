@@ -17,7 +17,7 @@ else
 	end)
 end
 
-local library, imgui = loadstring(game:HttpGet("https://raw.githubusercontent.com/WhateverNick7/roblox/main/imgui.lua"))()
+local library, imgui = loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main/imgui.lua"))()
 
 getgenv().n7 = {
 	autofarm = false

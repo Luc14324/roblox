@@ -1,7 +1,18 @@
+do -- protection
+	if getfenv().getconnections then
+		for _, Connection in next, getfenv().getconnections(game:GetService("ScriptContext").Error) do
+			Connection:Disable()
+		end
+		for _, Connection in next, getfenv().getconnections(game:GetService("LogService").MessageOut) do
+			Connection:Disable()
+		end
+	end
+end
+
 local id = game.PlaceId
 local notif = loadstring(game:HttpGet("https://raw.githubusercontent.com/laagginq/ui-libraries/main/dxhooknotify/src.lua", true))()
 function load(str)
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/WhateverNick7/roblox/main/scripts/"..str))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main/scripts/"..str))()
 end
 if id == 205224386 then
     load("hidenseek_extreme.lua")
