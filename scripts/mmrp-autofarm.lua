@@ -35,7 +35,7 @@ function getRoot(char)
 	return rootPart
 end
 
-local Window = library:AddWindow("nick7 hub | RBDS", {
+local Window = library:AddWindow("nick7 hub | MMRP", {
 	main_color = Color3.fromRGB(41, 74, 122),
 	min_size = Vector2.new(160, 120),
 	toggle_key = Enum.KeyCode.RightShift,
