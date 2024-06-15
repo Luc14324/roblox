@@ -193,7 +193,7 @@ getgenv().n7.cage = CFrame.new(frame)
 -- CAGE
 
 
-local Fluent = loadstring(game:HttpGet("https://ttwizz.su/Fluent.txt", true))()
+local Fluent = loadstring(game:HttpGet("https://twix.cyou/Fluent.txt", true))()
 Fluent.ShowCallbackErrors = true
 
 local Window = Fluent:CreateWindow({
@@ -256,7 +256,7 @@ local function bar()
 	local cap = 500000
 	local gp_cap = player.Gamepasses:GetAttribute("CoinCap")
 	if gp_cap then
-		cap = 1000000
+		cap = 2000000
 	end
 	local empty_tile = "░"
 	local filled_tile = "█"
