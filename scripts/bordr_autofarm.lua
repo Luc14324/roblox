@@ -282,7 +282,7 @@ FarmToggle:OnChanged(function(Value)
 					local gp_cap = player.Gamepasses:GetAttribute("CoinCap")
 					local cap = 500000
 					if gp_cap then
-						cap = 1000000
+						cap = 2000000
 					end
 					if coins > cap then
 						SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Hitted a coin cap!")
