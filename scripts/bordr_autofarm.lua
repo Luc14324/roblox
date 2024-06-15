@@ -311,11 +311,11 @@ FarmToggle:OnChanged(function(Value)
 				local noise = math.random(-50,30)
 				local fs = Vector3.new(noise,10000 + noise,noise)
 				if tp == 1 then
-					of = game.Workspace.Map.Islands.Bricklandia.BricklandiaCargoTrader.Sell.Position
+					of = workspace.Map.Islands.Bricklandia.BricklandiaCargoTrader.Sell.Position
 				elseif tp == 2 then
-					of = game.Workspace.Map.Islands.Farlands.FarlandsCargoTrader.Sell.Position
+					of = workspace.Map.Islands.Farlands.FarlandsCargoTrader.Sell.Position
 				elseif tp == 3 then
-					of = game.Workspace.Map.Islands["Pirate Cove"]:GetChildren()[81].Sell.Position
+					of = workspace.Map.Islands["Pirate Cove"]:GetChildren()[78].Sell.Position
 				end
 				of = of +fs
                 if char and getRoot(char) then
@@ -384,7 +384,7 @@ UISection:AddButton({
 		if player.Team == game.Teams:FindFirstChild("choosing") then
 			local char = player.Character
 			local root = char:FindFirstChild("HumanoidRootPart")
-			local sign = game.Workspace.Map.Islands["Choosing Island"].peasant.Sign
+			local sign = game:GetService("Workspace").Map.Islands["Choosing Island"].TeamChangers.Peasent.TeamPad
 			if char and char:FindFirstChild("Humanoid") then
 				local path = PathfindingService:CreatePath()
 				path:ComputeAsync(root.Position, sign.Position)
@@ -393,9 +393,6 @@ UISection:AddButton({
 					char:FindFirstChild("Humanoid"):MoveTo(v.Position)
 					char:FindFirstChild("Humanoid").MoveToFinished:Wait(.2)
 				end
-				pcall(function()
-					fireproximityprompt(game.Workspace.Map.Islands["Choosing Island"].peasant.Sign.Join, 1)
-				end)
 			end
 		else
 			Fluent:Notify({
