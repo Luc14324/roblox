@@ -315,7 +315,7 @@ FarmToggle:OnChanged(function(Value)
 				elseif tp == 2 then
 					of = workspace.Map.Islands.Farlands.FarlandsCargoTrader.Sell.Position
 				elseif tp == 3 then
-					of = workspace.Map.Islands["Pirate Cove"]:GetChildren()[78].Sell.Position
+					of = workspace.Map.Islands["Pirate Cove"].PirateCargoTrader.Sell.Position
 				end
 				of = of +fs
                 if char and getRoot(char) then
