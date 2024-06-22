@@ -251,13 +251,14 @@ local status = Farm:AddParagraph({
 	Title = "Autofarm status will be here", Content = ""
 })
 
+local cap = 1000000
+local gp_cap = player.Gamepasses:GetAttribute("CoinCap")
+if gp_cap then
+	cap = 2000000
+end
+
 local function bar()
 	local coins = player.leaderstats.coins.Value
-	local cap = 1000000
-	local gp_cap = player.Gamepasses:GetAttribute("CoinCap")
-	if gp_cap then
-		cap = 2000000
-	end
 	local empty_tile = "░"
 	local filled_tile = "█"
 	local percentage = coins / cap * 100
@@ -279,11 +280,6 @@ FarmToggle:OnChanged(function(Value)
 			while getgenv().n7.autofarm do
 				if getgenv().n7.saveable.webhook.cfg.on_cap then
 					local coins = player.leaderstats.coins.Value
-					local gp_cap = player.Gamepasses:GetAttribute("CoinCap")
-					local cap = 500000
-					if gp_cap then
-						cap = 2000000
-					end
 					if coins > cap then
 						SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Hitted a coin cap!")
 						if getgenv().n7.saveable.webhook.cfg.on_cap_kick then
