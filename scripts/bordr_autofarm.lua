@@ -253,7 +253,7 @@ local status = Farm:AddParagraph({
 
 local function bar()
 	local coins = player.leaderstats.coins.Value
-	local cap = 500000
+	local cap = 1000000
 	local gp_cap = player.Gamepasses:GetAttribute("CoinCap")
 	if gp_cap then
 		cap = 2000000
