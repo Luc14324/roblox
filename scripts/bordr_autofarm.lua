@@ -277,83 +277,92 @@ FarmToggle:OnChanged(function(Value)
 	getgenv().n7.autofarm = Value
 	if getgenv().n7.autofarm then
 		if player.leaderstats.coins.Value >= 50 then
-			while getgenv().n7.autofarm do
-				if getgenv().n7.saveable.webhook.cfg.on_cap then
-					local coins = player.leaderstats.coins.Value
-					if coins > cap then
-						SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Hitted a coin cap!")
-						if getgenv().n7.saveable.webhook.cfg.on_cap_kick then
-							player:Kick("hitted coin cap.")
+			if player.Team.Name ~= "choosing" then
+				while getgenv().n7.autofarm do
+					if getgenv().n7.saveable.webhook.cfg.on_cap then
+						local coins = player.leaderstats.coins.Value
+						if coins > cap then
+							SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Hitted a coin cap!")
+							if getgenv().n7.saveable.webhook.cfg.on_cap_kick then
+								player:Kick("hitted coin cap.")
+							end
 						end
 					end
-				end
-				local exp, tp = get_exp()
-				game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, true)
-				for i=10,1,-1 do
-					status:SetTitle("Waiting "..i.." seconds...")
-					task.wait(1)
+					local exp, tp = get_exp()
+					game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, true)
+					for i=10,1,-1 do
+						status:SetTitle("Waiting "..i.." seconds...")
+						task.wait(1)
+						if not getgenv().n7.autofarm then
+							status:SetTitle("Finished farming!")
+							break
+						end
+					end
 					if not getgenv().n7.autofarm then
-						status:SetTitle("Finished farming!")
 						break
 					end
-				end
-				if not getgenv().n7.autofarm then
-					break
-				end
-				local char = player.Character
-				local pre = getRoot(char).CFrame
-				char:FindFirstChild("Humanoid").Sit = false
-				local of = Vector3.new(0,0,0)
-				local noise = math.random(-50,30)
-				local fs = Vector3.new(noise,10000 + noise,noise)
-				if tp == 1 then
-					of = workspace.Map.Islands.Bricklandia.BricklandiaCargoTrader.Sell.Position
-				elseif tp == 2 then
-					of = workspace.Map.Islands.Farlands.FarlandsCargoTrader.Sell.Position
-				elseif tp == 3 then
-					of = Vector3.new(-961, 10, -132)
-				end
-				of = of +fs
-                if char and getRoot(char) then
-					pcall(function()
-						getRoot(char).CFrame = CFrame.new(of)
-						status:SetTitle("Teleported to selling point")
-						task.wait(.25)
-						local bef = player.leaderstats.coins.Value
-						game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, false)
-						if getgenv().n7.saveable.webhook.cfg.on_sale then
-							local aft_money = player.leaderstats.coins.Value
-							local function comma(Value) -- stolen from KDanHudds (YT)
-								local Number
-								local Formatted = Value
-								while true do
-									Formatted, Number = string.gsub(Formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
-									if (Number == 0) then
-										break
+					local char = player.Character
+					local pre = getRoot(char).CFrame
+					char:FindFirstChild("Humanoid").Sit = false
+					local of = Vector3.new(0,0,0)
+					local noise = math.random(-50,30)
+					local fs = Vector3.new(noise,10000 + noise,noise)
+					if tp == 1 then
+						of = workspace.Map.Islands.Bricklandia.BricklandiaCargoTrader.Sell.Position
+					elseif tp == 2 then
+						of = workspace.Map.Islands.Farlands.FarlandsCargoTrader.Sell.Position
+					elseif tp == 3 then
+						of = Vector3.new(-961, 10, -132)
+					end
+					of = of +fs
+					if char and getRoot(char) then
+						pcall(function()
+							getRoot(char).CFrame = CFrame.new(of)
+							status:SetTitle("Teleported to selling point")
+							task.wait(.25)
+							local bef = player.leaderstats.coins.Value
+							game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, false)
+							if getgenv().n7.saveable.webhook.cfg.on_sale then
+								local aft_money = player.leaderstats.coins.Value
+								local function comma(Value) -- stolen from KDanHudds (YT)
+									local Number
+									local Formatted = Value
+									while true do
+										Formatted, Number = string.gsub(Formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+										if (Number == 0) then
+											break
+										end
 									end
+									return Formatted
 								end
-								return Formatted
+								SendMessage("[[!](<https://www.roblox.com/users/"..player.UserId..">)] Sold for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."` | Progress: "..bar())
 							end
-							SendMessage("[[!](<https://www.roblox.com/users/"..player.UserId..">)] Sold for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."` | Progress: "..bar())
-						end
-						status:SetTitle("Teleporting back")
-						task.wait(.01)
-						getRoot(char).AssemblyLinearVelocity = Vector3.new(0,0,0)
-						getRoot(char).AssemblyAngularVelocity = Vector3.new(0,0,0)
-						if getgenv().n7.saveable.use_cage then
-							getRoot(char).CFrame = getgenv().n7.cage
-						else
-							getRoot(char).CFrame = pre
-						end
-					end)
-                else
-                    Fluent:Notify({
-                        Title = "nick7 hub | ERROR",
-                        Content = "Can't find character.",
-                        SubContent = "bordr autofarm",
-                        Duration = 5
-                    })
-                end
+							status:SetTitle("Teleporting back")
+							task.wait(.01)
+							getRoot(char).AssemblyLinearVelocity = Vector3.new(0,0,0)
+							getRoot(char).AssemblyAngularVelocity = Vector3.new(0,0,0)
+							if getgenv().n7.saveable.use_cage then
+								getRoot(char).CFrame = getgenv().n7.cage
+							else
+								getRoot(char).CFrame = pre
+							end
+						end)
+					else
+						Fluent:Notify({
+							Title = "nick7 hub | ERROR",
+							Content = "Can't find character.",
+							SubContent = "bordr autofarm",
+							Duration = 5
+						})
+					end
+				end
+			else
+				Fluent:Notify({
+					Title = "nick7 hub | WARN",
+					Content = "You can't farm as choosing!\nChoose a team first!",
+					SubContent = "bordr autofarm",
+					Duration = 5
+				})
 			end
 		else
 			Fluent:Notify({
@@ -400,6 +409,77 @@ UISection:AddButton({
 		end
 	end
 })
+
+UISection:AddButton({
+	Title = "Brew full belly potion",
+	Description = "Full belly potion will stop hunger from draining",
+	Callback = function()
+		if player.Team ~= game.Teams:FindFirstChild("choosing") then
+			if not player.Backpack:FindFirstChild("full belly potin") then
+				local char = player.Character
+				local root = char:FindFirstChild("HumanoidRootPart")
+				if char and root then
+					local _last = root.CFrame
+					if not (player.Backpack:FindFirstChild("catapillah") and player.Backpack:FindFirstChild("bery") and player.Backpack:FindFirstChild("applee")) then
+						local crp = nil
+						local arp = nil
+						do
+							for _,v in workspace.Map.Islands.Farlands.catapillah:GetChildren() do
+								if v:FindFirstChild("ClickDetector") then
+									crp = v
+								end
+							end
+							for _,v in workspace.Map.Islands.Farlands.applee:GetChildren() do
+								if v:FindFirstChild("ClickDetector") then
+									arp = v
+								end
+							end
+						end
+						repeat
+							root.CFrame = crp.CFrame
+							fireclickdetector(crp.ClickDetector)
+							task.wait()
+						until player.Backpack:FindFirstChild("catapillah")
+						task.wait(0.1)
+						repeat
+							root.CFrame = workspace.Map.Islands.Farlands.bery.Part.CFrame
+							fireclickdetector(workspace.Map.Islands.Farlands.bery.Part.ClickDetector)
+							task.wait()
+						until player.Backpack:FindFirstChild("bery")
+						task.wait(0.1)
+						repeat
+							root.CFrame = arp.CFrame
+							fireclickdetector(arp.ClickDetector)
+							task.wait()
+						until player.Backpack:FindFirstChild("applee")
+					end
+					task.wait(0.1)
+					root.CFrame = CFrame.new(-172, 12, 339)
+					repeat
+						game:GetService("ReplicatedStorage").Remotes.BrewPotion:FireServer("FullBelly")
+						task.wait(0.1)
+					until player.Backpack:FindFirstChild("full belly potin")
+					root.CFrame = _last
+				end
+			else
+				Fluent:Notify({
+					Title = "nick7 hub | WARN",
+					Content = "You already have full belly potion!",
+					SubContent = "bordr autofarm",
+					Duration = 5
+				})
+			end
+		else
+			Fluent:Notify({
+				Title = "nick7 hub | WARN",
+				Content = "You must choose a team first!",
+				SubContent = "bordr autofarm",
+				Duration = 5
+			})
+		end
+	end
+})
+
 
 Webhook = Window:AddTab({Title = "Webhook", Icon = "bell"})
 
