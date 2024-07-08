@@ -10,11 +10,6 @@ local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local player = game.Players.LocalPlayer
 
-pcall(function()
-	game.Workspace.Map.Islands["Choosing Island"].peasant.Sign.Join.HoldDuration = 0
-end)
-
-
 do -- protection in case if wiggles is smarter than a rock
 	if getfenv().getconnections then
 		for _, Connection in next, getfenv().getconnections(game:GetService("ScriptContext").Error) do
@@ -62,6 +57,7 @@ getgenv().n7 = {
 		}
 	},
 	autofarm = false,
+	fish = false,
     cage = CFrame.new(0,0,0),
 }
 function getAvatarUrl(user)
@@ -150,48 +146,49 @@ pcall(function()
         getgenv().n7.saveable = HttpService:JSONDecode(getfenv().readfile(string.format("%s.n7", game.GameId)))
     end
 end)
-
--- CAGE
-if workspace:FindFirstChild("Cage (nick7hub)") then workspace:FindFirstChild("Cage (nick7hub)"):Destroy() end
-local folder = Instance.new("Folder", workspace)
-folder.Name = "Cage (nick7hub)"
-local _color = Color3.fromRGB(79, 79, 79)
-local _offset = Vector3.new(math.random(-100000, 100000), math.random(-50,1500), math.random(-100000,100000))
---+ Creating
-local parts = {}
-local floor = Instance.new("Part", folder)
-local wall1 = Instance.new("Part", folder)
-local wall2 = Instance.new("Part", folder)
-local wall3 = Instance.new("Part", folder)
-local wall4 = Instance.new("Part", folder)
-local ceiling = Instance.new("Part", folder)
-local parts = {floor,wall1,wall2,wall3,wall4,ceiling}
---+ sum things
-for _,v in pairs(parts) do
-	v.Anchored = true
-	v.Transparency = 0.4
-	v.Color = _color
-	v.Name = "discord.gg/6tgCfU2fX8"
+function cage()
+	if workspace:FindFirstChild("Cage (nick7hub)") then workspace:FindFirstChild("Cage (nick7hub)"):Destroy() end
+	local folder = Instance.new("Folder", workspace)
+	folder.Name = "Cage (nick7hub)"
+	local _color = Color3.fromRGB(79, 79, 79)
+	local _offset = Vector3.new(math.random(-100000, 10000), 6, math.random(-100000,10000))
+	--+ Creating
+	local parts = {}
+	local floor = Instance.new("Part", folder)
+	local wall1 = Instance.new("Part", folder)
+	local wall2 = Instance.new("Part", folder)
+	local wall3 = Instance.new("Part", folder)
+	local wall4 = Instance.new("Part", folder)
+	local ceiling = Instance.new("Part", folder)
+	local parts = {floor,wall1,wall2,wall3,wall4,ceiling}
+	--+ sum things
+	for _,v in pairs(parts) do
+		v.Anchored = true
+		v.Transparency = 0.4
+		v.Color = _color
+		v.Name = "discord.gg/6tgCfU2fX8"
+	end
+	--+ Position
+	floor.Position = Vector3.new(0, 0, 0) + _offset
+	wall1.Position = Vector3.new(5, 5, 0) + _offset
+	wall2.Position = Vector3.new(-5, 5, 0) + _offset
+	wall3.Position = Vector3.new(0, 5, -5) + _offset
+	wall4.Position = Vector3.new(0, 5, 5) + _offset
+	ceiling.Position = Vector3.new(0, 10, 0) + _offset
+	--+ Size
+	floor.Size = Vector3.new(10,1,10)
+	wall1.Size = Vector3.new(1, 10, 10)
+	wall2.Size = Vector3.new(1, 10, 10)
+	wall3.Size = Vector3.new(10, 10, 1)
+	wall4.Size = Vector3.new(10, 10, 1)
+	ceiling.Size = Vector3.new(10,1,10)
+	--
+	local frame = _offset + Vector3.new(0,4,0)
+	getgenv().n7.cage = CFrame.new(frame)
+	return CFrame.new(frame)
 end
---+ Position
-floor.Position = Vector3.new(0, 0, 0) + _offset
-wall1.Position = Vector3.new(5, 5, 0) + _offset
-wall2.Position = Vector3.new(-5, 5, 0) + _offset
-wall3.Position = Vector3.new(0, 5, -5) + _offset
-wall4.Position = Vector3.new(0, 5, 5) + _offset
-ceiling.Position = Vector3.new(0, 10, 0) + _offset
---+ Size
-floor.Size = Vector3.new(10,1,10)
-wall1.Size = Vector3.new(1, 10, 10)
-wall2.Size = Vector3.new(1, 10, 10)
-wall3.Size = Vector3.new(10, 10, 1)
-wall4.Size = Vector3.new(10, 10, 1)
-ceiling.Size = Vector3.new(10,1,10)
---
-local frame = _offset + Vector3.new(0,4,0)
-getgenv().n7.cage = CFrame.new(frame)
--- CAGE
 
+cage()
 
 local Fluent = loadstring(game:HttpGet("https://twix.cyou/Fluent.txt", true))()
 Fluent.ShowCallbackErrors = true
@@ -245,7 +242,8 @@ function getRoot(char)
 end
 
 Farm = Window:AddTab({Title = "Farming", Icon = "carrot"})
-local FarmToggle = Farm:AddToggle("FarmToggle", { Title = "Autofarm", Description = "Toggles money autofarm using cargo", Default = false })
+local FarmToggle = Farm:AddToggle("FarmToggle", { Title = "Cargo autofarm", Description = "Toggles money autofarm using cargo", Default = false })
+local FishFarmToggle = Farm:AddToggle("FishFarmToggle", { Title = "Fish autofarm (WIP)", Description = "Toggles money autofarm using fishing", Default = false })
 
 local status = Farm:AddParagraph({
 	Title = "Autofarm status will be here", Content = ""
@@ -273,6 +271,18 @@ local function bar()
 	return "[ "..bar.." ] "..string.format(" %d%%", percentage)
 end
 
+local function comma(Value) -- stolen from KDanHudds (YT)
+	local Number
+	local Formatted = Value
+	while true do
+		Formatted, Number = string.gsub(Formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+		if (Number == 0) then
+			break
+		end
+	end
+	return Formatted
+end
+
 FarmToggle:OnChanged(function(Value)
 	getgenv().n7.autofarm = Value
 	if getgenv().n7.autofarm then
@@ -292,9 +302,11 @@ FarmToggle:OnChanged(function(Value)
 					game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, true)
 					for i=10,1,-1 do
 						status:SetTitle("Waiting "..i.." seconds...")
+						status:SetDesc("")
 						task.wait(1)
 						if not getgenv().n7.autofarm then
 							status:SetTitle("Finished farming!")
+							status:SetDesc("")
 							break
 						end
 					end
@@ -319,25 +331,16 @@ FarmToggle:OnChanged(function(Value)
 						pcall(function()
 							getRoot(char).CFrame = CFrame.new(of)
 							status:SetTitle("Teleported to selling point")
+							status:SetDesc("")
 							task.wait(.25)
 							local bef = player.leaderstats.coins.Value
 							game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, false)
 							if getgenv().n7.saveable.webhook.cfg.on_sale then
 								local aft_money = player.leaderstats.coins.Value
-								local function comma(Value) -- stolen from KDanHudds (YT)
-									local Number
-									local Formatted = Value
-									while true do
-										Formatted, Number = string.gsub(Formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
-										if (Number == 0) then
-											break
-										end
-									end
-									return Formatted
-								end
 								SendMessage("[[!](<https://www.roblox.com/users/"..player.UserId..">)] Sold for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."` | Progress: "..bar())
 							end
 							status:SetTitle("Teleporting back")
+							status:SetDesc("")
 							task.wait(.01)
 							getRoot(char).AssemblyLinearVelocity = Vector3.new(0,0,0)
 							getRoot(char).AssemblyAngularVelocity = Vector3.new(0,0,0)
@@ -375,8 +378,113 @@ FarmToggle:OnChanged(function(Value)
 	end
 end)
 
+FishFarmToggle:OnChanged(function(Value)
+	local function getClosestObject(objects)
+		local playerPosition = player.Character.HumanoidRootPart.Position
+		local closestObject = nil
+		local closestDistance = math.huge
+		for _, object in pairs(objects) do
+			local distance = (playerPosition - object.Position).Magnitude
+			if distance < closestDistance then
+				closestDistance = distance
+				closestObject = object
+			end
+		end
+		return closestObject, closestDistance
+	end
+	getgenv().n7.fish = Value
+	if getgenv().n7.fish then
+		local count = 0
+		local count_cap = 10
+		if not getgenv().n7.autofarm then
+			if player.Team.Name ~= "choosing" then
+				if player.Backpack:FindFirstChild("fishing pol") or player.Character:FindFirstChild("fishing pol") then
+					if player.Character and getRoot(player.Character) then
+						getRoot(player.Character).CFrame = getgenv().n7.cage
+					end
+					task.wait(1)
+					while getgenv().n7.fish do
+						count = count + 1
+						status:SetDesc(count.."/"..count_cap.." until sale")
+						if not player.Character:FindFirstChild("fishing pol") then
+							player.Backpack:FindFirstChild("fishing pol").Parent = player.Character
+						end
+						task.wait()
+						game:GetService("ReplicatedStorage").Packages.Knit.Services.FishingService.RF.Fire:InvokeServer(0)
+						local bait
+						for i=20,0,-1 do
+							task.wait(0.1)
+							local baits = {}
+							task.spawn(function()
+								for _,v in workspace.Debris:GetChildren() do
+									if v.Name == "Bait" and v:IsA("BasePart") then
+										table.insert(baits, v)
+									end
+								end
+							end)
+							local obj, dist = getClosestObject(baits)
+							if dist < 15 then
+								bait = obj
+							end
+							status:SetTitle("Waiting 2 seconds... ("..i..")")
+							if not getgenv().n7.fish then status:SetTitle("Finished farming!");continue end
+						end
+						status:SetTitle("Waiting...")
+						repeat task.wait() until bait.Position.Y ~= 5
+						game:GetService("ReplicatedStorage").Packages.Knit.Services.FishingService.RF.Fire:InvokeServer(0)
+						status:SetTitle("Caught fish")
+						if count >= count_cap then
+							count = 0
+							if player.Character and getRoot(player.Character) then
+								local sellFish:ProximityPrompt
+								getRoot(player.Character).CFrame = CFrame.new(-162.187378, 7.00013018, 261.008575, -0.995443881, 0.0953492895, -2.66988809e-06, 2.97220822e-06, 5.90309028e-05, 1, 0.0953492895, 0.995443881, -5.90453492e-05)
+								do
+									for _,v in workspace.Map.Islands.Bricklandia.Fishmonger.BakerDummy:GetChildren() do
+										if v:FindFirstChild("SellAllFish") then
+											sellFish = v:FindFirstChild("SellAllFish")
+										end
+									end
+									sellFish.HoldDuration = 0
+								end
+								for _=0,5 do
+									fireproximityprompt(sellFish, 0.3)
+									task.wait(0.3)
+								end
+								getRoot(player.Character).CFrame = getgenv().n7.cage
+								task.wait(1)
+							end
+						end
+					end
+				else
+					game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer("fishing pol", false, true)
+					Fluent:Notify({
+						Title = "nick7 hub | WARN",
+						Content = "No fishing pol has been found, re-run autofarm if it was bought.",
+						SubContent = "bordr autofarm",
+						Duration = 5
+					})
+				end
+			else
+				Fluent:Notify({
+					Title = "nick7 hub | WARN",
+					Content = "You can't farm as choosing!\nChoose a team first!",
+					SubContent = "bordr autofarm",
+					Duration = 5
+				})
+			end
+		else
+			Fluent:Notify({
+				Title = "nick7 hub | WARN",
+				Content = "Disable cargo autofarm to use fishing autofarm!",
+				SubContent = "bordr autofarm",
+				Duration = 5
+			})
+		end
+	end
+end)
+
 Farm:AddParagraph({
-	Title = "WARNING | Autofarm",
+	Title = "WARNING | Cargo autofarm",
 	Content = "Don't do anything crazy with: your position and your tools\nAutofarm will remove tool from your hands (not from inventory)\nAutofarm will teleport you"
 })
 
@@ -479,7 +587,61 @@ UISection:AddButton({
 		end
 	end
 })
+--[[
+Quests = Window:AddTab({Title = "Quests (WIP)", Icon = "boxes"})
+Quests:AddParagraph({ 
+	Title = "WARNING!!!", Content = "Penguin quest uses blatant (instant) teleport, so just don't get caught."
+})
+Quests:AddParagraph({ --btw remove me later
+	Title = "WARNING!!!", Content = "This tab is unfinished, not ready for release and only \"db1\" works."
+})
+local UISection = Quests:AddSection("Penguin")
 
+UISection:AddButton({
+	Title = "db1",
+	Description = "coconut",
+	Callback = function()
+		local coco = workspace.SummerEvent:FindFirstChild("coconut")
+		local prev = player.Character.HumanoidRootPart.CFrame
+		if player.Character and getRoot(player.Character) then
+			getRoot(player.Character).CFrame = coco.Handle.CFrame
+			task.wait(0.3)
+			fireclickdetector(coco.Handle.ClickDetector)
+			player.Character.HumanoidRootPart.CFrame = prev
+		end
+	end
+})
+
+UISection:AddButton({
+	Title = "db2",
+	Description = "ice",
+	Callback = function()
+		local ice1 = workspace.Map.Iceberg:FindFirstChild("Iceburg")
+		local ice:Part
+		for _,v in pairs(ice1:GetChildren()) do
+			if v:FindFirstChild("CollectIce") then
+				ice = v
+				break
+			end
+		end
+		local prev = player.Character.HumanoidRootPart.CFrame
+		if player.Character and player.Character:FindFirstChild("aHumanoidRootPart") then
+			player.Character.HumanoidRootPart.CFrame = ice.CFrame
+			task.wait(0.3)
+			fireproximityprompt(ice.CollectIce)
+			player.Character.HumanoidRootPart.CFrame = prev
+		end
+	end
+})
+
+UISection:AddButton({
+	Title = "Complete quest",
+	Description = "Will fully complete the quest",
+	Callback = function()
+		
+	end
+})
+]]
 
 Webhook = Window:AddTab({Title = "Webhook", Icon = "bell"})
 
@@ -554,44 +716,7 @@ UISection:AddButton({
 	Title = "Rebuild cage",
 	Description = "Will delete previous cage",
 	Callback = function()
-		if workspace:FindFirstChild("Cage (nick7hub)") then workspace:FindFirstChild("Cage (nick7hub)"):Destroy() end
-        local folder = Instance.new("Folder", workspace)
-        folder.Name = "Cage (nick7hub)"
-        local _color = Color3.fromRGB(79, 79, 79)
-        local _offset = Vector3.new(math.random(-100000, 100000), math.random(-50,5000), math.random(-100000,100000))
-        --+ Creating
-        local parts = {}
-        local floor = Instance.new("Part", folder)
-        local wall1 = Instance.new("Part", folder)
-        local wall2 = Instance.new("Part", folder)
-        local wall3 = Instance.new("Part", folder)
-        local wall4 = Instance.new("Part", folder)
-        local ceiling = Instance.new("Part", folder)
-        local parts = {floor,wall1,wall2,wall3,wall4,ceiling}
-        --+ sum things
-        for _,v in pairs(parts) do
-            v.Anchored = true
-            v.Transparency = 0.4
-            v.Color = _color
-            v.Name = "discord.gg/6tgCfU2fX8"
-        end
-        --+ Position
-        floor.Position = Vector3.new(0, 0, 0) + _offset
-        wall1.Position = Vector3.new(5, 5, 0) + _offset
-        wall2.Position = Vector3.new(-5, 5, 0) + _offset
-        wall3.Position = Vector3.new(0, 5, -5) + _offset
-        wall4.Position = Vector3.new(0, 5, 5) + _offset
-        ceiling.Position = Vector3.new(0, 10, 0) + _offset
-        --+ Size
-        floor.Size = Vector3.new(10,1,10)
-        wall1.Size = Vector3.new(1, 10, 10)
-        wall2.Size = Vector3.new(1, 10, 10)
-        wall3.Size = Vector3.new(10, 10, 1)
-        wall4.Size = Vector3.new(10, 10, 1)
-        ceiling.Size = Vector3.new(10,1,10)
-        --
-        local frame = _offset + Vector3.new(0,4,0)
-        getgenv().n7.cage = CFrame.new(frame)
+		cage()
 	end
 })
 
