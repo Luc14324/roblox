@@ -4,7 +4,6 @@ if game.PlaceId ~= 3411100258 then
 end
 
 
-local GuiService = game:GetService("GuiService")
 local PathfindingService = game:GetService("PathfindingService")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
@@ -42,7 +41,6 @@ end
 
 getgenv().n7 = {
 	saveable = {
-		use_cage = true,
 		check_admins = true,
 		webhook = {
 			use = false,
@@ -73,7 +71,7 @@ local local_pfp = getAvatarUrl(player)
 function SendMessage(message)
 	local url = getgenv().n7.saveable.webhook.link
 	if url ~= "" or url ~= " " then
-		local http = game:GetService("HttpService")
+		local http = HttpService
 		local headers = {
 			["Content-Type"] = "application/json"
 		}
@@ -105,7 +103,7 @@ function SendWarn(admin, was)
 	end
 	local url = getgenv().n7.saveable.webhook.link
 	if url ~= "" or url ~= " " then
-		local http = game:GetService("HttpService")
+		local http = HttpService
 		local headers = {
 			["Content-Type"] = "application/json"
 		}
@@ -283,21 +281,25 @@ local function comma(Value) -- stolen from KDanHudds (YT)
 	return Formatted
 end
 
+local function cap_check()
+	if getgenv().n7.saveable.webhook.cfg.on_cap then
+		local coins = player.leaderstats.coins.Value
+		if coins > cap then
+			SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Hitted a coin cap!")
+			if getgenv().n7.saveable.webhook.cfg.on_cap_kick then
+				player:Kick("hitted coin cap.")
+			end
+		end
+	end
+end
+
 FarmToggle:OnChanged(function(Value)
 	getgenv().n7.autofarm = Value
-	if getgenv().n7.autofarm then
+	if getgenv().n7.autofarm and not getgenv().n7.fish then
 		if player.leaderstats.coins.Value >= 50 then
 			if player.Team.Name ~= "choosing" then
 				while getgenv().n7.autofarm do
-					if getgenv().n7.saveable.webhook.cfg.on_cap then
-						local coins = player.leaderstats.coins.Value
-						if coins > cap then
-							SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Hitted a coin cap!")
-							if getgenv().n7.saveable.webhook.cfg.on_cap_kick then
-								player:Kick("hitted coin cap.")
-							end
-						end
-					end
+					cap_check()
 					local exp, tp = get_exp()
 					game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, true)
 					for i=10,1,-1 do
@@ -314,7 +316,6 @@ FarmToggle:OnChanged(function(Value)
 						break
 					end
 					local char = player.Character
-					local pre = getRoot(char).CFrame
 					char:FindFirstChild("Humanoid").Sit = false
 					local of = Vector3.new(0,0,0)
 					local noise = math.random(-50,30)
@@ -337,18 +338,14 @@ FarmToggle:OnChanged(function(Value)
 							game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, false)
 							if getgenv().n7.saveable.webhook.cfg.on_sale then
 								local aft_money = player.leaderstats.coins.Value
-								SendMessage("[[!](<https://www.roblox.com/users/"..player.UserId..">)] Sold for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."` | Progress: "..bar())
+								SendMessage("[[!](<https://www.roblox.com/users/"..player.UserId..">)] Sold cargo for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."` | Progress: "..bar())
 							end
 							status:SetTitle("Teleporting back")
 							status:SetDesc("")
 							task.wait(.01)
 							getRoot(char).AssemblyLinearVelocity = Vector3.new(0,0,0)
 							getRoot(char).AssemblyAngularVelocity = Vector3.new(0,0,0)
-							if getgenv().n7.saveable.use_cage then
-								getRoot(char).CFrame = getgenv().n7.cage
-							else
-								getRoot(char).CFrame = pre
-							end
+							getRoot(char).CFrame = getgenv().n7.cage
 						end)
 					else
 						Fluent:Notify({
@@ -427,13 +424,15 @@ FishFarmToggle:OnChanged(function(Value)
 								bait = obj
 							end
 							status:SetTitle("Waiting 2 seconds... ("..i..")")
-							if not getgenv().n7.fish then status:SetTitle("Finished farming!");continue end
+							if not getgenv().n7.fish then status:SetTitle("Finished farming!");return end
 						end
-						status:SetTitle("Waiting...")
+						status:SetTitle("Waiting until bait moves...")
 						repeat task.wait() until bait.Position.Y ~= 5
 						game:GetService("ReplicatedStorage").Packages.Knit.Services.FishingService.RF.Fire:InvokeServer(0)
 						status:SetTitle("Caught fish")
 						if count >= count_cap then
+							local bef = player.leaderstats.coins.Value
+							status:SetTitle("Selling fish...")
 							count = 0
 							if player.Character and getRoot(player.Character) then
 								local sellFish:ProximityPrompt
@@ -451,6 +450,12 @@ FishFarmToggle:OnChanged(function(Value)
 									task.wait(0.3)
 								end
 								getRoot(player.Character).CFrame = getgenv().n7.cage
+								local aft_money = player.leaderstats.coins.Value
+								if getgenv().n7.saveable.webhook.cfg.on_sale then
+									local aft_money = player.leaderstats.coins.Value
+									SendMessage("[[!](<https://www.roblox.com/users/"..player.UserId.."/profile>)] Sold fish for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."` | Progress: "..bar())
+								end
+								cap_check()
 								task.wait(1)
 							end
 						end
@@ -497,7 +502,7 @@ UISection:AddButton({
 		if player.Team == game.Teams:FindFirstChild("choosing") then
 			local char = player.Character
 			local root = char:FindFirstChild("HumanoidRootPart")
-			local sign = game:GetService("Workspace").Map.Islands["Choosing Island"].TeamChangers.Peasent.TeamPad
+			local sign = workspace.Map.Islands["Choosing Island"].TeamChangers.Peasent.TeamPad
 			if char and char:FindFirstChild("Humanoid") then
 				local path = PathfindingService:CreatePath()
 				path:ComputeAsync(root.Position, sign.Position)
@@ -517,131 +522,77 @@ UISection:AddButton({
 		end
 	end
 })
-
-UISection:AddButton({
-	Title = "Brew full belly potion",
-	Description = "Full belly potion will stop hunger from draining",
-	Callback = function()
-		if player.Team ~= game.Teams:FindFirstChild("choosing") then
-			if not player.Backpack:FindFirstChild("full belly potin") then
-				local char = player.Character
-				local root = char:FindFirstChild("HumanoidRootPart")
-				if char and root then
-					local _last = root.CFrame
-					if not (player.Backpack:FindFirstChild("catapillah") and player.Backpack:FindFirstChild("bery") and player.Backpack:FindFirstChild("applee")) then
-						local crp = nil
-						local arp = nil
-						do
-							for _,v in workspace.Map.Islands.Farlands.catapillah:GetChildren() do
-								if v:FindFirstChild("ClickDetector") then
-									crp = v
+if fireclickdetector then
+	UISection:AddButton({
+		Title = "Brew full belly potion",
+		Description = "Full belly potion will stop hunger from draining",
+		Callback = function()
+			if player.Team ~= game.Teams:FindFirstChild("choosing") then
+				if not player.Backpack:FindFirstChild("full belly potin") then
+					local char = player.Character
+					local root = char:FindFirstChild("HumanoidRootPart")
+					if char and root then
+						local _last = root.CFrame
+						if not (player.Backpack:FindFirstChild("catapillah") and player.Backpack:FindFirstChild("bery") and player.Backpack:FindFirstChild("applee")) then
+							local crp
+							local arp
+							do
+								for _,v in workspace.Map.Islands.Farlands.catapillah:GetChildren() do
+									if v:FindFirstChild("ClickDetector") then
+										crp = v
+									end
+								end
+								for _,v in workspace.Map.Islands.Farlands.applee:GetChildren() do
+									if v:FindFirstChild("ClickDetector") then
+										arp = v
+									end
 								end
 							end
-							for _,v in workspace.Map.Islands.Farlands.applee:GetChildren() do
-								if v:FindFirstChild("ClickDetector") then
-									arp = v
-								end
-							end
+							repeat
+								root.CFrame = crp.CFrame
+								fireclickdetector(crp.ClickDetector)
+								task.wait()
+							until player.Backpack:FindFirstChild("catapillah")
+							task.wait(0.1)
+							repeat
+								root.CFrame = workspace.Map.Islands.Farlands.bery.Part.CFrame
+								fireclickdetector(workspace.Map.Islands.Farlands.bery.Part.ClickDetector)
+								task.wait()
+							until player.Backpack:FindFirstChild("bery")
+							task.wait(0.1)
+							repeat
+								root.CFrame = arp.CFrame
+								fireclickdetector(arp.ClickDetector)
+								task.wait()
+							until player.Backpack:FindFirstChild("applee")
 						end
-						repeat
-							root.CFrame = crp.CFrame
-							fireclickdetector(crp.ClickDetector)
-							task.wait()
-						until player.Backpack:FindFirstChild("catapillah")
 						task.wait(0.1)
+						root.CFrame = CFrame.new(-172, 12, 339)
 						repeat
-							root.CFrame = workspace.Map.Islands.Farlands.bery.Part.CFrame
-							fireclickdetector(workspace.Map.Islands.Farlands.bery.Part.ClickDetector)
-							task.wait()
-						until player.Backpack:FindFirstChild("bery")
-						task.wait(0.1)
-						repeat
-							root.CFrame = arp.CFrame
-							fireclickdetector(arp.ClickDetector)
-							task.wait()
-						until player.Backpack:FindFirstChild("applee")
+							game:GetService("ReplicatedStorage").Remotes.BrewPotion:FireServer("FullBelly")
+							task.wait(0.1)
+						until player.Backpack:FindFirstChild("full belly potin")
+						root.CFrame = _last
 					end
-					task.wait(0.1)
-					root.CFrame = CFrame.new(-172, 12, 339)
-					repeat
-						game:GetService("ReplicatedStorage").Remotes.BrewPotion:FireServer("FullBelly")
-						task.wait(0.1)
-					until player.Backpack:FindFirstChild("full belly potin")
-					root.CFrame = _last
+				else
+					Fluent:Notify({
+						Title = "nick7 hub | WARN",
+						Content = "You already have full belly potion!",
+						SubContent = "bordr autofarm",
+						Duration = 5
+					})
 				end
 			else
 				Fluent:Notify({
 					Title = "nick7 hub | WARN",
-					Content = "You already have full belly potion!",
+					Content = "You must choose a team first!",
 					SubContent = "bordr autofarm",
 					Duration = 5
 				})
 			end
-		else
-			Fluent:Notify({
-				Title = "nick7 hub | WARN",
-				Content = "You must choose a team first!",
-				SubContent = "bordr autofarm",
-				Duration = 5
-			})
 		end
-	end
-})
---[[
-Quests = Window:AddTab({Title = "Quests (WIP)", Icon = "boxes"})
-Quests:AddParagraph({ 
-	Title = "WARNING!!!", Content = "Penguin quest uses blatant (instant) teleport, so just don't get caught."
-})
-Quests:AddParagraph({ --btw remove me later
-	Title = "WARNING!!!", Content = "This tab is unfinished, not ready for release and only \"db1\" works."
-})
-local UISection = Quests:AddSection("Penguin")
-
-UISection:AddButton({
-	Title = "db1",
-	Description = "coconut",
-	Callback = function()
-		local coco = workspace.SummerEvent:FindFirstChild("coconut")
-		local prev = player.Character.HumanoidRootPart.CFrame
-		if player.Character and getRoot(player.Character) then
-			getRoot(player.Character).CFrame = coco.Handle.CFrame
-			task.wait(0.3)
-			fireclickdetector(coco.Handle.ClickDetector)
-			player.Character.HumanoidRootPart.CFrame = prev
-		end
-	end
-})
-
-UISection:AddButton({
-	Title = "db2",
-	Description = "ice",
-	Callback = function()
-		local ice1 = workspace.Map.Iceberg:FindFirstChild("Iceburg")
-		local ice:Part
-		for _,v in pairs(ice1:GetChildren()) do
-			if v:FindFirstChild("CollectIce") then
-				ice = v
-				break
-			end
-		end
-		local prev = player.Character.HumanoidRootPart.CFrame
-		if player.Character and player.Character:FindFirstChild("aHumanoidRootPart") then
-			player.Character.HumanoidRootPart.CFrame = ice.CFrame
-			task.wait(0.3)
-			fireproximityprompt(ice.CollectIce)
-			player.Character.HumanoidRootPart.CFrame = prev
-		end
-	end
-})
-
-UISection:AddButton({
-	Title = "Complete quest",
-	Description = "Will fully complete the quest",
-	Callback = function()
-		
-	end
-})
-]]
+	})
+end
 
 Webhook = Window:AddTab({Title = "Webhook", Icon = "bell"})
 
@@ -689,7 +640,7 @@ EventAdmin:OnChanged(function(Value)
 	getgenv().n7.saveable.webhook.cfg.on_admin = Value
 end)
 
-local EventSale = UISection:AddToggle("EventSale", { Title = "Sale", Description = "Will message when you sell cargo (with autofarm)", Default = getgenv().n7.saveable.webhook.cfg.on_sale})
+local EventSale = UISection:AddToggle("EventSale", { Title = "Sale", Description = "Will message when you sell cargo/fish (with autofarm)", Default = getgenv().n7.saveable.webhook.cfg.on_sale})
 EventSale:OnChanged(function(Value)
 	getgenv().n7.saveable.webhook.cfg.on_sale = Value
 end)
@@ -706,11 +657,6 @@ end)
 
 local Settings = Window:AddTab({ Title = "Settings", Icon = "cog"})
 local UISection = Settings:AddSection("Farming")
-
-local FarmToggle = Settings:AddToggle("CageToggle", { Title = "Use cage", Description = "Teleports you to cage after selling", Default = getgenv().n7.saveable.use_cage})
-FarmToggle:OnChanged(function(Value)
-    getgenv().n7.saveable.use_cage = Value
-end)
 
 UISection:AddButton({
 	Title = "Rebuild cage",
