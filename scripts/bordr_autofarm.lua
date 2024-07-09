@@ -241,7 +241,7 @@ end
 
 Farm = Window:AddTab({Title = "Farming", Icon = "carrot"})
 local FarmToggle = Farm:AddToggle("FarmToggle", { Title = "Cargo autofarm", Description = "Toggles money autofarm using cargo", Default = false })
-local FishFarmToggle = Farm:AddToggle("FishFarmToggle", { Title = "Fish autofarm (WIP)", Description = "Toggles money autofarm using fishing", Default = false })
+local FishFarmToggle = Farm:AddToggle("FishFarmToggle", { Title = "Fish autofarm", Description = "Toggles money autofarm using fishing", Default = false })
 
 local status = Farm:AddParagraph({
 	Title = "Autofarm status will be here", Content = ""
@@ -295,10 +295,19 @@ end
 
 FarmToggle:OnChanged(function(Value)
 	getgenv().n7.autofarm = Value
-	if getgenv().n7.autofarm and not getgenv().n7.fish then
+	if getgenv().n7.autofarm then
 		if player.leaderstats.coins.Value >= 50 then
 			if player.Team.Name ~= "choosing" then
 				while getgenv().n7.autofarm do
+					if getgenv().n7.fish then
+						Fluent:Notify({
+							Title = "nick7 hub | WARN",
+							Content = "Disable fish autofarm to use cargo autofarm!",
+							SubContent = "bordr autofarm",
+							Duration = 5
+						})
+						return
+					end
 					cap_check()
 					local exp, tp = get_exp()
 					game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, true)
@@ -318,8 +327,8 @@ FarmToggle:OnChanged(function(Value)
 					local char = player.Character
 					char:FindFirstChild("Humanoid").Sit = false
 					local of = Vector3.new(0,0,0)
-					local noise = math.random(-50,30)
-					local fs = Vector3.new(noise,10000 + noise,noise)
+					local noise = math.random(-100,49)
+					local fs = Vector3.new(noise,9500 + noise,noise)
 					if tp == 1 then
 						of = workspace.Map.Islands.Bricklandia.BricklandiaCargoTrader.Sell.Position
 					elseif tp == 2 then
@@ -480,7 +489,7 @@ FishFarmToggle:OnChanged(function(Value)
 		else
 			Fluent:Notify({
 				Title = "nick7 hub | WARN",
-				Content = "Disable cargo autofarm to use fishing autofarm!",
+				Content = "Disable cargo autofarm to use fish autofarm!",
 				SubContent = "bordr autofarm",
 				Duration = 5
 			})
