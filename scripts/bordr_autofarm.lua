@@ -385,19 +385,6 @@ FarmToggle:OnChanged(function(Value)
 end)
 
 FishFarmToggle:OnChanged(function(Value)
-	local function getClosestObject(objects)
-		local playerPosition = player.Character.HumanoidRootPart.Position
-		local closestObject = nil
-		local closestDistance = math.huge
-		for _, object in pairs(objects) do
-			local distance = (playerPosition - object.Position).Magnitude
-			if distance < closestDistance then
-				closestDistance = distance
-				closestObject = object
-			end
-		end
-		return closestObject, closestDistance
-	end
 	getgenv().n7.fish = Value
 	if getgenv().n7.fish then
 		local count = 0
@@ -418,20 +405,12 @@ FishFarmToggle:OnChanged(function(Value)
 						task.wait()
 						game:GetService("ReplicatedStorage").Packages.Knit.Services.FishingService.RF.Fire:InvokeServer(0)
 						local bait
+						if player.Character:FindFirstChild("fishing pol") then
+							repeat task.wait() until player.Character:FindFirstChild("fishing pol").Bait.Value
+							bait = player.Character:FindFirstChild("fishing pol").Bait.Value
+						end
 						for i=20,0,-1 do
 							task.wait(0.1)
-							local baits = {}
-							task.spawn(function()
-								for _,v in workspace.Debris:GetChildren() do
-									if v.Name == "Bait" and v:IsA("BasePart") then
-										table.insert(baits, v)
-									end
-								end
-							end)
-							local obj, dist = getClosestObject(baits)
-							if dist < 15 then
-								bait = obj
-							end
 							status:SetTitle("Waiting 2 seconds... ("..i..")")
 							if not getgenv().n7.fish then status:SetTitle("Finished farming!");return end
 						end
@@ -470,13 +449,22 @@ FishFarmToggle:OnChanged(function(Value)
 						end
 					end
 				else
-					game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer("fishing pol", false, true)
-					Fluent:Notify({
-						Title = "nick7 hub | WARN",
-						Content = "No fishing pol has been found, re-run autofarm if it was bought.",
-						SubContent = "bordr autofarm",
-						Duration = 5
-					})
+					if player.leaderstats.coins.Value >= 150 then
+						game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer("fishing pol", false, true)
+						Fluent:Notify({
+							Title = "nick7 hub | WARN",
+							Content = "No fishing pol has been found, re-run autofarm if it was bought.",
+							SubContent = "bordr autofarm",
+							Duration = 5
+						})
+					else
+						Fluent:Notify({
+							Title = "nick7 hub | WARN",
+							Content = "Not enough coins! You need 150 coins",
+							SubContent = "bordr autofarm",
+							Duration = 5
+						})
+					end
 				end
 			else
 				Fluent:Notify({
@@ -537,59 +525,66 @@ if fireclickdetector then
 		Description = "Full belly potion will stop hunger from draining",
 		Callback = function()
 			if player.Team ~= game.Teams:FindFirstChild("choosing") then
-				if not player.Backpack:FindFirstChild("full belly potin") then
-					local char = player.Character
-					local root = char:FindFirstChild("HumanoidRootPart")
-					if char and root then
-						local _last = root.CFrame
-						if not (player.Backpack:FindFirstChild("catapillah") and player.Backpack:FindFirstChild("bery") and player.Backpack:FindFirstChild("applee")) then
-							local crp
-							local arp
-							do
-								for _,v in workspace.Map.Islands.Farlands.catapillah:GetChildren() do
-									if v:FindFirstChild("ClickDetector") then
-										crp = v
-									end
-								end
-								for _,v in workspace.Map.Islands.Farlands.applee:GetChildren() do
-									if v:FindFirstChild("ClickDetector") then
-										arp = v
-									end
+				local function getPotions()
+					local check = "full belly potin"
+					local all_tools = {}
+					for _,v in player.Character:GetChildren() do
+						if v:IsA("Tool") and v.Name == check then
+							table.insert(all_tools, v)
+						end
+					end
+					for _,v in player.Backpack:GetChildren() do
+						if v.Name == check then
+							table.insert(all_tools, v)
+						end
+					end
+					return #all_tools
+				end
+				local fbpc = getPotions() -- full belly potions count
+				local char = player.Character
+				local root = char:FindFirstChild("HumanoidRootPart")
+				if char and root then
+					local _last = root.CFrame
+					if not (player.Backpack:FindFirstChild("catapillah") and player.Backpack:FindFirstChild("bery") and player.Backpack:FindFirstChild("applee")) then
+						local crp
+						local arp
+						do
+							for _,v in workspace.Map.Islands.Farlands.catapillah:GetChildren() do
+								if v:FindFirstChild("ClickDetector") then
+									crp = v
 								end
 							end
-							repeat
-								root.CFrame = crp.CFrame
-								fireclickdetector(crp.ClickDetector)
-								task.wait()
-							until player.Backpack:FindFirstChild("catapillah")
-							task.wait(0.1)
-							repeat
-								root.CFrame = workspace.Map.Islands.Farlands.bery.Part.CFrame
-								fireclickdetector(workspace.Map.Islands.Farlands.bery.Part.ClickDetector)
-								task.wait()
-							until player.Backpack:FindFirstChild("bery")
-							task.wait(0.1)
-							repeat
-								root.CFrame = arp.CFrame
-								fireclickdetector(arp.ClickDetector)
-								task.wait()
-							until player.Backpack:FindFirstChild("applee")
+							for _,v in workspace.Map.Islands.Farlands.applee:GetChildren() do
+								if v:FindFirstChild("ClickDetector") then
+									arp = v
+								end
+							end
 						end
-						task.wait(0.1)
-						root.CFrame = CFrame.new(-172, 12, 339)
 						repeat
-							game:GetService("ReplicatedStorage").Remotes.BrewPotion:FireServer("FullBelly")
-							task.wait(0.1)
-						until player.Backpack:FindFirstChild("full belly potin")
-						root.CFrame = _last
+							root.CFrame = crp.CFrame
+							fireclickdetector(crp.ClickDetector)
+							task.wait()
+						until player.Backpack:FindFirstChild("catapillah")
+						task.wait(0.1)
+						repeat
+							root.CFrame = workspace.Map.Islands.Farlands.bery.Part.CFrame
+							fireclickdetector(workspace.Map.Islands.Farlands.bery.Part.ClickDetector)
+							task.wait()
+						until player.Backpack:FindFirstChild("bery")
+						task.wait(0.1)
+						repeat
+							root.CFrame = arp.CFrame
+							fireclickdetector(arp.ClickDetector)
+							task.wait()
+						until player.Backpack:FindFirstChild("applee")
 					end
-				else
-					Fluent:Notify({
-						Title = "nick7 hub | WARN",
-						Content = "You already have full belly potion!",
-						SubContent = "bordr autofarm",
-						Duration = 5
-					})
+					task.wait(0.1)
+					root.CFrame = CFrame.new(-172, 12, 339)
+					repeat
+						game:GetService("ReplicatedStorage").Remotes.BrewPotion:FireServer("FullBelly")
+						task.wait(0.1)
+					until getPotions() > fbpc
+					root.CFrame = _last
 				end
 			else
 				Fluent:Notify({
@@ -888,9 +883,9 @@ if getfenv().isfile and getfenv().readfile and getfenv().writefile and getfenv()
 	})
 end
 
-local Optimisation = Settings:AddSection("Optimisation")
+local Optimization = Settings:AddSection("Optimization")
 
-Optimisation:AddToggle("3DRendering", {
+Optimization:AddToggle("3DRendering", {
 	Title = "Toggle 3D rendering",
 	Description = "Makes your screen white, excluding GUIs",
 	Default = true,
