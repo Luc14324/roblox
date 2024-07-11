@@ -52,6 +52,12 @@ getgenv().n7 = {
 				on_cap = false,
 				on_cap_kick = false
 			}
+		},
+		afterloading = {
+			enabled = false,
+			step1 = "peasant",
+			step2 = true,
+			step3 = "Fish autofarm"
 		}
 	},
 	autofarm = false,
@@ -69,6 +75,7 @@ function getAvatarUrl(user)
 end
 local local_pfp = getAvatarUrl(player)
 function SendMessage(message)
+	if not request then return end
 	local url = getgenv().n7.saveable.webhook.link
 	if url ~= "" or url ~= " " then
 		local http = HttpService
@@ -91,6 +98,7 @@ function SendMessage(message)
 end
 
 function SendWarn(admin, was)
+	if not request then return end
 	local needEmbed = false
 	if admin ~= nil and admin ~= false then
 		needEmbed = true
@@ -282,12 +290,14 @@ local function comma(Value) -- stolen from KDanHudds (YT)
 end
 
 local function cap_check()
-	if getgenv().n7.saveable.webhook.cfg.on_cap then
-		local coins = player.leaderstats.coins.Value
-		if coins > cap then
-			SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Hitted a coin cap!")
-			if getgenv().n7.saveable.webhook.cfg.on_cap_kick then
-				player:Kick("hitted coin cap.")
+	if getgenv().n7.saveable.webhook.use then
+		if getgenv().n7.saveable.webhook.cfg.on_cap then
+			local coins = player.leaderstats.coins.Value
+			if coins > cap then
+				SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Hitted a coin cap!")
+				if getgenv().n7.saveable.webhook.cfg.on_cap_kick then
+					player:Kick("hitted coin cap.")
+				end
 			end
 		end
 	end
@@ -300,6 +310,7 @@ FarmToggle:OnChanged(function(Value)
 			if player.Team.Name ~= "choosing" then
 				while getgenv().n7.autofarm do
 					if getgenv().n7.fish then
+						FarmToggle:SetValue(false)
 						Fluent:Notify({
 							Title = "nick7 hub | WARN",
 							Content = "Disable fish autofarm to use cargo autofarm!",
@@ -345,7 +356,7 @@ FarmToggle:OnChanged(function(Value)
 							task.wait(.25)
 							local bef = player.leaderstats.coins.Value
 							game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, false)
-							if getgenv().n7.saveable.webhook.cfg.on_sale then
+							if getgenv().n7.saveable.webhook.cfg.on_sale and getgenv().n7.saveable.webhook.use then
 								local aft_money = player.leaderstats.coins.Value
 								SendMessage("[[!](<https://www.roblox.com/users/"..player.UserId..">)] Sold cargo for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."` | Progress: "..bar())
 							end
@@ -357,6 +368,7 @@ FarmToggle:OnChanged(function(Value)
 							getRoot(char).CFrame = getgenv().n7.cage
 						end)
 					else
+						FarmToggle:SetValue(false)
 						Fluent:Notify({
 							Title = "nick7 hub | ERROR",
 							Content = "Can't find character.",
@@ -366,6 +378,7 @@ FarmToggle:OnChanged(function(Value)
 					end
 				end
 			else
+				FarmToggle:SetValue(false)
 				Fluent:Notify({
 					Title = "nick7 hub | WARN",
 					Content = "You can't farm as choosing!\nChoose a team first!",
@@ -374,6 +387,7 @@ FarmToggle:OnChanged(function(Value)
 				})
 			end
 		else
+			FarmToggle:SetValue(false)
 			Fluent:Notify({
 				Title = "nick7 hub | WARN",
 				Content = "Not enough coins! You need 50 coins",
@@ -387,6 +401,14 @@ end)
 FishFarmToggle:OnChanged(function(Value)
 	getgenv().n7.fish = Value
 	if getgenv().n7.fish then
+		if not fireproximityprompt then
+			Fluent:Notify({
+				Title = "nick7 hub | WARN",
+				Content = "Your exploit doesn't support fireproximityprompt\nAutofarm will now just fish",
+				SubContent = "bordr autofarm",
+				Duration = 10
+			})
+		end
 		local count = 0
 		local count_cap = 10
 		if not getgenv().n7.autofarm then
@@ -397,8 +419,10 @@ FishFarmToggle:OnChanged(function(Value)
 					end
 					task.wait(1)
 					while getgenv().n7.fish do
-						count = count + 1
-						status:SetDesc(count.."/"..count_cap.." until sale")
+						if fireproximityprompt then
+							count = count + 1
+							status:SetDesc(count.."/"..count_cap.." until sale")
+						end
 						if not player.Character:FindFirstChild("fishing pol") then
 							player.Backpack:FindFirstChild("fishing pol").Parent = player.Character
 						end
@@ -418,7 +442,7 @@ FishFarmToggle:OnChanged(function(Value)
 						repeat task.wait() until bait.Position.Y ~= 5
 						game:GetService("ReplicatedStorage").Packages.Knit.Services.FishingService.RF.Fire:InvokeServer(0)
 						status:SetTitle("Caught fish")
-						if count >= count_cap then
+						if count >= count_cap and fireproximityprompt then
 							local bef = player.leaderstats.coins.Value
 							status:SetTitle("Selling fish...")
 							count = 0
@@ -438,8 +462,7 @@ FishFarmToggle:OnChanged(function(Value)
 									task.wait(0.3)
 								end
 								getRoot(player.Character).CFrame = getgenv().n7.cage
-								local aft_money = player.leaderstats.coins.Value
-								if getgenv().n7.saveable.webhook.cfg.on_sale then
+								if getgenv().n7.saveable.webhook.cfg.on_sale and getgenv().n7.saveable.webhook.use then
 									local aft_money = player.leaderstats.coins.Value
 									SendMessage("[[!](<https://www.roblox.com/users/"..player.UserId.."/profile>)] Sold fish for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."` | Progress: "..bar())
 								end
@@ -449,14 +472,11 @@ FishFarmToggle:OnChanged(function(Value)
 						end
 					end
 				else
+					FishFarmToggle:SetValue(false)
 					if player.leaderstats.coins.Value >= 150 then
 						game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer("fishing pol", false, true)
-						Fluent:Notify({
-							Title = "nick7 hub | WARN",
-							Content = "No fishing pol has been found, re-run autofarm if it was bought.",
-							SubContent = "bordr autofarm",
-							Duration = 5
-						})
+						repeat task.wait() until player.Backpack:FindFirstChild("fishing pol") or player.Character:FindFirstChild("fishing pol")
+						FishFarmToggle:SetValue(true)
 					else
 						Fluent:Notify({
 							Title = "nick7 hub | WARN",
@@ -467,6 +487,7 @@ FishFarmToggle:OnChanged(function(Value)
 					end
 				end
 			else
+				FishFarmToggle:SetValue(false)
 				Fluent:Notify({
 					Title = "nick7 hub | WARN",
 					Content = "You can't farm as choosing!\nChoose a team first!",
@@ -475,6 +496,7 @@ FishFarmToggle:OnChanged(function(Value)
 				})
 			end
 		else
+			FishFarmToggle:SetValue(false)
 			Fluent:Notify({
 				Title = "nick7 hub | WARN",
 				Content = "Disable cargo autofarm to use fish autofarm!",
@@ -597,67 +619,67 @@ if fireclickdetector then
 		end
 	})
 end
+if request then
+	Webhook = Window:AddTab({Title = "Webhook", Icon = "bell"})
+	local UseWebhook = Webhook:AddToggle("UseWebhook", { Title = "Use webhook", Description = "Will message on selected event(-s)", Default = getgenv().n7.saveable.webhook.use})
+	UseWebhook:OnChanged(function(Value)
+		getgenv().n7.saveable.webhook.use = Value
+	end)
 
-Webhook = Window:AddTab({Title = "Webhook", Icon = "bell"})
+	Webhook:AddInput("WebhookLink", {
+		Title = "Webhook link",
+		Description = "After typing, press Enter",
+		Default = #getgenv().n7.saveable.webhook.link > 0 and getgenv().n7.saveable.webhook.link or "",
+		Numeric = false,
+		Finished = true,
+		Placeholder = "https://discord.com/api/webhooks/*",
+		Callback = function(Value)
+			getgenv().n7.saveable.webhook.link = Value
+		end
+	})
 
-local UseWebhook = Webhook:AddToggle("UseWebhook", { Title = "Use webhook", Description = "Will message on selected event(-s)", Default = getgenv().n7.saveable.webhook.use})
-UseWebhook:OnChanged(function(Value)
-	getgenv().n7.saveable.webhook.use = Value
-end)
+	Webhook:AddInput("WebhookPing", {
+		Title = "Mention text",
+		Description = "AKA ping",
+		Default = getgenv().n7.saveable.webhook.cfg.ping,
+		Numeric = false,
+		Finished = true,
+		Placeholder = "@everyone",
+		Callback = function(Value)
+			getgenv().n7.saveable.webhook.cfg.ping = Value
+		end
+	})
 
-Webhook:AddInput("WebhookLink", {
-    Title = "Webhook link",
-    Description = "After typing, press Enter",
-	Default = #getgenv().n7.saveable.webhook.link > 0 and getgenv().n7.saveable.webhook.link or "",
-    Numeric = false,
-    Finished = true,
-    Placeholder = "https://discord.com/api/webhooks/*",
-    Callback = function(Value)
-        getgenv().n7.saveable.webhook.link = Value
-    end
-})
+	Webhook:AddButton({
+		Title = "Test webhook",
+		Description = "Will send a test message to your webhook",
+		Callback = function()
+			SendMessage("Message sent from `".. player.Name.."`.")
+		end
+	})
 
-Webhook:AddInput("WebhookPing", {
-    Title = "Mention text",
-    Description = "AKA ping",
-	Default = getgenv().n7.saveable.webhook.cfg.ping,
-    Numeric = false,
-    Finished = true,
-    Placeholder = "@everyone",
-    Callback = function(Value)
-        getgenv().n7.saveable.webhook.cfg.ping = Value
-    end
-})
+	local UISection = Webhook:AddSection("Events")
 
-Webhook:AddButton({
-	Title = "Test webhook",
-	Description = "Will send a test message to your webhook",
-	Callback = function()
-		SendMessage("Message sent from `".. player.Name.."`.")
-	end
-})
+	local EventAdmin = UISection:AddToggle("EventAdmin", { Title = "Admin join/exists", Description = "Will message when admin is on the server", Default = getgenv().n7.saveable.webhook.cfg.on_admin})
+	EventAdmin:OnChanged(function(Value)
+		getgenv().n7.saveable.webhook.cfg.on_admin = Value
+	end)
 
-local UISection = Webhook:AddSection("Events")
+	local EventSale = UISection:AddToggle("EventSale", { Title = "Sale", Description = "Will message when you sell cargo/fish (with autofarm)", Default = getgenv().n7.saveable.webhook.cfg.on_sale})
+	EventSale:OnChanged(function(Value)
+		getgenv().n7.saveable.webhook.cfg.on_sale = Value
+	end)
 
-local EventAdmin = UISection:AddToggle("EventAdmin", { Title = "Admin join/exists", Description = "Will message when admin is on the server", Default = getgenv().n7.saveable.webhook.cfg.on_admin})
-EventAdmin:OnChanged(function(Value)
-	getgenv().n7.saveable.webhook.cfg.on_admin = Value
-end)
+	local EventCap = UISection:AddToggle("EventCap", { Title = "Cap", Description = "Will message when autofarm hits money cap", Default = getgenv().n7.saveable.webhook.cfg.on_cap})
+	EventCap:OnChanged(function(Value)
+		getgenv().n7.saveable.webhook.cfg.on_cap = Value
+	end)
 
-local EventSale = UISection:AddToggle("EventSale", { Title = "Sale", Description = "Will message when you sell cargo/fish (with autofarm)", Default = getgenv().n7.saveable.webhook.cfg.on_sale})
-EventSale:OnChanged(function(Value)
-	getgenv().n7.saveable.webhook.cfg.on_sale = Value
-end)
-
-local EventCap = UISection:AddToggle("EventCap", { Title = "Cap", Description = "Will message when autofarm hits money cap", Default = getgenv().n7.saveable.webhook.cfg.on_cap})
-EventCap:OnChanged(function(Value)
-	getgenv().n7.saveable.webhook.cfg.on_cap = Value
-end)
-
-local EventCapKick = UISection:AddToggle("EventCapKick", { Title = "(Cap) Kick after cap", Description = "Will kick you after autofarm hits money cap", Default = getgenv().n7.saveable.webhook.cfg.on_cap_kick})
-EventCapKick:OnChanged(function(Value)
-	getgenv().n7.saveable.webhook.cfg.on_cap_kick = Value
-end)
+	local EventCapKick = UISection:AddToggle("EventCapKick", { Title = "(Cap) Kick after cap", Description = "Will kick you after autofarm hits money cap", Default = getgenv().n7.saveable.webhook.cfg.on_cap_kick})
+	EventCapKick:OnChanged(function(Value)
+		getgenv().n7.saveable.webhook.cfg.on_cap_kick = Value
+	end)
+end
 
 local Settings = Window:AddTab({ Title = "Settings", Icon = "cog"})
 local UISection = Settings:AddSection("Farming")
@@ -732,7 +754,7 @@ AdminCheck:OnChanged(function(Value)
 				cb = check_3()
 			end
 			if cb then
-				if getgenv().n7.saveable.webhook.use then
+				if getgenv().n7.saveable.webhook.use and request then
 					if not warned then
 						SendWarn(admin, code)
 						warned = true
@@ -756,7 +778,7 @@ game.Players.PlayerAdded:Connect(function(plr)
 			cb = check_3()
 		end
 		if cb then
-			if getgenv().n7.saveable.webhook.use then
+			if getgenv().n7.saveable.webhook.use and request then
 				SendWarn(admin, code)
 			end
 		end
@@ -894,11 +916,66 @@ Optimization:AddToggle("3DRendering", {
 	end
 })
 
+if getfenv().isfile and getfenv().readfile and getfenv().writefile and getfenv().delfile then
+	local AfterLoading = Window:AddTab({ Title = "After loading", Icon = "refresh-ccw"})
+	AfterLoading:AddParagraph({
+		Title = "About | After loading",
+		Content = "Script will execute the actions selected below after it was loaded again.\nDon't forget to export config to save changes!"
+	})
+	local al = AfterLoading:AddToggle("ToggleAfterLoading", {Title = "Toggle", Description = "Toggles after loading", Default = getgenv().n7.saveable.afterloading.enabled or false})
+	al:OnChanged(function(Value)
+		getgenv().n7.saveable.afterloading.enabled = Value
+    end)
+	local Step1 = AfterLoading:AddDropdown("Step1", {
+        Title = "Step 1 | Team (neutrals)",
+        Values = {"None", "peasant", "pirate"},
+        Multi = false,
+        Default = "peasant",
+    })
+    Step1:OnChanged(function(Value)
+		if Value ~= nil then
+			local function check_team(xteam)
+				local team = string.lower(xteam)
+				if team == "peasant" then return true end
+				if team == "pirate" then return workspace.Map.Islands["Choosing Island"].TeamChangers.Pirate.TeamPad.Transparency == 0 end
+			end
+			if string.lower(Value) == "none" then
+				getgenv().n7.saveable.afterloading.step1 = Value
+			else
+				if check_team(Value) then
+					getgenv().n7.saveable.afterloading.step1 = Value
+				end
+			end
+		end
+    end)
+	local xc = ""
+	if not fireclickdetector then
+		xc = " | UNSUPPORTED"
+	end
+	local Step2 = AfterLoading:AddToggle("Step2", { Title = "Step 2 | Full belly potion" .. xc, Description = "Brew full belly potion after team was chosen.\nIgnored if step 1 wasn't selected", Default = getgenv().n7.saveable.afterloading.step2})
+	Step2:OnChanged(function(Value)
+		if Value ~= nil then
+			getgenv().n7.saveable.afterloading.step2 = Value
+		end
+	end)
+	local Step3 = AfterLoading:AddDropdown("Step3", {
+        Title = "Step 3 | Farm",
+		Description = "Ignored if step 1 wasn't selected.",
+        Values = {"None", "Cargo autofarm", "Fish autofarm"},
+        Multi = false,
+        Default = getgenv().n7.saveable.afterloading.step3,
+    })
+    Step3:OnChanged(function(Value)
+		if Value ~= nil then
+			getgenv().n7.saveable.afterloading.step3 = Value
+		end
+    end)
+end
 
 Credits = Window:AddTab({Title = "Credits", Icon = "person-standing"})
 Credits:AddParagraph({
 	Title = "nick7 hub",
-	Content = "Main script was made by Stonifam with ttwiz_zs help\nUsing forked Fluent UI lib by @ttwiz_z"
+	Content = "Main script is made by Stonifam with ttwiz_zs help\nUsing forked Fluent UI lib by @ttwiz_z"
 })
 Credits:AddButton({
 	Title = "Copy discord invite",
@@ -909,3 +986,114 @@ Credits:AddButton({
 })
 
 Window:SelectTab(1)
+-- After loading part :P
+
+if getgenv().n7.saveable.afterloading.enabled then
+	Fluent:Notify({
+		Title = "nick7 hub | Welcome!",
+		Content = "Afterloading is enabled, wait until it will finish.",
+		SubContent = "bordr autofarm",
+		Duration = 5
+	})
+	if getgenv().n7.saveable.afterloading.step1 ~= "None" and getgenv().n7.saveable.afterloading.step1 == "peasant" or getgenv().n7.saveable.afterloading.step1 == "pirate" and player.Team.Name == "choosing" then
+		local sign:Part
+		if not player.Character and not player.Character:FindFirstChild("Humanoid") then
+			repeat task.wait(0.2) until player.Character and player.Character:FindFirstChild("Humanoid")
+		end
+		if getgenv().n7.saveable.afterloading.step1 == "peasant" then
+			sign = workspace.Map.Islands["Choosing Island"].TeamChangers.Peasent.TeamPad
+		elseif getgenv().n7.saveable.afterloading.step1 == "pirate" then
+			sign = workspace.Map.Islands["Choosing Island"].TeamChangers.Pirate.TeamPad
+		end
+		if player.Team == game.Teams:FindFirstChild("choosing") then
+			local char = player.Character
+			local root = char:FindFirstChild("HumanoidRootPart")
+			if char and char:FindFirstChild("Humanoid") then
+				local path = PathfindingService:CreatePath()
+				path:ComputeAsync(root.Position, sign.Position)
+				local waypoints = path:GetWaypoints()
+				for _,v in waypoints do
+					char:FindFirstChild("Humanoid"):MoveTo(v.Position)
+					char:FindFirstChild("Humanoid").MoveToFinished:Wait(.2)
+				end
+			end
+		end
+		task.wait(3)
+		if getgenv().n7.saveable.afterloading.step2 and fireclickdetector then
+			local function getPotions()
+				local check = "full belly potin"
+				local all_tools = {}
+				for _,v in player.Character:GetChildren() do
+					if v:IsA("Tool") and v.Name == check then
+						table.insert(all_tools, v)
+					end
+				end
+				for _,v in player.Backpack:GetChildren() do
+					if v.Name == check then
+						table.insert(all_tools, v)
+					end
+				end
+				return #all_tools
+			end
+			local fbpc = getPotions() -- full belly potions count
+			local char = player.Character
+			local root = char:FindFirstChild("HumanoidRootPart")
+			if char and root then
+				local _last = root.CFrame
+				if not (player.Backpack:FindFirstChild("catapillah") and player.Backpack:FindFirstChild("bery") and player.Backpack:FindFirstChild("applee")) then
+					local crp
+					local arp
+					do
+						for _,v in workspace.Map.Islands.Farlands.catapillah:GetChildren() do
+							if v:FindFirstChild("ClickDetector") then
+								crp = v
+							end
+						end
+						for _,v in workspace.Map.Islands.Farlands.applee:GetChildren() do
+							if v:FindFirstChild("ClickDetector") then
+								arp = v
+							end
+						end
+					end
+					repeat
+						root.CFrame = crp.CFrame
+						fireclickdetector(crp.ClickDetector)
+						task.wait()
+					until player.Backpack:FindFirstChild("catapillah")
+					task.wait(0.1)
+					repeat
+						root.CFrame = workspace.Map.Islands.Farlands.bery.Part.CFrame
+						fireclickdetector(workspace.Map.Islands.Farlands.bery.Part.ClickDetector)
+						task.wait()
+					until player.Backpack:FindFirstChild("bery")
+					task.wait(0.1)
+					repeat
+						root.CFrame = arp.CFrame
+						fireclickdetector(arp.ClickDetector)
+						task.wait()
+					until player.Backpack:FindFirstChild("applee")
+				end
+				task.wait(0.1)
+				root.CFrame = CFrame.new(-172, 12, 339)
+				repeat
+					game:GetService("ReplicatedStorage").Remotes.BrewPotion:FireServer("FullBelly")
+					task.wait(0.1)
+				until getPotions() > fbpc
+				root.CFrame = _last
+				local potion = player.Backpack:FindFirstChild("full belly potin")
+				potion.Parent = player.Character
+				task.wait(0.05)
+				potion:Activate()
+				task.wait(0.2)
+				potion.Parent = player.Backpack
+			end
+		end
+		if getgenv().n7.saveable.afterloading.step3 ~= "None" and getgenv().n7.saveable.afterloading.step3 == "Fish autofarm" or getgenv().n7.saveable.afterloading.step3 ~= "Cargo autofarm" then
+			if getgenv().n7.saveable.afterloading.step3 == "Cargo autofarm" then
+				FarmToggle:SetValue(true)
+			elseif getgenv().n7.saveable.afterloading.step3 == "Fish autofarm" then
+				FishFarmToggle:SetValue(true)
+			end
+		end
+	end
+end
