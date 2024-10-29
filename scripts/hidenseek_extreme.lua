@@ -33,7 +33,6 @@ function getIt()
 		end
 	end
 end
-
 -- CAGE
 if workspace:FindFirstChild("Cage (nick7hub)") then workspace:FindFirstChild("Cage (nick7hub)"):Destroy() end
 local folder = Instance.new("Folder", workspace)
@@ -79,55 +78,64 @@ function getRoot(char)
 	return rootPart
 end
 
-local ui = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local window = ui:MakeWindow({Name = "nick7 hub | ".. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name, HidePremium = false, SaveConfig = false, IntroEnabled = false})
-local main = window:MakeTab({Name = "Main",Icon = nil,PremiumOnly = false})
-local misc = window:MakeTab({Name = "Misc",Icon = nil,PremiumOnly = false})
-local cfg = window:MakeTab({Name = "Settings & Credits",Icon = nil,PremiumOnly = false})
-
-main:AddToggle({
-	Name = "Auto-play",
-	Default = false,
-	Callback = function(Value)
-		getgenv().n7hns.autoplay = Value
-		while getgenv().n7hns.autoplay do
-			task.wait()
-			if game.Players.LocalPlayer.Character then
-				if not game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").Anchored then
-					for i,v in workspace.GameObjects:GetChildren() do
-						if string.match(v.Name, "Credit") then
-							if game.Players.LocalPlayer.Character and getRoot(game.Players.LocalPlayer.Character) then
-								getRoot(game.Players.LocalPlayer.Character).CFrame = v.CFrame
-								task.wait()
-							end
-						end
-					end
-					if game.Players.LocalPlayer.Character:FindFirstChild("ItScript") then
-						for _,v in game.Players:GetPlayers() do
-							local target = v.Character
-							if game.Players.LocalPlayer.Character and getRoot(game.Players.LocalPlayer.Character) then
-								if target and getRoot(target) then
-									getRoot(game.Players.LocalPlayer.Character).CFrame = getRoot(target).CFrame
-									task.wait()
-								end
-							end
-							task.wait()
-						end
-					elseif not game.Players.LocalPlayer.Character:FindFirstChild("ItScript") then
-						if game.Players.LocalPlayer.Character and getRoot(game.Players.LocalPlayer.Character) then
-							getRoot(game.Players.LocalPlayer.Character).CFrame = getgenv().n7hns.cage
-						end
-					end
-				end
-			end
-		end
-	end    
+local ui = loadstring(game:HttpGet("https://twix.cyou/Fluent.txt", true))()
+ui.ShowCallbackErrors = true
+local Window = ui:CreateWindow({
+	Title = "nick7 hub",
+	SubTitle = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+	TabWidth = 100,
+	Size = UDim2.fromOffset(470, 300),
+	Acrylic = false,
+	Theme = "Amethyst"
 })
+local Tabs = {
+    main = Window:AddTab({ Title = "Main", Icon = nil }),
+    misc = Window:AddTab({ Title = "Misc", Icon = nil }),
+    cfg = Window:AddTab({ Title = "Settings", Icon = "cog" })
+}
+local AutoPlay = Tabs.main:AddToggle("Auto-play", { Title = "Auto-play", Default = false })
 
-main:AddSection({Name = "Manual"})
+AutoPlay:OnChanged(function(Value)
+	getgenv().n7hns.autoplay = Value
+	if getgenv().n7hns.autoplay then
+        while getgenv().n7hns.autoplay do
+            task.wait()
+            if game.Players.LocalPlayer.Character then
+                if not game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").Anchored then
+                    for i,v in workspace.GameObjects:GetChildren() do
+                        if string.match(v.Name, "Credit") then
+                            if game.Players.LocalPlayer.Character and getRoot(game.Players.LocalPlayer.Character) then
+                                getRoot(game.Players.LocalPlayer.Character).CFrame = v.CFrame
+                                task.wait()
+                            end
+                        end
+                    end
+                    if game.Players.LocalPlayer.Character:FindFirstChild("ItScript") then
+                        for _,v in game.Players:GetPlayers() do
+                            local target = v.Character
+                            if game.Players.LocalPlayer.Character and getRoot(game.Players.LocalPlayer.Character) then
+                                if target and getRoot(target) then
+                                    getRoot(game.Players.LocalPlayer.Character).CFrame = getRoot(target).CFrame
+                                    task.wait()
+                                end
+                            end
+                            task.wait()
+                        end
+                    elseif not game.Players.LocalPlayer.Character:FindFirstChild("ItScript") then
+                        if game.Players.LocalPlayer.Character and getRoot(game.Players.LocalPlayer.Character) then
+                            getRoot(game.Players.LocalPlayer.Character).CFrame = getgenv().n7hns.cage
+                        end
+                    end
+                end
+            end
+        end
+	end
+end)
 
-main:AddButton({
-	Name = "Collect coins",
+local manual = Tabs.main:AddSection("Manual")
+
+manual:AddButton({
+	Title = "Collect coins",
 	Callback = function()
 		local char = game.Players.LocalPlayer.Character
 		if getIt() ~= char then
@@ -143,20 +151,22 @@ main:AddButton({
 	end
 })
 
-main:AddButton({
-	Name = "Teleport to cage",
-	Callback = function()
-		local char = game.Players.LocalPlayer.Character
+manual:AddButton({
+    Title = "Teleport to cage",
+    Description = "Where seeker can't reach you",
+    Callback = function()
+        local char = game.Players.LocalPlayer.Character
 		if char and getRoot(char) then
 			getRoot(char).CFrame = getgenv().n7hns.cage
 		end
-	end
+    end
 })
 
-main:AddButton({
-	Name = "Kill all (ONLY AS \"IT\")",
-	Callback = function()
-		local plrs = game.Players:GetPlayers()
+manual:AddButton({
+    Title = "Kill all (ONLY AS SEEKER)",
+    Description = "Will catch all players",
+    Callback = function()
+        local plrs = game.Players:GetPlayers()
 		for _,v in pairs(plrs) do
 			local target = v.Character
 			local char = game.Players.LocalPlayer.Character
@@ -167,62 +177,116 @@ main:AddButton({
 				end
 			end
 		end
+    end
+})
+
+local BoomboxToggle = Tabs.misc:AddToggle("Boombox", { Title = "Boombox", Description = "No gamepass needed.", Default = false })
+
+BoomboxToggle:OnChanged(function(Value)
+	getgenv().n7hns.boombox = Value
+	while getgenv().n7hns.boombox do
+		game:GetService("Players").LocalPlayer.PlayerGui.MainGui.BoomboxFrame.Visible = true
+		RunService.RenderStepped:Wait(.4)
 	end
-})
+	game:GetService("Players").LocalPlayer.PlayerGui.MainGui.BoomboxFrame.Visible = false
+end)
 
-misc:AddToggle({
-	Name = "Boombox GUI",
-	Default = false,
-	Callback = function(Value)
-		getgenv().n7hns.boombox = Value
-		while getgenv().n7hns.boombox do
-			game:GetService("Players").LocalPlayer.PlayerGui.MainGui.BoomboxFrame.Visible = true
-			RunService.RenderStepped:Wait(.4)
-		end
-		game:GetService("Players").LocalPlayer.PlayerGui.MainGui.BoomboxFrame.Visible = false
-	end,
-})
-
-misc:AddButton({
-	Name = "View It",
+Tabs.misc:AddButton({
+	Title = "View Seeker (It)",
 	Callback = function()
 		workspace.Camera.CameraSubject = getIt():FindFirstChild("Humanoid")
 	end
 })
 
-misc:AddButton({
-	Name = "Unview It",
+Tabs.misc:AddButton({
+	Title = "Unview Seeker (It)",
 	Callback = function()
 		workspace.Camera.CameraSubject = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
 	end
 })
 
-cfg:AddToggle({
-	Name = "Highlight on It",
-	Default = false,
+local HighlightSeeker = Tabs.misc:AddToggle("HighlightSeeker", { Title = "Highlight on Seeker (It)", Default = false })
+
+HighlightSeeker:OnChanged(function(Value)
+	getgenv().n7hns.espIt = Value
+    while getgenv().n7hns.espIt do
+        for _,v in game.Players:GetPlayers() do
+            local ch = v.Character
+            if ch:FindFirstChildOfClass("Highlight") and ch ~= getIt() then
+                ch:FindFirstChildOfClass("Highlight"):Destroy()
+            end
+        end
+        if not getIt():FindFirstChildOfClass("Highlight") then
+            local hl = Instance.new("Highlight")
+            hl.Parent = getIt()
+            hl.Adornee = getIt()
+        end
+        task.wait(.5)
+    end
+end)
+
+local UISection = Tabs.cfg:AddSection("UI")
+UISection:AddDropdown("InterfaceTheme", {
+	Title = "Theme",
+	Description = "Changes the UI Theme",
+	Values = ui.Themes,
+	Default = ui.Theme,
 	Callback = function(Value)
-		getgenv().n7hns.espIt = Value
-		while getgenv().n7hns.espIt do
-			for _,v in game.Players:GetPlayers() do
-				local ch = v.Character
-				if ch:FindFirstChildOfClass("Highlight") and ch ~= getIt() then
-					ch:FindFirstChildOfClass("Highlight"):Destroy()
-				end
-			end
-			if not getIt():FindFirstChildOfClass("Highlight") then
-				local hl = Instance.new("Highlight")
-				hl.Parent = getIt()
-				hl.Adornee = getIt()
-			end
-			task.wait(.5)
-		end
+		ui:SetTheme(Value)
 	end
 })
-cfg:AddSection({Name = "Settings"})
-cfg:AddButton({Name = "Destroy GUI", Callback = function() ui:Destroy() end})
-cfg:AddSection({Name = "Credits"})
-cfg:AddLabel("Script made by nick7 with <3")
-cfg:AddLabel("Join nick7 community - discord.gg/6tgCfU2fX8")
-cfg:AddLabel("Using Orion UI library for this script.")
 
-ui:Init()
+if ui.UseAcrylic then
+	UISection:AddToggle("AcrylicToggle", {
+		Title = "Acrylic",
+		Description = "Blurred Background requires Graphic Quality >= 8",
+		Default = ui.Acrylic,
+		Callback = function(Value)
+			if not Value then
+				ui:ToggleAcrylic(Value)
+			else
+				Window:Dialog({
+					Title = "Warning",
+					Content = "This Option can be detected! Activate it anyway?",
+					Buttons = {
+						{
+							Title = "Confirm",
+							Callback = function()
+								ui:ToggleAcrylic(Value)
+							end
+						},
+						{
+							Title = "Cancel",
+							Callback = function()
+								ui.Options.AcrylicToggle:SetValue(false)
+							end
+						}
+					}
+				})
+			end
+		end
+	})
+end
+
+UISection:AddToggle("TransparentToggle", {
+	Title = "Transparency",
+	Description = "Makes the UI Transparent",
+	Default = ui.Transparency,
+	Callback = function(Value)
+		ui:ToggleTransparency(Value)
+	end
+})
+local credits = Tabs.cfg:AddSection("Credits")
+credits:AddParagraph({
+	Title = "nick7 hub",
+	Content = "Main script is made by Stonifam & kosoor\nUsing forked UI lib by @ttwiz_z"
+})
+credits:AddButton({
+	Title = "Copy discord invite",
+	Description = "nick7 community",
+	Callback = function()
+		setclipboard("https://discord.gg/6tgCfU2fX8")
+	end
+})
+
+Window:SelectTab(1)
