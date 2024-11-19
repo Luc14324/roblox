@@ -239,13 +239,14 @@ Tabs.Main:AddToggle("GoldFarm", { Title = "Farm gold", Default = getfenv().n7.go
 					if not getfenv().n7.gb_only then -- ignore, function didn't worked correctly with `or`.
 						if not first_launch then
 							task.wait(0.1)
+							local t = os.clock()
 							repeat
 								task.wait(0.05) -- random number
 								workspace.ClaimRiverResultsGold:FireServer() -- to solve count gold on 2nd stage
 								local statustext = "Getting gold"
 								status:SetDesc(statustext)
 								if n7fps then stattext.Text = string.format(getp(1), statustext) end
-							until gold_path.Value ~= saved_gold or not getfenv().n7.goldfarm or Fluent.Unloaded
+							until gold_path.Value ~= saved_gold or not getfenv().n7.goldfarm or Fluent.Unloaded or (os.clock()-t)>3 -- in rare cases
 						end
 					end
 					saved_gold = gold_path.Value

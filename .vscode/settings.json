@@ -1,0 +1,18 @@
+{
+    "robloxLsp.diagnostics.globals": [
+        "getgenv",
+        "get_signal_cons",
+        "getconnections",
+        "fireclickdetector",
+        "request",
+        "fireproximityprompt",
+        "setclipboard",
+        "firetouchinterest",
+        "queueteleport",
+        "syn",
+        "queue_on_teleport",
+        "fluxus",
+        "httprequest",
+        "firesignal"
+    ]
+}

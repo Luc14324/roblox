@@ -11,7 +11,7 @@ local ui_options = {
 	can_resize = true,
 }
 
-local imgui = game:GetService("CoreGui"):FindFirstChild("imgui")
+local imgui = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("imgui")
 if imgui then imgui:Destroy() end
 
 local imgui = Instance.new("ScreenGui")
@@ -88,7 +88,7 @@ local Input_Roundify_4px = Instance.new("ImageLabel")
 local Windows = Instance.new("Frame")
 
 imgui.Name = "imgui"
-imgui.Parent = game:GetService("CoreGui")
+imgui.Parent = game:GetService("Players").LocalPlayer.PlayerGui
 
 Prefabs.Name = "Prefabs"
 Prefabs.Parent = imgui
@@ -1774,8 +1774,8 @@ function library:AddWindow(title, options)
 									elseif quote == true and c == "]" then
 										quote = false
 									end
-									if quote == false and c == "\]" then
-										highlight = highlight .. "\]"
+									if quote == false and c == "]" then
+										highlight = highlight .. "]"
 									elseif c == "\n" then
 										highlight = highlight .. "\n"
 									elseif c == "\t" then
@@ -1855,9 +1855,6 @@ function library:AddWindow(title, options)
 
 									sf.CanvasSize = UDim2.new(0, 0, lin * 0.153846154, 0)
 								end
-
-								local highlight_logs = function(type)
-								end
 								if type == "Text" then
 									Source.Text = Source.Text:gsub("\13", "")
 									Source.Text = Source.Text:gsub("\t", "      ")
@@ -1879,9 +1876,6 @@ function library:AddWindow(title, options)
 								Source.Changed:Connect(highlight_lua)
 							elseif console_options.source == "Logs" then
 								Lines.Visible = false
-
-								highlight_logs("Text")
-								Source.Changed:Connect(highlight_logs)
 							end
 
 							function console_data:Set(code)
