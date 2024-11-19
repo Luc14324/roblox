@@ -1,5 +1,4 @@
 -- made by nick7/kidnoob_you
--- support me @ https://link-hub.net/1135925/support-nick7
 
 -- Gui to Lua
 -- Version: 3.2

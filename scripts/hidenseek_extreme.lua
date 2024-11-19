@@ -14,7 +14,7 @@ else
 		VirtualUser:ClickButton2(Vector2.new())
 	end)
 end
-getgenv().n7hns = {
+getgenv().n7 = {
 	autoplay = false,
 	cage = CFrame.new(0,0,0),
 	espIt = false,
@@ -71,7 +71,7 @@ wall4.Size = Vector3.new(10, 10, 1)
 ceiling.Size = Vector3.new(10,1,10)
 --
 local frame = _offset + Vector3.new(0,4,0)
-getgenv().n7hns.cage = CFrame.new(frame)
+getgenv().n7.cage = CFrame.new(frame)
 -- CAGE
 function getRoot(char)
 	local rootPart = char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
@@ -89,16 +89,16 @@ local Window = ui:CreateWindow({
 	Theme = "Amethyst"
 })
 local Tabs = {
-    main = Window:AddTab({ Title = "Main", Icon = nil }),
-    misc = Window:AddTab({ Title = "Misc", Icon = nil }),
+    main = Window:AddTab({ Title = "Main", Icon = "sparkles" }),
+    misc = Window:AddTab({ Title = "Misc", Icon = "file-box" }),
     cfg = Window:AddTab({ Title = "Settings", Icon = "cog" })
 }
 local AutoPlay = Tabs.main:AddToggle("Auto-play", { Title = "Auto-play", Default = false })
 
 AutoPlay:OnChanged(function(Value)
-	getgenv().n7hns.autoplay = Value
-	if getgenv().n7hns.autoplay then
-        while getgenv().n7hns.autoplay do
+	getgenv().n7.autoplay = Value
+	if getgenv().n7.autoplay then
+        while getgenv().n7.autoplay do
             task.wait()
             if game.Players.LocalPlayer.Character then
                 if not game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").Anchored then
@@ -123,7 +123,7 @@ AutoPlay:OnChanged(function(Value)
                         end
                     elseif not game.Players.LocalPlayer.Character:FindFirstChild("ItScript") then
                         if game.Players.LocalPlayer.Character and getRoot(game.Players.LocalPlayer.Character) then
-                            getRoot(game.Players.LocalPlayer.Character).CFrame = getgenv().n7hns.cage
+                            getRoot(game.Players.LocalPlayer.Character).CFrame = getgenv().n7.cage
                         end
                     end
                 end
@@ -157,7 +157,7 @@ manual:AddButton({
     Callback = function()
         local char = game.Players.LocalPlayer.Character
 		if char and getRoot(char) then
-			getRoot(char).CFrame = getgenv().n7hns.cage
+			getRoot(char).CFrame = getgenv().n7.cage
 		end
     end
 })
@@ -183,8 +183,8 @@ manual:AddButton({
 local BoomboxToggle = Tabs.misc:AddToggle("Boombox", { Title = "Boombox", Description = "No gamepass needed.", Default = false })
 
 BoomboxToggle:OnChanged(function(Value)
-	getgenv().n7hns.boombox = Value
-	while getgenv().n7hns.boombox do
+	getgenv().n7.boombox = Value
+	while getgenv().n7.boombox do
 		game:GetService("Players").LocalPlayer.PlayerGui.MainGui.BoomboxFrame.Visible = true
 		RunService.RenderStepped:Wait(.4)
 	end
@@ -208,8 +208,8 @@ Tabs.misc:AddButton({
 local HighlightSeeker = Tabs.misc:AddToggle("HighlightSeeker", { Title = "Highlight on Seeker (It)", Default = false })
 
 HighlightSeeker:OnChanged(function(Value)
-	getgenv().n7hns.espIt = Value
-    while getgenv().n7hns.espIt do
+	getgenv().n7.espIt = Value
+    while getgenv().n7.espIt do
         for _,v in game.Players:GetPlayers() do
             local ch = v.Character
             if ch:FindFirstChildOfClass("Highlight") and ch ~= getIt() then
@@ -276,6 +276,10 @@ UISection:AddToggle("TransparentToggle", {
 		ui:ToggleTransparency(Value)
 	end
 })
+
+UISection:AddKeybind("MinimizeKeybind", { Title = "Minimize Key", Description = "Changes the Minimize Key", Default = "RightShift"})
+ui.MinimizeKeybind = ui.Options.MinimizeKeybind
+
 local credits = Tabs.cfg:AddSection("Credits")
 credits:AddParagraph({
 	Title = "nick7 hub",

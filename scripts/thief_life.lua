@@ -608,6 +608,10 @@ UISection:AddToggle("TransparentToggle", {
 		ui:ToggleTransparency(Value)
 	end
 })
+
+UISection:AddKeybind("MinimizeKeybind", { Title = "Minimize Key", Description = "Changes the Minimize Key", Default = "RightShift"})
+ui.MinimizeKeybind = ui.Options.MinimizeKeybind
+
 tabs.creds:AddParagraph({
 	Title = "nick7 hub",
 	Content = "Main script is made by Stonifam & kosoor\nUsing forked UI lib by @ttwiz_z\nThank you for using nick7 hub! <3"

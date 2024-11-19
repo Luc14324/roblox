@@ -1,4 +1,4 @@
--- made by nick7/kidnoob_you for scriptblox <3
+-- made by stonifam for scriptblox <3
 
 local GC = getconnections or get_signal_cons
 if GC then

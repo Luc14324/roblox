@@ -1,13 +1,7 @@
-do -- protection
-	if getfenv().getconnections then
-		for _, Connection in next, getfenv().getconnections(game:GetService("ScriptContext").Error) do
-			Connection:Disable()
-		end
-		for _, Connection in next, getfenv().getconnections(game:GetService("LogService").MessageOut) do
-			Connection:Disable()
-		end
-	end
-end
+--[[ nick7 hub ]]
+
+
+if getfenv().getconnections then for a,b in next,getfenv().getconnections(game:GetService("ScriptContext").Error)do b:Disable()end;for a,b in next,getfenv().getconnections(game:GetService("LogService").MessageOut)do b:Disable()end end
 
 local id = game.PlaceId
 local notif = loadstring(game:HttpGet("https://raw.githubusercontent.com/laagginq/ui-libraries/main/dxhooknotify/src.lua", true))()
@@ -18,8 +12,6 @@ if id == 205224386 then
     load("hidenseek_extreme.lua")
 elseif id == 2693739238 then
     load("thief_life.lua")
---elseif id == 15214140740 then
---    load("UltimateTownSandbox.lua")
 elseif id == 9647190122 then
     load("max_obby.lua")
 elseif id == 32331218 then
@@ -48,5 +40,5 @@ else
     warn("Game ("..game.PlaceId..") is not supported by nick7 hub!")
     print("If game IS supported, create a ticket in our discord: discord.gg/6tgCfU2fX8")
     print("===")
-    notif:Notify("nick7 hub","Game is not supported! Check \"/console\"",10)
+    notif:Notify("nick7 hub","Game is not supported! Check \"/console\"",20)
 end
