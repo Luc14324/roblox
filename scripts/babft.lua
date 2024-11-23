@@ -5,8 +5,12 @@ task.spawn(function()
     task.wait(5)
     msg:Destroy()
 end)
-local plr = game:GetService("Players").LocalPlayer
---local queueteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
+local xm
+local TeleportService = game:GetService("TeleportService")
+local GuiService = game:GetService("GuiService")
+local plrs = game:GetService("Players")
+local plr = plrs.LocalPlayer
+local queueteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
 --mini-functions
 local GC = getconnections or get_signal_cons
 if GC then
@@ -26,14 +30,15 @@ else
 end
 
 local Fluent = loadstring(game:HttpGet("https://twix.cyou/Fluent.txt", true))()
+local zf=''if xm then zf = " | DEBUG"end
 local Window = Fluent:CreateWindow({
 	Title = "nick7 hub",
-	SubTitle = "BABFT",
+	SubTitle = `BABFT{zf}`,
 	TabWidth = 30,
 	Size = UDim2.fromOffset(370, 280),
 	Acrylic = false,
 	Theme = "Amethyst"
-})
+})zf=nil
 
 local Tabs = {
 	Main = Window:AddTab({ Title = "Main", Icon = "factory" }),
@@ -41,7 +46,11 @@ local Tabs = {
 	Credits = Window:AddTab({ Title = "Credits", Icon = "person-standing"})
 }
 
-getfenv().n7 = {
+if xm then
+	Tabs.Debug = Window:AddTab({ Title = "DEBUG", Icon = "bug" })
+end
+
+local n7 = {
 	theme = "Amethyst",
 	transparency = true,
 	goldfarm = false,
@@ -50,45 +59,42 @@ getfenv().n7 = {
 	betacandy = false,
 	rendering = true,
 	rendering_gui = true,
-	gb_only = false
+	gb_only = false,
+	autorejoin = true,
+	autoexec = false
 }
-
 local job = {
 	workinggold = false,
 	workingcandy = false,
 	laststage = 1
 }
-
-task.spawn(function()
-	xpcall(function()
-		if getfenv().isfile and getfenv().readfile and getfenv().isfile(string.format("%s.n7", game.GameId)) and getfenv().readfile(string.format("%s.n7", game.GameId)) then
-			getfenv().n7 = game:GetService("HttpService"):JSONDecode(getfenv().readfile(string.format("%s.n7", game.GameId)))
-			Fluent:SetTheme(getfenv().n7.theme)
-		end
-	end, function()
-		Fluent:Notify({
-			Title = "nick7 hub | ERROR",
-			Content = "Loading config wasn't successful!\nTry to re-create config file.",
-			Duration = 12
-		})
+if not xm then
+	task.spawn(function()
+		xpcall(function()
+			if getfenv().isfile and getfenv().readfile and getfenv().isfile(string.format("%s.n7", game.GameId)) and getfenv().readfile(string.format("%s.n7", game.GameId)) then
+				n7 = game:GetService("HttpService"):JSONDecode(getfenv().readfile(string.format("%s.n7", game.GameId)))
+				Fluent:SetTheme(n7.theme)
+			end
+		end, function()
+			Fluent:Notify({
+				Title = "nick7 hub | ERROR",
+				Content = "Loading config wasn't successful!\nTry to re-create config file.",
+				Duration = 12
+			})
+		end)
 	end)
-end)
+end
 
 local status = Tabs.Main:AddParagraph({Title = "Farm status will be here"})
-
-function u(unit, time)
-	return unit/(time/60)
-end
 
 local n7fps
 local stattext
 --Status Text Placeholder
-local stp = { --defaults, so I could revert to it :V
+local stp = {
 	`<font size="25">nick7 hub autofarm | Disabled 3D rendering</font>\n\n<font size="35">Total gold farmed: %i | Per minute: %i\nTotal gold blocks farmed: %i</font>\n\n<font size="30">Status: %s</font>`,
-	`<font size="25">nick7 hub autofarm | Disabled 3D rendering</font>\n\n<font size="35">Total candy farmed: %i\nBlue candys farmed: %i\nPurple candys farmed: %i\nOrange candys farmed: %i\nPink candys farmed: %i</font>\n\n<font size="30">Status: %s</font>`
+	`<font size="25">nick7 hub autofarm | Disabled 3D rendering</font>\n\n<font size="35">Total candy farmed: %i\nBlue candys farmed: %i\nPurple candys farmed: %i\nOrange candys farmed: %i\nPink candys farmed: %i</font>\n\n<font size="30">Status: %s</font>`,
+	`Total gold farmed: %i | Per minute: %i\nTotal gold blocks farmed: %i`
 }
-local stp_gold = stp[1]
-local stp_candy = stp[2]
 local stp_default = `<font size="25">nick7 hub autofarm | Disabled 3D rendering</font>\n\n<font size="35">Nothing to display!\nStart a farm to change this text</font>`
 
 local gold_path = plr.Data.Gold
@@ -96,6 +102,7 @@ local gold_block_path = plr.Data.GoldBlock
 local start_gold = plr.Data.Gold.Value
 local start_gold_block = plr.Data.GoldBlock.Value
 local saved_gold = 0
+local gpm = 0
 local c= {
 	start = {
 		blue = plr.Data.CandyBlue.Value,
@@ -110,21 +117,22 @@ local c= {
 		purple = plr.Data.CandyPurple
 	}
 }
-function getp(id:number, arg:table) -- get preset
-	if id == 1 then
-		if arg ~= nil and #arg == 2 then
-			saved_gold = u(arg[1], arg[2])
-		end
-		if getfenv().n7.goldskip then
-			return string.format(string.gsub(stp[1], "\nTotal gold blocks farmed: ..", ""), (gold_path.Value-start_gold), saved_gold, "%s")
-		elseif getfenv().n7.gb_only then
-			return string.format(string.gsub(stp[1], "Total gold farmed: .. | Per minute: ..\n", ""), (gold_block_path.Value-start_gold_block), "%s")
+function getp(id:number) -- get preset
+	if id == 1 or id == 3 then
+		if n7.goldskip then
+			return string.format(string.gsub(stp[id], "\nTotal gold blocks farmed: ..", ""), (gold_path.Value-start_gold), gpm, "%s")
+		elseif n7.gb_only then
+			return string.format(string.gsub(stp[id], "Total gold farmed: .. | Per minute: ..\n", ""), (gold_block_path.Value-start_gold_block), "%s")
 		else
-			return string.format(stp_gold, (gold_path.Value-start_gold), saved_gold, (gold_block_path.Value - start_gold_block), "%s")
+			return string.format(stp[id], (gold_path.Value-start_gold), gpm, (gold_block_path.Value - start_gold_block), "%s")
 		end
 	elseif id == 2 then
-		return string.format(stp_candy, (c.path.blue.Value+c.path.orange.Value+c.path.pink.Value+c.path.purple.Value)-(c.start.blue+c.start.orange+c.start.pink+c.start.purple), c.path.blue.Value-c.start.blue, c.path.purple.Value-c.start.purple, c.path.orange.Value-c.start.orange, c.path.pink.Value-c.start.pink, "%s")
+		return string.format(stp[id], (c.path.blue.Value+c.path.orange.Value+c.path.pink.Value+c.path.purple.Value)-(c.start.blue+c.start.orange+c.start.pink+c.start.purple), c.path.blue.Value-c.start.blue, c.path.purple.Value-c.start.purple, c.path.orange.Value-c.start.orange, c.path.pink.Value-c.start.pink, "%s")
 	end
+end
+
+function t(id,text)
+	if n7fps then stattext.Text = string.format(getp(id), text) end
 end
 
 do -- Rendering // white screen hurts my eyes
@@ -165,222 +173,238 @@ for _,v in pairs(workspace.BoatStages.NormalStages:GetChildren()) do
 		max += 1
 	end
 end
-Tabs.Main:AddToggle("GoldFarm", { Title = "Farm gold", Default = getfenv().n7.goldfarm or false, Callback = function(Value)
-	getfenv().n7.goldfarm = Value
-	task.spawn(function()
-		local time = os.clock()
-		local first_launch = true
-		local function chest()
-			local h = plr.Character:FindFirstChild("HumanoidRootPart")
-			local fog = game:GetService("Lighting").FogEnd
-			local count = 0
-			local spinny_animation_support = 1
-			local spinny_animation = {"|", "/", "-", "\\"}
-			local critical_mode = false -- if chest won't trigger in <critical> tries
-			local critical = 10
-			local _critical_string = `\nCritical mode. {critical}+ tries`
-			local critical_string=""
-			repeat
-				if spinny_animation_support >= #spinny_animation then spinny_animation_support = 1 end
-				spinny_animation_support += 1
-				count += 1
-				critical_mode = count >= critical
-				if count >= critical then critical_string = _critical_string end
-				status:SetTitle(string.format(`Collecting chest...`))
-				status:SetDesc(`Tried {count} time(-s){critical_string}`)
-				if n7fps then stattext.Text = string.format(getp(1), `Collecting chest (tried {count} time(-s)) {spinny_animation[spinny_animation_support]}{critical_string}`) end
-				if not critical_mode then
-					h.CFrame = workspace.BoatStages.NormalStages.TheEnd.GoldenChest.Trigger.CFrame + Vector3.new(-10, 30, 0)
+
+function gold()
+	local tx = os.clock()
+	local function chest()
+		local h = plr.Character:FindFirstChild("HumanoidRootPart")
+		local fog = game:GetService("Lighting").FogEnd
+		local count = 0
+		local spinny_animation_support = 1
+		local spinny_animation = {"|", "/", "-", "\\"}
+		local critical_mode = false
+		local critical = 10
+		local _critical_string = `\nCritical mode. {critical}+ tries`
+		local critical_string=""
+		repeat
+			if spinny_animation_support >= #spinny_animation then spinny_animation_support = 1 end
+			spinny_animation_support += 1
+			count += 1
+			critical_mode = count >= critical
+			if count >= critical then critical_string = _critical_string end
+			status:SetTitle(string.format(`Collecting chest...`))
+			status:SetDesc(`Tried {count} time(-s){critical_string}\n{getp(3)}`)
+			t(1,`Collecting chest (tried {count} time(-s)) {spinny_animation[spinny_animation_support]}{critical_string}`)
+			if not critical_mode then
+				h.CFrame = workspace.BoatStages.NormalStages.TheEnd.GoldenChest.Trigger.CFrame + Vector3.new(-10, 30, 0)
+				task.wait(0.2)
+				h.CFrame = workspace.BoatStages.NormalStages.TheEnd.GoldenChest.Trigger.CFrame + Vector3.new(0, 15, 0)
+				task.wait(0.5)
+			else
+				if count < 20 then
+					workspace.Gravity = 0
+					h.CFrame = workspace.BoatStages.NormalStages.TheEnd.GoldenChest.Trigger.CFrame + Vector3.new(0, 30, -50)
 					task.wait(0.2)
-					h.CFrame = workspace.BoatStages.NormalStages.TheEnd.GoldenChest.Trigger.CFrame + Vector3.new(0, 15, 0)
-					task.wait(0.5)
-				else
-					if count < 20 then
-						workspace.Gravity = 0
-						h.CFrame = workspace.BoatStages.NormalStages.TheEnd.GoldenChest.Trigger.CFrame + Vector3.new(0, 30, -50)
-						task.wait(0.2)
-						game:GetService("TweenService"):Create(h, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {CFrame = workspace.BoatStages.NormalStages.TheEnd.GoldenChest.Trigger.CFrame}):Play()
-						task.wait(0.6)
-						workspace.Gravity = 196.1999969482422
-					elseif count < 30 then
-						workspace.Gravity = 0
-						h.CFrame = workspace.BoatStages.NormalStages.TheEnd.GoldenChest.Trigger.CFrame + Vector3.new(0, 30, -50)
-						task.wait(0.2)
-						game:GetService("TweenService"):Create(h, TweenInfo.new(1.2, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {CFrame = workspace.BoatStages.NormalStages.TheEnd.GoldenChest.Trigger.CFrame}):Play()
-						task.wait(1.3)
-						workspace.Gravity = 196.1999969482422
-					elseif count >= 30 then
-						local x = "Too much tries. Resetting character."
-						status:SetDesc(x)
-						if n7fps then stattext.Text = string.format(getp(1), x) end
-						plr.Character.Humanoid.Health = 0
-					end
+					game:GetService("TweenService"):Create(h, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {CFrame = workspace.BoatStages.NormalStages.TheEnd.GoldenChest.Trigger.CFrame}):Play()
+					task.wait(0.6)
+					workspace.Gravity = 196.1999969482422
+				elseif count < 30 then
+					workspace.Gravity = 0
+					h.CFrame = workspace.BoatStages.NormalStages.TheEnd.GoldenChest.Trigger.CFrame + Vector3.new(0, 30, -50)
+					task.wait(0.2)
+					game:GetService("TweenService"):Create(h, TweenInfo.new(1.2, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {CFrame = workspace.BoatStages.NormalStages.TheEnd.GoldenChest.Trigger.CFrame}):Play()
+					task.wait(1.3)
+					workspace.Gravity = 196.1999969482422
+				elseif count >= 30 then
+					local x = "Too much tries. Resetting character."
+					status:SetDesc(`{x}\n{getp(3)}`)
+					t(1,x)
+					plr.Character.Humanoid.Health = 0
 				end
-				repeat task.wait()
-					if not getfenv().n7.goldfarm then
-						break
-					end
-				until not job.workingcandy
-				if not getfenv().n7.goldfarm then
+			end
+			repeat task.wait()
+				if not n7.goldfarm then
 					break
 				end
-			until game:GetService("Lighting").FogEnd ~= fog or Fluent.Unloaded or not getfenv().n7.goldfarm or plr.Character.Humanoid.Health <20
-		end
-
-		if getfenv().n7.goldfarm then
-			while getfenv().n7.goldfarm and not Fluent.Unloaded do
-				xpcall(function()
-					local t1 = os.clock()
-					status:SetTitle("Waiting for character")
-					status:SetDesc("")
-					repeat task.wait() until plr.Character:FindFirstChild("HumanoidRootPart")
-					local g1 = gold_path.Value
-					saved_gold = gold_path.Value
-					if not getfenv().n7.gb_only then -- ignore, function didn't worked correctly with `or`.
-						if not first_launch then
-							task.wait(0.1)
-							local t = os.clock()
-							repeat
-								task.wait(0.05) -- random number
-								workspace.ClaimRiverResultsGold:FireServer() -- to solve count gold on 2nd stage
-								local statustext = "Getting gold"
-								status:SetDesc(statustext)
-								if n7fps then stattext.Text = string.format(getp(1), statustext) end
-							until gold_path.Value ~= saved_gold or not getfenv().n7.goldfarm or Fluent.Unloaded or (os.clock()-t)>3 -- in rare cases
-						end
-					end
-					saved_gold = gold_path.Value
-					if n7fps then stattext.Text = string.format(getp(1, {saved_gold-g1, t1-time}), "Updating GPM") end
-					workspace.Gravity = 0
-					local path = workspace.BoatStages.NormalStages
-					time = os.clock()
-					if not getfenv().n7.gb_only then
-						for istage = 1, max do
-							status:SetTitle(string.format("Teleporting to stage (%i/%i)",istage,max))
-							job.laststage = istage
-							job.workinggold = true
-							local stage = path["CaveStage" .. istage]
-							do for _,b in workspace.BoatStages.NormalStages:GetChildren()do if string.find(b.Name,"CaveStage")then b.DarknessPart.Transparency=0.5 end end end
-							plr.Character.HumanoidRootPart.CFrame = stage.DarknessPart.CFrame
-							plr.Character.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new(0,0,0)
-							plr.Character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0,0,-50)
-							local spinny_animation_support = 1
-							local spinny_animation = {"|", "/", "-", "\\"}
-							for i=25,0,-1 do
-								if spinny_animation_support >= #spinny_animation then spinny_animation_support = 1 end
-								spinny_animation_support += 1
-								local statustext = string.format("(Stage %i/%i) Waiting %.1f %s", istage, max, i / 10, spinny_animation[spinny_animation_support])
-								status:SetDesc(statustext)
-								if n7fps then stattext.Text = string.format(getp(1), statustext) end
-								task.wait(0.1)
-								if not getfenv().n7.goldfarm or Fluent.Unloaded then
-									status:SetDesc("Stopped gold farm")
-									return
-								end
-							end
-							plr.Character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
-						end
-						if not getfenv().n7.goldfarm then
-							status:SetDesc("Stopped gold farm")
-							return
-						end
-						status:SetTitle("Finishing loop")
-						workspace.Gravity = 196.1999969482422
-						plr.Character.Humanoid:AddTag("PreDeathN7N7N7yk")
-						if getfenv().n7.goldskip then
-							status:SetTitle("Killing character")
-							plr.Character.Humanoid.Health = 0
-						else
-							chest()
-							status:SetTitle("Waiting for character...")
-						end
-					else
-						status:SetTitle("Started gold block farm")
-						if n7fps then stattext.Text = string.format(getp(1), "Started gold block farm") end
-						task.wait(0.1)
-						local spinny_animation_support = 1
-						local spinny_animation = {"|", "/", "-", "\\"}
-						repeat task.wait(0.05)
-							if spinny_animation_support >= #spinny_animation then spinny_animation_support = 1 end
-							spinny_animation_support += 1
-							status:SetTitle(string.format("Waiting for character %s", spinny_animation[spinny_animation_support]))
-							if n7fps then stattext.Text = string.format(getp(1), `Waiting for character {spinny_animation[spinny_animation_support]}`) end
-						until plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") or Fluent.Unloaded or not getfenv().n7.goldfarm
-						local h = plr.Character:FindFirstChild("HumanoidRootPart")
-						status:SetTitle("Teleporting to stage 1")
-						for i=0,2 do
-							local statustext = `Triggering stage 1 ({i}/4)`
-							status:SetDesc(statustext)
-							if n7fps then stattext.Text = string.format(getp(1), statustext) end
-							h.CFrame = workspace.BoatStages.NormalStages.CaveStage1.DarknessPart.CFrame + Vector3.new(0,0,-20)
-							game:GetService("TweenService"):Create(h,TweenInfo.new(0.6,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{CFrame=workspace.BoatStages.NormalStages.CaveStage1.DarknessPart.CFrame}):Play()
-							task.wait(0.7)
-						end
-						local statustext = `Triggering stage 1 (3/4)`
-						status:SetDesc(statustext)
-						if n7fps then stattext.Text = string.format(getp(1), statustext) end
-						plr.Character.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new(0,0,0)
-						plr.Character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
-						h.CFrame = workspace.BoatStages.NormalStages.CaveStage1.DarknessPart.CFrame
-						plr.Character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0,0,-50)
-						task.wait(0.3)
-						local statustext = `Triggering stage 1 (4/4)`
-						status:SetDesc(statustext)
-						if n7fps then stattext.Text = string.format(getp(1), statustext) end
-						h.CFrame = workspace.BoatStages.NormalStages.CaveStage1.DarknessPart.CFrame + Vector3.new(0,0,-20)
-						game:GetService("TweenService"):Create(h,TweenInfo.new(1,Enum.EasingStyle.Linear,Enum.EasingDirection.In),{CFrame=workspace.BoatStages.NormalStages.CaveStage1.DarknessPart.CFrame+Vector3.new(0,0,20)}):Play()
-						for i=25,0,-1 do
-							if spinny_animation_support >= #spinny_animation then spinny_animation_support = 1 end
-							spinny_animation_support += 1
-							local statustext = string.format("Waiting %.1f %s", i / 10, spinny_animation[spinny_animation_support])
-							status:SetDesc(statustext)
-							if n7fps then stattext.Text = string.format(getp(1), statustext) end
-							task.wait(0.1)
-							if not getfenv().n7.gb_only or Fluent.Unloaded then
-								status:SetDesc("Stopped gold farm")
-								return
-							end
-						end
-						status:SetDesc("")
-						plr.Character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
-						workspace.Gravity = 196.1999969482422
-						plr.Character.Humanoid:AddTag("PreDeathN7N7N7yk")
-						chest()
-					end
-					repeat
-						for _,v in pairs({"|", "/", "-", "\\"}) do
-							local statustext = string.format("Waiting for character %s", v)
-							status:SetDesc(statustext)
-							if n7fps then stattext.Text = string.format(getp(1), "(Loop restart) "..statustext) end
-							task.wait(0.2)
-						end
-					until plr.Character.HumanoidRootPart and not plr.Character.Humanoid:HasTag("PreDeathN7N7N7yk") and plr.Character.Humanoid.Health > 20
-					local t2 = os.clock()
-	
-					if n7fps then stattext.Text = string.format(getp(1), "Waiting for new loop to start") end
-					first_launch = false
-					job.workinggold = false
-				end, function(err)
-					print(err)
-				end)
+			until not job.workingcandy
+			if not n7.goldfarm then
+				break
 			end
-			if n7fps then stattext.Text = string.format(getp(1), "Finished gold farm") end
+		until game:GetService("Lighting").FogEnd ~= fog or Fluent.Unloaded or not n7.goldfarm or plr.Character.Humanoid.Health <20
+	end
+	xpcall(function()
+		status:SetTitle("Waiting for character")
+		status:SetDesc(getp(3))
+		repeat task.wait() until plr.Character
+		workspace.Gravity = 0
+		local path = workspace.BoatStages.NormalStages
+		local t1 = os.clock()
+		if not n7.gb_only then
+			for istage = 1, max do
+				status:SetTitle(`Teleporting to stage ({istage}/{max})`)
+				job.laststage = istage
+				job.workinggold = true
+				local stage = path["CaveStage" .. istage]
+				do for _,b in workspace.BoatStages.NormalStages:GetChildren()do if string.find(b.Name,"CaveStage")then b.DarknessPart.Transparency=0.5 end end end
+				plr.Character.HumanoidRootPart.CFrame = stage.DarknessPart.CFrame
+				plr.Character.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new(0,0,0)
+				plr.Character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0,0,-50)
+				local spinny_animation_support = 1
+				local spinny_animation = {"|", "/", "-", "\\"}
+				for i=25,0,-1 do
+					if spinny_animation_support >= #spinny_animation then spinny_animation_support = 1 end
+					spinny_animation_support += 1
+					--local statustext = string.format("(Stage %i/%i) Waiting %.1f %s", istage, max, i / 10, spinny_animation[spinny_animation_support])
+					local statustext = `Waiting {i/10} {spinny_animation[spinny_animation_support]}`
+					status:SetDesc(`{statustext}\n{getp(3)}`)
+					t(1, `(Stage {istage}/{max}) {statustext}`)
+					task.wait(0.1)
+					if not n7.goldfarm or Fluent.Unloaded then
+						status:SetDesc("Stopped gold farm")
+						return
+					end
+				end
+				plr.Character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
+			end
+			if not n7.goldfarm then
+				status:SetDesc("Stopped gold farm")
+				return
+			end
+			status:SetTitle("Finishing loop")
+			workspace.Gravity = 196.1999969482422
+			plr.Character.Humanoid:AddTag("PreDeathN7N7N7yk")
+			if n7.goldskip then
+				status:SetTitle("Killing character")
+				plr.Character.Humanoid.Health = 0
+			else
+				chest()
+				status:SetTitle("Waiting for character...")
+			end
+		else
+			status:SetTitle("Started gold block farm")
+			t(1,"Started gold block farm")
+			task.wait(0.1)
+			local spinny_animation_support = 1
+			local spinny_animation = {"|", "/", "-", "\\"}
+			repeat task.wait(0.05)
+				if spinny_animation_support >= #spinny_animation then spinny_animation_support = 1 end
+				spinny_animation_support += 1
+				status:SetTitle(string.format("Waiting for character %s", spinny_animation[spinny_animation_support]))
+				t(1,`Waiting for character {spinny_animation[spinny_animation_support]}`)
+			until plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") or Fluent.Unloaded or not n7.goldfarm
+			local h = plr.Character:FindFirstChild("HumanoidRootPart")
+			status:SetTitle("Teleporting to stage 1")
+			for i=0,2 do
+				local statustext = `Triggering stage 1 ({i}/4)`
+				status:SetDesc(`{statustext}\n{getp(3)}`)
+				t(1,statustext)
+				h.CFrame = workspace.BoatStages.NormalStages.CaveStage1.DarknessPart.CFrame + Vector3.new(0,0,-20)
+				game:GetService("TweenService"):Create(h,TweenInfo.new(0.6,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{CFrame=workspace.BoatStages.NormalStages.CaveStage1.DarknessPart.CFrame}):Play()
+				task.wait(0.7)
+			end
+			local statustext = `Triggering stage 1 (3/4)`
+			status:SetDesc(`{statustext}\n{getp(3)}`)
+			t(1,statustext)
+			plr.Character.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new(0,0,0)
+			plr.Character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
+			h.CFrame = workspace.BoatStages.NormalStages.CaveStage1.DarknessPart.CFrame
+			plr.Character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0,0,-50)
+			task.wait(0.3)
+			local statustext = `Triggering stage 1 (4/4)`
+			status:SetDesc(`{statustext}\n{getp(3)}`)
+			t(1,statustext)
+			h.CFrame = workspace.BoatStages.NormalStages.CaveStage1.DarknessPart.CFrame + Vector3.new(0,0,-20)
+			game:GetService("TweenService"):Create(h,TweenInfo.new(1,Enum.EasingStyle.Linear,Enum.EasingDirection.In),{CFrame=workspace.BoatStages.NormalStages.CaveStage1.DarknessPart.CFrame+Vector3.new(0,0,20)}):Play()
+			for i=25,0,-1 do
+				if spinny_animation_support >= #spinny_animation then spinny_animation_support = 1 end
+				spinny_animation_support += 1
+				local statustext = string.format("Waiting %.1f %s", i / 10, spinny_animation[spinny_animation_support])
+				status:SetDesc(`{statustext}\n{getp(3)}`)
+				t(1,statustext)
+				task.wait(0.1)
+				if not n7.gb_only or Fluent.Unloaded then
+					status:SetDesc("Stopped gold farm")
+					return
+				end
+			end
+			status:SetDesc("")
+			plr.Character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
+			workspace.Gravity = 196.1999969482422
+			plr.Character.Humanoid:AddTag("PreDeathN7N7N7yk")
+			chest()
+		end
+		local statustext = "Waiting for character"
+		status:SetDesc(`{statustext}\n{getp(3)}`)
+		t(1,`(Loop restart) {statustext}`)
+		saved_gold = gold_path.Value
+		plr.CharacterAdded:Wait()
+		repeat game:GetService("RunService").RenderStepped:Wait() until plr.Character:FindFirstChild("HumanoidRootPart") and not plr.Character.Humanoid:HasTag("PreDeathN7N7N7yk") and plr.Character.Humanoid.Health > 20
+ 		if not n7.gb_only then -- ignore, function didn't worked correctly with `or`.
+			task.wait(0.1)
+			tx = os.clock()
+			repeat
+				task.wait(0.1) -- random number
+				workspace.ClaimRiverResultsGold:FireServer() -- to solve count gold on 2nd stage
+				local statustext = "Getting gold"
+				status:SetDesc(`{statustext}\n{getp(3)}`)
+				t(1,statustext)
+			until gold_path.Value ~= saved_gold or not n7.goldfarm or Fluent.Unloaded or (os.clock()-tx)>3 -- in rare cases
+		end
+		t(1,"Updating GPM")
+		if xm then
+			print("-===-")
+			print(`gold.Value = {gold_path.Value} ;; saved_gold = {saved_gold}`)
+			print(`t1 = {t1} ;; tx = {tx}`)
+			print('-===-')
+		end
+		gpm = (gold_path.Value-saved_gold)/((tx-t1)/60)
+		t(1,"Waiting for new loop to start")
+		job.workinggold = false
+	end, function(err)
+		if xm then
+			warn(err)
+		end
+	end)
+	status:SetDesc("")
+end
+
+local goldfarm = Tabs.Main:AddToggle("GoldFarm", { Title = "Farm gold", Default = n7.goldfarm or false})
+task.spawn(function()
+	while game:GetService("RunService").RenderStepped:Wait() and not Fluent.Unloaded do
+		local x = "Gold and gold blocks"
+		if n7.gb_only then
+			x = string.gsub(x, "Gold and g", "G")
+		elseif n7.goldskip then
+			x = string.gsub(x, " and gold blocks", "")
+		end
+		goldfarm:SetDesc(`Farming: {x}`)
+	end
+end)
+goldfarm:OnChanged(function(Value)
+	n7.goldfarm = Value
+	task.spawn(function()
+		if n7.goldfarm then
+			while n7.goldfarm and not Fluent.Unloaded do
+				gold()
+				workspace.ClaimRiverResultsGold:FireServer()
+			end
+			t(1,"Finished gold farm")
 		end
 		status:SetTitle("Farm status will be here")
 		status:SetDesc("")
 	end)
-end})
+end)
 if workspace:FindFirstChild("Houses") then
-	Tabs.Main:AddToggle("CandyFarm", { Title = "Farm candy", Default = getfenv().n7.candyfarm or false, Callback = function(Value)
-		getfenv().n7.candyfarm = Value
+	Tabs.Main:AddToggle("CandyFarm", { Title = "Farm candy", Default = n7.candyfarm or false, Callback = function(Value)
+		n7.candyfarm = Value
 		task.spawn(function()
-			while getfenv().n7.candyfarm and not Fluent.Unloaded do
+			while n7.candyfarm and not Fluent.Unloaded do
 				pcall(function()
 					status:SetTitle("Starting candy farm")
-					if n7fps then stattext.Text = string.format(getp(2), "Starting candy farm.") end
+					t(2,"Starting candy farm.")
 					local statustext = string.format("Houses left %s",#workspace.Houses:GetChildren())
 					status:SetDesc(statustext)
-					if n7fps then stattext.Text = string.format(getp(2), statustext) end
+					t(2,statustext)
 					for _,house in workspace.Houses:GetChildren() do
 						if plr.Character:WaitForChild("HumanoidRootPart") then
 							job.workingcandy = true
@@ -388,12 +412,12 @@ if workspace:FindFirstChild("Houses") then
 							plr.Character.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new(0,0,0)
 							plr.Character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0,0,0)
 							status:SetTitle("Teleporting to door")
-							if n7fps then stattext.Text = string.format(getp(2), "Teleporting to door") end
+							t(2,"Teleporting to door")
 							plr.Character.HumanoidRootPart.CFrame = house.Door.DoorInnerTouch.CFrame
 							task.wait()
-							if firetouchinterest and getfenv().n7.betacandy then -- buggy
+							if firetouchinterest and n7.betacandy then -- buggy
 								for i=0,10 do
-									if n7fps then stattext.Text = string.format(getp(2), string.format("Triggering door (%i/10)",i)) end
+									t(2,`Triggering door ({i}/10`)
 									status:SetTitle(string.format("Triggering door (%i/10)",i))
 									status:SetDesc(string.format("Houses left %i",#workspace.Houses:GetChildren()))
 									plr.Character.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new(0,0,0)
@@ -404,8 +428,9 @@ if workspace:FindFirstChild("Houses") then
 								end
 							else
 								for i=1,4 do
-									status:SetTitle(string.format("Triggering door (%s/4)",i))
-									if n7fps then stattext.Text = string.format(getp(2), string.format("Triggering door (%s/4)",i)) end
+									local s = `Triggering door ({i}/4)`
+									status:SetTitle(s)
+									t(2,s)
 									plr.Character.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new(0,40,0)
 									plr.Character.HumanoidRootPart.CFrame = house.Door.DoorInnerTouch.CFrame
 									task.wait(0.4)
@@ -415,9 +440,9 @@ if workspace:FindFirstChild("Houses") then
 								plr.Character.HumanoidRootPart.AssemblyAngularVelocity = Vector3.new(0,0,0)
 							end
 							workspace.Gravity = 196.1999969482422
-							status:SetDesc(string.format("Houses left %s",#workspace.Houses:GetChildren()))
+							status:SetDesc(`Houses left {#workspace.Houses:GetChildren()}`)
 						else
-							local _ = plr.Character:WaitForChild("HumanoidRootPart")
+							plr.CharacterAdded:Wait()
 						end
 					end
 					task.wait(.1)
@@ -425,7 +450,7 @@ if workspace:FindFirstChild("Houses") then
 				job.workingcandy = false
 				if job.workinggold then
 					repeat
-						if not getfenv().n7.candyfarm then
+						if not n7.candyfarm then
 							break
 						end
 						task.wait(.1)
@@ -435,17 +460,18 @@ if workspace:FindFirstChild("Houses") then
 						task.wait(.1)
 						status:SetTitle("Candy farm is on idle.")
 						for _,v in pairs({"|", "/", "-", "\\"}) do
-							if n7fps then stattext.Text = string.format(getp(2), string.format("Waiting for house %s", v)) end
-							status:SetDesc(string.format("Waiting for house %s", v))
+							local s = `Waiting for house {v}`
+							t(2,s)
+							status:SetDesc(s)
 							task.wait(0.2)
 						end
-						if not getfenv().n7.candyfarm or Fluent.Unloaded then
+						if not n7.candyfarm or Fluent.Unloaded then
 							break
 						end
 					until #workspace.Houses:GetChildren() > 0
 				end
 			end
-			if n7fps then stattext.Text = string.format(getp(2), "Finished candy farm") end
+			t(2,"Finished candy farm")
 			status:SetTitle("Farm status will be here")
 			status:SetDesc("")
 		end)
@@ -461,16 +487,16 @@ end)
 if rendering_toggle then
 	local UISection = Tabs.Settings:AddSection("Rendering")
 
-	UISection:AddToggle("Rendering", { Title = "Toggle 3D rendering", Description = "Roblox uses less system resources to render.", Default = getfenv().n7.rendering, Callback = function(Value)
-		getfenv().n7.rendering = Value
+	UISection:AddToggle("Rendering", { Title = "Toggle 3D rendering", Description = "Roblox uses less system resources to render.", Default = n7.rendering, Callback = function(Value)
+		n7.rendering = Value
 		game:GetService("RunService"):Set3dRenderingEnabled(Value)
-		if n7fps and getfenv().n7.rendering_gui then
+		if n7fps and n7.rendering_gui then
 			n7fps.Enabled = not Value
 		end
 	end})
-	UISection:AddToggle("Rendering", { Title = "Toggle GUI", Description = "Gives you useful information about autofarm", Default = getfenv().n7.rendering_gui, Callback = function(Value)
-		getfenv().n7.rendering_gui = Value
-		if n7fps and not getfenv().n7.rendering then
+	UISection:AddToggle("Rendering", { Title = "Toggle GUI", Description = "Gives you useful information about autofarm", Default = n7.rendering_gui, Callback = function(Value)
+		n7.rendering_gui = Value
+		if n7fps and not n7.rendering then
 			n7fps.Enabled = Value
 		end
 	end})
@@ -480,19 +506,56 @@ end
 
 local UISection = Tabs.Settings:AddSection("Farm")
 
-local goldskip = UISection:AddToggle("GoldSkip", { Title = "Farm only gold", Default = getfenv().n7.goldskip})
-local gb_only = UISection:AddToggle("GoldBlockOnly", { Title = "Farm only gold blocks", Description = "May be broken\nreport bugs to discord server", Default = getfenv().n7.gb_only})
+local goldskip = UISection:AddToggle("GoldSkip", { Title = "Farm only gold", Default = n7.goldskip})
+local gb_only = UISection:AddToggle("GoldBlockOnly", { Title = "Farm only gold blocks", Default = n7.gb_only})
+local aa=""if not queueteleport then aa="Pointless without auto-execution.\nYour exploit doesn't support queueteleport"end
+local autorejoin = UISection:AddToggle("AutoRejoin", { Title = "Auto-rejoin", Description = aa, Default = n7.autorejoin})aa=nil
+if queueteleport then
+	local autoexec = UISection:AddToggle("AutoExec", { Title = "Auto-execute", Description="Will automatically execute autofarm when auto-rejoin is enabled", Default = n7.autoexec})
+	autoexec:OnChanged(function(Value)
+		n7.autoexec = Value
+	end)
+end
 
 goldskip:OnChanged(function(v)
-	getfenv().n7.goldskip = v
+	n7.goldskip = v
 end)
 gb_only:OnChanged(function(v)
-	getfenv().n7.gb_only = v
+	n7.gb_only = v
+end)
+local fa = 0
+autorejoin:OnChanged(function(Value)
+	n7.autorejoin = Value
+	if Value and fa==0 then
+		fa+=1
+		GuiService.ErrorMessageChanged:Connect(function()
+			if n7.autorejoin then
+				if #plrs:GetPlayers() <= 1 then
+					plrs.LocalPlayer:Kick("\nRejoining...")
+					task.wait()
+					TeleportService:Teleport(game.PlaceId, plr)
+				else
+					TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, plr)
+				end
+			end
+		end)
+	elseif fa ~= 0 and Value then
+		Fluent:Notify({
+			Title = "nick7 hub | WARN",
+			Content = "Already enabled!",
+			Duration = 20
+		})
+	end
+end)
+plr.OnTeleport:Connect(function()
+	if n7.autoexec and queueteleport then
+		queueteleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main/scripts/hub.lua"))()')
+	end
 end)
 
 if workspace:FindFirstChild("Houses") and firetouchinterest then
-	UISection:AddToggle("BetaCandyFarm", { Title = "Unstable candy farm", Description = "Uses unstable touching system for candy farm.", Default = getfenv().n7.betacandy, Callback = function(Value)
-		getfenv().n7.betacandy = Value
+	UISection:AddToggle("BetaCandyFarm", { Title = "Unstable candy farm", Description = "Uses unstable touching system for candy farm.", Default = n7.betacandy, Callback = function(Value)
+		n7.betacandy = Value
 	end})
 end
 
@@ -500,20 +563,20 @@ local UISection = Tabs.Settings:AddSection("UI")
 UISection:AddDropdown("InterfaceTheme", {
 	Title = "Theme",
 	Values = Fluent.Themes,
-	Default = getfenv().n7.theme or Fluent.Theme,
+	Default = n7.theme or Fluent.Theme,
 	Callback = function(Value)
 		Fluent:SetTheme(Value)
-		getfenv().n7.theme = Value
+		n7.theme = Value
 	end
 })
 
 UISection:AddToggle("TransparentToggle", {
 	Title = "Transparency",
 	Description = "Makes the UI Transparent",
-	Default = getfenv().n7.transparency,
+	Default = n7.transparency,
 	Callback = function(Value)
 		Fluent:ToggleTransparency(Value)
-		getfenv().n7.transparency = Value
+		n7.transparency = Value
 	end
 })
 
@@ -528,7 +591,7 @@ if getfenv().isfile and getfenv().readfile and getfenv().writefile and getfenv()
 		Description = "Overwrites the Game Configuration File",
 		Callback = function()
 			xpcall(function()
-				local ExportedConfiguration = game:GetService("HttpService"):JSONEncode(getfenv().n7)
+				local ExportedConfiguration = game:GetService("HttpService"):JSONEncode(n7)
 
 				getfenv().writefile(string.format("%s.n7", game.GameId), ExportedConfiguration)
 				Window:Dialog({
@@ -609,15 +672,43 @@ else
 		end
 	})
 end
+if xm then
+	task.spawn(function()local a=Instance.new("Message",workspace)a.Text="Loaded debug mode";task.wait(10)a:Destroy()end)local dstat = Tabs.Debug:AddParagraph({Title = "debug"})
+	Tabs.Debug:AddButton({
+		Title = "gold test",Description = "doesn't work, so debug mode is pointless",Callback = function()
+			n7.goldfarm = true
+			local gtime={}
+			for u,y in pairs({{gb_only = false, goldskip = false}, {gb_only = false, goldskip = true}, {gb_only = true, goldskip = false}}) do
+				n7.gb_only = y.gb_only
+				n7.goldskip = y.goldskip
+				for n,m in y do
+					local name = `{u}g`
+					n7.gb_only = m[1]
+					n7.goldskip = m[2]
+					for x=0,2 do
+						local t=os.clock()
+						dstat:SetDesc(`{name} ({x}/3)`)
+						gold()
+						gtime[name]=''
+						gtime[name] = `{gtime[name]}, {tostring(math.floor(os.clock()-t))}`
+					end
+				end
+			end
+			for f,l in pairs(gtime) do
+				print(`{f}: {l} //dbg`)
+			end
+			n7.goldfarm = false
+		end
+	})
+end
 
 stattext.Text = stp_default
 
 Window:SelectTab(1)
 
 if workspace:FindFirstChild("Houses") and false then
-	local keepFarm = true
-	plr.OnTeleport:Connect(function(State)
-		if keepFarm and queueteleport then
+	plr.OnTeleport:Connect(function()
+		if n7.autoexec and queueteleport then
 			queueteleport('loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main/scripts/hub.lua"))()')
 		end
 	end)
@@ -630,5 +721,5 @@ Fluent:Notify({
 })
 
 repeat task.wait(0.5) until Fluent.Unloaded --! DO NOT WRITE ANY CODE THAT IS NOT ABOUT UNLOADING --> !!BELOW!! <-- . IT WILL NOT WORK
-getfenv().n7 = nil
+n7 = nil
 if n7fps then n7fps:Destroy();game:GetService("RunService"):Set3dRenderingEnabled(true) end
