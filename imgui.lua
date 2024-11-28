@@ -89,6 +89,7 @@ local Windows = Instance.new("Frame")
 
 imgui.Name = "imgui"
 imgui.Parent = game:GetService("Players").LocalPlayer.PlayerGui
+imgui.ResetOnRespawn = false
 
 Prefabs.Name = "Prefabs"
 Prefabs.Parent = imgui
