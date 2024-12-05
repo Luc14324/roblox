@@ -15,30 +15,74 @@ else
 	end)
 end
 
-local library, imgui = loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main/imgui.lua"))()
-
-getgenv().n7 = {
-	autofarm = true
-}
-
-function getRoot(char)
-	local rootPart = char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
-	return rootPart
-end
+function getRoot(char)return char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')end
 
 local _levels = game:GetService("Workspace").PointFolder:GetChildren()
 
-local Window = library:AddWindow("nick7 hub | Obby", {
-	main_color = Color3.fromRGB(41, 74, 122),
-	min_size = Vector2.new(160, 120),
-	toggle_key = Enum.KeyCode.RightShift,
-	can_resize = true,
-})
-local Tab = Window:AddTab("Main")
+local plr = game:GetService("Players").LocalPlayer
+local GC = getconnections or get_signal_cons
+if GC then
+	for _,v in pairs(GC(plr.Idled)) do
+		if v["Disable"] then
+			v["Disable"](v)
+		elseif v["Disconnect"] then
+			v["Disconnect"](v)
+		end
+	end
+else
+	plr.Idled:Connect(function()
+		local VirtualUser = game:GetService("VirtualUser")
+		VirtualUser:CaptureController()
+		VirtualUser:ClickButton2(Vector2.new())
+	end)
+end
 
-Tab:AddSwitch("Autofarm", function(Value)
-	getgenv().n7.autofarm = Value
-	while getgenv().n7.autofarm do
+local g = {}
+if getgenv then
+	getgenv().n7 = {autofarm = false}
+	g = getgenv()
+else
+	g.n7 = {autofarm = false}
+	task.spawn(function()
+		local m=Instance.new("Message", workspace)
+		local txt="nick7 hub | WARNING\n\nYour exploit DOES NOT support getgenv function!\nThis could lead to detecting you and possible ban (not in this game and not with this script)\nnick7 hub will load now.\n\n"
+		m.Text=txt
+		for i=15,0,-1 do
+			m.Text=txt..i
+			task.wait(1)
+		end
+		m:Destroy()
+	end)
+end
+
+local Fluent = loadstring(game:HttpGet("https://twix.cyou/Fluent.txt", true))()
+
+local Window = Fluent:CreateWindow({
+	Title = "nick7 hub",
+    SubTitle = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+	TabWidth = 30,
+	Size = UDim2.fromOffset(370, 280),
+	Acrylic = false,
+	Theme = "Dark"
+})
+
+local Tabs = {
+	Main = Window:AddTab({ Title = "Main", Icon = "factory" }),
+	Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
+	Credits = Window:AddTab({ Title = "Credits", Icon = "person-standing"})
+}
+
+Tabs.Main:AddButton({ Title = "Finish obby", Callback = function()
+	local char = game.Players.LocalPlayer.Character
+	if char and getRoot(char) then
+		getRoot(char).CFrame = game:GetService("Workspace").PointFolder:FindFirstChild(tostring(#_levels - 1)).CFrame	
+	end
+end})
+
+local autofarm = Tabs.Main:AddToggle("Autofarm", { Title = "Autofarm rebirths", Default = false})
+autofarm:OnChanged(function(Value)
+	g.n7.autofarm = Value
+	while g.n7.autofarm do
 		local char = game.Players.LocalPlayer.Character
 		if char and getRoot(char) then
 			getRoot(char).CFrame = game:GetService("Workspace").PointFolder:FindFirstChild(tostring(#_levels - 1)).CFrame
@@ -48,9 +92,61 @@ Tab:AddSwitch("Autofarm", function(Value)
 	end
 end)
 
-Tab:AddButton("Destroy", function()
-	imgui:Destroy()
-end)
+local UISection = Tabs.Settings:AddSection("UI")
+UISection:AddDropdown("InterfaceTheme", {
+	Title = "Theme",
+	Values = Fluent.Themes,
+	Default = Fluent.Theme,
+	Callback = function(Value)
+		Fluent:SetTheme(Value)
+	end
+})
 
-Tab:Show()
-library:FormatWindows()
+UISection:AddToggle("TransparentToggle", {
+	Title = "Transparency",
+	Description = "Makes the UI Transparent",
+	Default = Fluent.Transparency,
+	Callback = function(Value)
+		Fluent:ToggleTransparency(Value)
+	end
+})
+
+UISection:AddKeybind("MinimizeKeybind", { Title = "Minimize Key", Description = "Changes the Minimize Key", Default = "RightShift"})
+Fluent.MinimizeKeybind = Fluent.Options.MinimizeKeybind
+
+Tabs.Credits:AddParagraph({
+	Title = "nick7 hub",
+	Content = "Main script is made by Stonifam\nUsing forked Fluent UI lib by @ttwiz_z"
+})
+if setclipboard then
+	Tabs.Credits:AddButton({
+		Title = "Copy discord invite",
+		Description = "nick7 community",
+		Callback = function()
+			setclipboard("https://discord.gg/6tgCfU2fX8")
+		end
+	})
+else
+	Tabs.Credits:AddButton({
+		Title = "Notify discord invite",
+		Description = "nick7 community",
+		Callback = function()
+			Fluent:Notify({
+				Title = "https://discord.gg/6tgCfU2fX8",
+				Content = "nick7 discord invite",
+				Duration = 20
+			})
+		end
+	})
+end
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+	Title = "nick7 hub | Fluent",
+	Content = "The script has been loaded.",
+	Duration = 8
+})
+
+repeat task.wait(0.5) until Fluent.Unloaded --! DO NOT WRITE ANY CODE THAT IS NOT ABOUT UNLOADING --> !!BELOW!! <-- . IT WILL NOT WORK
+g.n7 = nil

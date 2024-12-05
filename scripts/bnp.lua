@@ -1,6 +1,7 @@
+local plr = game:GetService("Players").LocalPlayer
 local GC = getconnections or get_signal_cons
 if GC then
-	for i,v in pairs(GC(game.Players.LocalPlayer.Idled)) do
+	for _,v in pairs(GC(plr.Idled)) do
 		if v["Disable"] then
 			v["Disable"](v)
 		elseif v["Disconnect"] then
@@ -8,58 +9,133 @@ if GC then
 		end
 	end
 else
-	game.Players.LocalPlayer.Idled:Connect(function()
+	plr.Idled:Connect(function()
 		local VirtualUser = game:GetService("VirtualUser")
 		VirtualUser:CaptureController()
 		VirtualUser:ClickButton2(Vector2.new())
 	end)
 end
-
-local library, imgui = loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main/imgui.lua"))()
-
-getgenv().n7 = {
-	autofarm = false
-}
-
-if game.Workspace.Map.Classic.KillBrick then
-	game.Workspace.Map.Classic.KillBrick:Destroy()
+if workspace.Map.Classic:FindFirstChild("KillBrick") then
+	workspace.Map.Classic.KillBrick:Destroy()
+end
+local g = {}
+if getgenv then
+	getgenv().n7 = {autofarm = false}
+	g = getgenv()
+else
+	g.n7 = {autofarm = false}
+	task.spawn(function()
+		local m=Instance.new("Message", workspace)
+		local txt="nick7 hub | WARNING\n\nYour exploit DOES NOT support getgenv function!\nThis could lead to detecting you and possible ban (not in this game and not with this script)\nnick7 hub will load now.\n\n"
+		m.Text=txt
+		for i=15,0,-1 do
+			m.Text=txt..i
+			task.wait(1)
+		end
+		m:Destroy()
+	end)
 end
 
-local Window = library:AddWindow("nick7 hub | BnP", {
-	main_color = Color3.fromRGB(41, 74, 122),
-	min_size = Vector2.new(160, 120),
-	toggle_key = Enum.KeyCode.RightShift,
-	can_resize = true,
-})
-local Tab = Window:AddTab("Main")
+local Fluent = loadstring(game:HttpGet("https://twix.cyou/Fluent.txt", true))()
 
-Tab:AddSwitch("Autofarm", function(Value)
-	getgenv().n7.autofarm = Value
-	while getgenv().n7.autofarm do
-		if game.Players.LocalPlayer.Team.Name == "Destroyer" then
+local Window = Fluent:CreateWindow({
+	Title = "nick7 hub",
+	SubTitle = "Blocks n' Props",
+	TabWidth = 30,
+	Size = UDim2.fromOffset(370, 280),
+	Acrylic = false,
+	Theme = "Dark"
+})
+
+local Tabs = {
+	Main = Window:AddTab({ Title = "Main", Icon = "factory" }),
+	Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
+	Credits = Window:AddTab({ Title = "Credits", Icon = "person-standing"})
+}
+
+local AutoFinish = Tabs.Main:AddToggle("AutoFinish", { Title = "Auto-finish", Description = "Will automatically finish round as playing team.", Default = false})
+AutoFinish:OnChanged(function(Value)
+	g.n7.autofarm = Value
+	while g.n7.autofarm do
+		if plr.Team.Name == "Destroyer" then
 			repeat
-				if game.Players.LocalPlayer.Character:FindFirstChild("Head") then
-					game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Health = 0
-					if game.Players.LocalPlayer.Character:FindFirstChild("Humanoid").Health ~= 100 then
-						game.Players.LocalPlayer.Character.Head:Destroy()
+				task.wait(1)
+				if plr.Character:FindFirstChild("Head") then
+					plr.Character:WaitForChild("Humanoid").Health = 0
+					if plr.Character:FindFirstChild("Humanoid").Health ~= 100 then
+						plr.Character.Head:Destroy()
 					end
+				elseif plr.Character:FindFirstChild("HumanoidRootPart") then
+					plr.Character.HumanoidRootPart.CFrame = CFrame.new(0,-1000000,0)
+				task.wait(0.5)
 				end
-				task.wait()
-			until game.Players.LocalPlayer.Team.Name ~= "Destroyer"
-		elseif game.Players.LocalPlayer.Team.Name == "Towers" then
-			local _l = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-			repeat 
-				wait(.1)
-			until _l
-			game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = game:GetService("Workspace").Map.Classic.Button.CFrame
+			until plr.Team.Name ~= "Destroyer" or Fluent.Unloaded or not g.n7.autofarm
+		elseif plr.Team.Name == "Towers" then
+			repeat task.wait(0.1) until plr.Character:WaitForChild("HumanoidRootPart")
+			repeat
+			plr.Character:FindFirstChild("HumanoidRootPart").CFrame = workspace.Map.Classic.Button.CFrame	
+				task.wait(0.5)
+			until plr.Team.Name ~= "Towers" or Fluent.Unloaded or not g.n7.autofarm
 		end
-		wait(.4)
+		task.wait(0.4)
 	end
 end)
 
-Tab:AddButton("Destroy", function()
-	imgui:Destroy()
-end)
+local UISection = Tabs.Settings:AddSection("UI")
+UISection:AddDropdown("InterfaceTheme", {
+	Title = "Theme",
+	Values = Fluent.Themes,
+	Default = Fluent.Theme,
+	Callback = function(Value)
+		Fluent:SetTheme(Value)
+	end
+})
 
-Tab:Show()
-library:FormatWindows()
+UISection:AddToggle("TransparentToggle", {
+	Title = "Transparency",
+	Description = "Makes the UI Transparent",
+	Default = Fluent.Transparency,
+	Callback = function(Value)		
+		Fluent:ToggleTransparency(Value)
+	end
+})
+
+UISection:AddKeybind("MinimizeKeybind", { Title = "Minimize Key", Description = "Changes the Minimize Key", Default = "RightShift"})
+Fluent.MinimizeKeybind = Fluent.Options.MinimizeKeybind
+
+Tabs.Credits:AddParagraph({
+	Title = "nick7 hub",
+	Content = "Main script is made by Stonifam\nUsing forked Fluent UI lib by @ttwiz_z"
+})
+if setclipboard then
+	Tabs.Credits:AddButton({
+		Title = "Copy discord invite",
+		Description = "nick7 community",
+		Callback = function()
+			setclipboard("https://discord.gg/6tgCfU2fX8")
+		end
+	})
+else
+	Tabs.Credits:AddButton({
+		Title = "Notify discord invite",
+		Description = "nick7 community",
+		Callback = function()
+			Fluent:Notify({
+				Title = "https://discord.gg/6tgCfU2fX8",
+				Content = "nick7 discord invite",
+				Duration = 20
+			})
+		end
+	})
+end
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+	Title = "nick7 hub | Fluent",
+	Content = "The script has been loaded.",
+	Duration = 8
+})
+
+repeat task.wait(0.5) until Fluent.Unloaded --! DO NOT WRITE ANY CODE THAT IS NOT ABOUT UNLOADING --> !!BELOW!! <-- . IT WILL NOT WORK
+g.n7 = nil
