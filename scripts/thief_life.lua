@@ -500,7 +500,7 @@ section.clubEvade:AddToggle("AutoClanLeave", {
 		end
 	end
 })
--- bGl0ZXJhbGx5IG5vYm9keSBpcyByZWFkaW5nIHRoaXMgc2hpdC1jb2RlLCBzby4uIEkgaGF2ZSBzZXJpb3VzIG1lbnRhbCBpc3N1ZXMgdGhhdCBJJ20gaGlkaW5nIGZvciBiZXN0LCBhbmQgb25seSB0aGluZyBJIHdhbnQgaXMgbW9yZSB1c2VycyBvZiBuaWNrNyBodWIuLi4KaWYgeW91J3JlIHJlYWRpbmcgdGhpcywgZG8gbm90IHB1Ymxpc2ggdGhpcyB0ZXh0Li4gcGxlYXNlLgpUaGFua3MgZm9yIHVzaW5nIG5pY2s3ISA8MwotIHN0b25pZmFt
+
 section.clubCreate:AddParagraph({Title = "Clan note", Content = "Club that will be created is broken and it's temporary in most of the cases"})
 
 section.clubCreate:AddInput("ClubName", {

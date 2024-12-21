@@ -1,9 +1,6 @@
 --[[
 	made by nick7
-	script is still in progress
-	
-	ur exploit must support fireproximityprompt with getconnections.
-	use it, but carefully.
+	OUTDATED
 ]]
 local ui = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local Workspace = game.Workspace

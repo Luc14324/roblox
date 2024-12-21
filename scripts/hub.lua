@@ -13,7 +13,7 @@ local games = {
     [2693739238] = 'load("thief_life.lua")',
     [9647190122] = 'load("max_obby.lua")',
     [32331218] = 'load("mmrp-autofarm.lua")',
-    --[6999691637] = 'load("rbds.lua")', delayed for next(?) update
+    [6999691637] = 'load("rbds.lua")',
     [230362888] = 'load("normal_elevator.lua")',
     [15410077867] = 'load("superhero_obby.lua")',
     [2537430692] = 'load("bnp.lua")',
@@ -21,7 +21,7 @@ local games = {
     [3411100258] = 'load("bordr_autofarm.lua")',
     [394773622] = 'workspace.DoShopPurchase:InvokeServer(game.Players.LocalPlayer.leaderstats.Coins, -945986745698454679,"skill3")',
 }
-local broken = {6999691637--[[ride box down simulator ?]], 15214140740--[[Ultimate Town Sandbox or what is it called]]}
+local broken = {6999691637--[[Ride a Box Down a Slide]], 15214140740--[[Ultimate Town Sandbox]]}
 local supported = false
 for k, _ in pairs(games) do
     if k == id then
@@ -36,10 +36,10 @@ if supported then
         outdated_warn()
     end
 else
-    local notif = loadstring(game:HttpGet("https://raw.githubusercontent.com/laagginq/ui-libraries/main/dxhooknotify/src.lua", true))()
     print("--=(nick7 hub)=--")
     warn(`Game ({id}) is not supported by nick7 hub!`)
     print("If game IS supported, create a ticket in our discord: discord.gg/6tgCfU2fX8")
     print("--=(nick7 hub)=--")
+    local notif = loadstring(game:HttpGet("https://raw.githubusercontent.com/laagginq/ui-libraries/main/dxhooknotify/src.lua", true))()
     notif:Notify("nick7 hub","Game is not supported! Check \"/console\"",20)
 end 

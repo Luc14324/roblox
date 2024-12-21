@@ -22,14 +22,16 @@ for _,v in pairs(game.Workspace:GetChildren()) do
 		v:Destroy()
 	end
 end
+
 function getRoot(char) return char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso') end
 
 local g = {}
+local defaults = {autofarm = false}
 if getgenv then
-	getgenv().n7 = {autofarm = false}
+	getgenv().n7 = defaults
 	g = getgenv()
 else
-	g.n7 = {autofarm = false}
+	g.n7 = defaults
 	task.spawn(function()
 		local m=Instance.new("Message", workspace)
 		local txt="nick7 hub | WARNING\n\nYour exploit DOES NOT support getgenv function!\nThis could lead to detecting you and possible ban (not in this game and not with this script)\nnick7 hub will load now.\n\n"
