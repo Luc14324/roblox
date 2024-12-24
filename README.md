@@ -24,6 +24,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main
 - Mega Marble Run Pit: [Features](#mega-marble-run-pit) · [Game link](https://www.roblox.com/games/32331218/)
 - Build A Boat For Treasure: [Features](#build-a-boat-for-treasure) · [Game link](https://www.roblox.com/games/537413528/)
 - bordr gam: [Features](#bordr-gam) · [Game link](https://www.roblox.com/games/3411100258/)
+- Ride a Box Down a Slide: [Features](#ride-a-box-down-a-slide) · [Game link](https://www.roblox.com/games/6999691637/)
 - Max's Glitch Per Difficulty Chart Obby: [Features](#maxs-glitch-per-difficulty-chart-obby) · [Game link](https://www.roblox.com/games/9647190122/)
 - The Normal Elevator: [Features](#the-normal-elevator) · [Game link](https://www.roblox.com/games/230362888/)
 - Super Hero Obby: [Features](#super-hero-obby) · [Game link](https://www.roblox.com/games/15410077867/)
@@ -87,6 +88,12 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main
   * On cap kick - kicks player after hitting coin cap
 
 [Source code](https://github.com/nick7-hub/roblox/blob/main/scripts/bordr_autofarm.lua) · [Game link](https://www.roblox.com/games/3411100258/)
+## Ride a Box Down a Slide
+- Anti-AFK
+- Autofarm wins
+- Annoy - spam spawns boxes
+
+[Source code](https://github.com/nick7-hub/roblox/blob/main/scripts/rbds.lua) · [Game link](https://www.roblox.com/games/6999691637/)
 ## Max's Glitch Per Difficulty Chart Obby
 - Autofarm rebirth
 

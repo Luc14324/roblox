@@ -1,9 +1,9 @@
 -- made by nick7 with <3
--- scripts used: https://pastebin.com/raw/Cmm23T9g and https://pastebin.com/raw/jj3gMMVD
 
+local plr = game:GetService("Players").LocalPlayer
 local GC = getconnections or get_signal_cons
 if GC then
-	for i,v in pairs(GC(game.Players.LocalPlayer.Idled)) do
+	for _,v in pairs(GC(plr.Idled)) do
 		if v["Disable"] then
 			v["Disable"](v)
 		elseif v["Disconnect"] then
@@ -11,82 +11,326 @@ if GC then
 		end
 	end
 else
-	game.Players.LocalPlayer.Idled:Connect(function()
+	plr.Idled:Connect(function()
 		local VirtualUser = game:GetService("VirtualUser")
 		VirtualUser:CaptureController()
 		VirtualUser:ClickButton2(Vector2.new())
 	end)
 end
 
-local library, imgui = loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main/imgui.lua"))()
-
-getgenv().n7 = {
+local g = {}
+local defaults = {
 	autofarm = false,
-	annoy = false
+	annoy = {
+		toggle = false,
+		vip = false,
+		exclusive = false
+	},
+	tp_method = true
+}
+if getgenv then
+	getgenv().n7 = defaults
+	g = getgenv()
+else
+	g.n7 = defaults
+	task.spawn(function()
+		local m=Instance.new("Message", workspace)
+		local txt="nick7 hub | WARNING\n\nYour exploit DOES NOT support getgenv function!\nThis could lead to detecting you and possible ban (not in this game and not with this script)\nnick7 hub will load now.\n\n"
+		m.Text=txt
+		for i=15,0,-1 do
+			m.Text=txt..i
+			task.wait(1)
+		end
+		m:Destroy()
+	end)
+end
+
+--[[ working on it
+pcall(function()
+    if getfenv().isfile and getfenv().readfile and getfenv().isfile(string.format("%s.n7", game.GameId)) and getfenv().readfile(string.format("%s.n7", game.GameId)) then
+        g.n7 = game:GetService("HttpService"):JSONDecode(getfenv().readfile(string.format("%s.n7", game.GameId)))
+    end
+end)
+]]
+
+local Fluent = loadstring(game:HttpGet("https://twix.cyou/Fluent.txt", true))()
+
+local Window = Fluent:CreateWindow({
+	Title = "nick7 hub",
+    SubTitle = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+	TabWidth = 30,
+	Size = UDim2.fromOffset(370, 280),
+	Acrylic = false,
+	Theme = "Dark"
+})
+
+local Tabs = {
+	Main = Window:AddTab({ Title = "Main", Icon = "factory" }),
+	Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
+	Credits = Window:AddTab({ Title = "Credits", Icon = "person-standing"})
 }
 
-local Window = library:AddWindow("nick7 hub | RBDS", {
-	main_color = Color3.fromRGB(41, 74, 122),
-	min_size = Vector2.new(160, 160),
-	toggle_key = Enum.KeyCode.RightShift,
-	can_resize = true,
-})
-local Tab = Window:AddTab("Main")
 
-Tab:AddButton("Unlock VIP", function()
-	if workspace:FindFirstChild("VIPDoor") and workspace:FindFirstChild("SuperVIPDoor") then
-		workspace.VIPDoor:Destroy()
-		workspace.SuperVIPDoor:Destroy()
+Tabs.Main:AddButton({Title = 'Remove Morphs door', Callback = function()
+	if workspace:FindFirstChild('Morphs') then
+		workspace.Morphs:Destroy()
+	else
+		Fluent:Notify({
+			Title = "nick7 hub | WARN",
+			Content = "Already removed or name got changed.",
+			Duration = 10
+		})
 	end
-end)
+end})
 
-Tab:AddSwitch("Autofarm", function(Value)
-	getgenv().n7.autofarm = Value
-	local parts = game:GetService("Workspace"):GetChildren()
-	while getgenv().n7.autofarm do
-		for i, v in pairs(parts) do
-			if v.Name == "SpawnLocation" then
-				v.CanCollide = false
-				v.Position = game.Players.LocalPlayer.Character.Torso.Position + Vector3.new(0,40,0)
-				task.wait()
-				v.Position = game.Players.LocalPlayer.Character.Torso.Position
-			end
-		end
-	end
-end)
+local autofarm = Tabs.Main:AddToggle("Autofarm", { Title = "Autofarm wins", Default = g.n7.autofarm})
 
-Tab:AddSwitch("Annoy", function(Value)
-	local spawners = {}
-	getgenv().n7.annoy = Value
-	while getgenv().n7.annoy do
-		local objects = game:GetService("Workspace"):GetChildren()
-		for i, v in pairs(objects) do
-			if v then
-				if v.Name == "Model1" then
-					for a, b in pairs(v:GetChildren()) do
-						if b.Name == "Regen Button" then
-							table.insert(spawners, b)
-						end
+local annoy = Tabs.Main:AddToggle("Annoy", { Title = "Annoy", Description = 'Spam spawns all boxes', Default = g.n7.annoy.toggle})
+
+do
+	local winner = workspace.Winners.TouchInterest.Parent
+	local spawnLocation = workspace.SpawnLocation
+
+	autofarm:OnChanged(function(Value)
+		g.n7.autofarm = Value
+		while g.n7.autofarm and not Fluent.Unloaded do
+			pcall(function()
+				if plr.Character and plr.Character:FindFirstChild('HumanoidRootPart') then
+					local root = plr.Character:FindFirstChild('HumanoidRootPart')
+					if firetouchinterest and not g.n7.tp_method then
+						firetouchinterest(root, winner, 0)
+						firetouchinterest(root, winner, 1)
+						firetouchinterest(root, spawnLocation, 0)
+						firetouchinterest(root, spawnLocation, 1)
+					else
+						local pre_pos = {winner.Position, spawnLocation.Position}
+						local pre_collision = {winner.CanCollide, spawnLocation.CanCollide}
+						winner.CanCollide = false
+						winner.Position = root.Position
+						task.wait()
+						winner.Position = pre_pos[1]
+						winner.CanCollide = pre_collision[1]
+						spawnLocation.Position = root.Position
+						spawnLocation.CanCollide = false
+						task.wait()
+						spawnLocation.Position = pre_pos[2]
+						spawnLocation.CanCollide = pre_collision[2]
 					end
 				end
+			end)
+			task.wait()
+		end
+	end)
+
+	local boxes = {}
+
+	local function GetBoxes()
+		local EXLUSIVE_COLOR = BrickColor.new('Bright red')
+		local VIP_COLOR = BrickColor.new('Dark Curry')
+
+		boxes = {}
+
+		for _, part in ipairs(workspace.Boxes:GetDescendants()) do
+			if part:IsA("BasePart") and not (part.BrickColor == EXLUSIVE_COLOR and not g.n7.annoy.exclusive) and not (part.BrickColor == VIP_COLOR and not g.n7.annoy.vip) and not part.Parent.Parent:IsA('Model') then
+				table.insert(boxes, part)
 			end
 		end
-		for i,v in pairs(spawners) do
-			task.spawn(function()
-				local _ = v.Position
-				v.CanCollide = false
-				v.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
-				wait(0.1)
-				v.Position = _
+	end
+
+	GetBoxes()
+
+	annoy:OnChanged(function(Value)
+		g.n7.annoy.toggle = Value
+		while g.n7.annoy.toggle and not Fluent.Unloaded do
+			pcall(function()
+				if plr.Character and plr.Character:FindFirstChild('HumanoidRootPart') then
+					local root = plr.Character:FindFirstChild('HumanoidRootPart')
+					for _,spawner in boxes do
+						if firetouchinterest then
+							firetouchinterest(root, spawner, 0)
+							firetouchinterest(root, spawner, 1)
+						else
+							local pre_pos = spawner.Position
+							spawner.Position = root.Position
+							spawner.CanCollide = false
+							task.wait()
+							spawner.CanCollide = true
+							spawner.Position = pre_pos
+						end
+						task.wait()
+					end
+				end
+			end)
+			task.wait()
+		end
+	end)
+
+
+	Tabs.Settings:AddButton({Title = "Fix annoy", Description = "Re-makes list with spawners.", Callback = function()
+		GetBoxes()
+		if firetouchinterest and plr.Character:FindFirstChild('HumanoidRootPart') and not g.n7.tp_method then
+			for _,spawner in boxes do
+				task.spawn(function()
+					local highlight = Instance.new('Highlight',spawner)
+					local root = plr.Character:FindFirstChild('HumanoidRootPart')
+					firetouchinterest(root, spawner, 0)
+					firetouchinterest(root, spawner, 1)
+					task.wait(5)
+					highlight:Destroy()
+				end)
+			end
+		else
+			for _,spawner in boxes do
+				task.spawn(function()
+					local highlight = Instance.new('Highlight',spawner)
+					task.wait(5)
+					highlight:Destroy()
+				end)
+			end
+		end
+		
+		Fluent:Notify({
+			Title = "nick7 hub | Info",
+			Content = "Highlighted all spawners. If all (free) spawners are highlighted - annoy is fixed",
+			Duration = 8
+		})
+	end})
+
+	Tabs.Settings:AddToggle('ForceTeleportMethod', {Title = 'Force teleport method', Description = 'Will teleport things to you instead of firing (faking) touch.', Default = g.n7.tp_method, Callback = function(Value)
+		g.n7.tp_method = Value
+	end})
+
+	Tabs.Settings:AddToggle('ToggleVIPAnnoy', {Title = 'Include VIP for Annoy', Description = 'After enabling, press on "fix annoy"', Default = g.n7.annoy.vip, Callback = function(Value)
+		g.n7.annoy.vip = Value
+	end})
+
+	Tabs.Settings:AddToggle('ToggleExclusiveAnnoy', {Title = 'Include exclusive boxes for Annoy', Description = 'After enabling, press on "fix annoy"', Default = g.n7.annoy.exclusive, Callback = function(Value)
+		g.n7.annoy.exclusive = Value
+	end})
+end
+
+
+local UISection = Tabs.Settings:AddSection("UI")
+UISection:AddDropdown("InterfaceTheme", {
+	Title = "Theme",
+	Values = Fluent.Themes,
+	Default = Fluent.Theme,
+	Callback = function(Value)
+		Fluent:SetTheme(Value)
+	end
+})
+
+UISection:AddToggle("TransparentToggle", {
+	Title = "Transparency",
+	Description = "Makes the UI Transparent",
+	Default = Fluent.Transparency,
+	Callback = function(Value)
+		Fluent:ToggleTransparency(Value)
+	end
+})
+
+UISection:AddKeybind("MinimizeKeybind", { Title = "Minimize Key", Description = "Changes the Minimize Key", Default = "RightShift"})
+Fluent.MinimizeKeybind = Fluent.Options.MinimizeKeybind
+
+--[[ working on it
+if getfenv().isfile and getfenv().readfile and getfenv().writefile and getfenv().delfile then
+	local ConfigurationManager = Tabs.Settings:AddSection("Configuration Manager")
+
+	ConfigurationManager:AddButton({
+		Title = "Export Configuration",
+		Description = "Overwrites the Game Configuration File",
+		Callback = function()
+			xpcall(function()
+				local ExportedConfiguration = game:GetService("HttpService"):JSONEncode(g.n7)
+
+				getfenv().writefile(string.format("%s.n7", game.GameId), ExportedConfiguration)
+				Window:Dialog({
+					Title = "Configuration Manager",
+					Content = string.format("Configuration File %s.n7 has been successfully overwritten!", game.GameId),
+					Buttons = {
+						{
+							Title = "Confirm"
+						}
+					}
+				})
+			end, function()
+				Window:Dialog({
+					Title = "Configuration Manager",
+					Content = string.format("An Error occurred when overwriting the Configuration File %s.n7", game.GameId),
+					Buttons = {
+						{
+							Title = "Confirm"
+						}
+					}
+				})
 			end)
 		end
-		task.wait()
-	end
-end)
+	})
 
-Tab:AddButton("Destroy", function()
-	imgui:Destroy()
-end)
+	ConfigurationManager:AddButton({
+		Title = "Delete Configuration File",
+		Description = "Deletes the Game Configuration File",
+		Callback = function()
+			if getfenv().isfile(string.format("%s.n7", game.GameId)) then
+				getfenv().delfile(string.format("%s.n7", game.GameId))
+				Window:Dialog({
+					Title = "Configuration Manager",
+					Content = string.format("Configuration File %s.n7 has been successfully deleted!", game.GameId),
+					Buttons = {
+						{
+							Title = "Confirm"
+						}
+					}
+				})
+			else
+				Window:Dialog({
+					Title = "Configuration Manager",
+					Content = string.format("Configuration File %s.n7 could not be found!", game.GameId),
+					Buttons = {
+						{
+							Title = "Confirm"
+						}
+					}
+				})
+			end
+		end
+	})
+end
+]]
 
-Tab:Show()
-library:FormatWindows()
+Tabs.Credits:AddParagraph({
+	Title = "nick7 hub",
+	Content = "Main script is made by Stonifam\nUsing forked Fluent UI lib by @ttwiz_z"
+})
+if setclipboard then
+	Tabs.Credits:AddButton({
+		Title = "Copy discord invite",
+		Description = "nick7 community",
+		Callback = function()
+			setclipboard("https://discord.gg/6tgCfU2fX8")
+		end
+	})
+else
+	Tabs.Credits:AddButton({
+		Title = "Notify discord invite",
+		Description = "nick7 community",
+		Callback = function()
+			Fluent:Notify({
+				Title = "https://discord.gg/6tgCfU2fX8",
+				Content = "nick7 discord invite",
+				Duration = 20
+			})
+		end
+	})
+end
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+	Title = "nick7 hub | Fluent",
+	Content = "The script has been loaded.",
+	Duration = 8
+})
+
+repeat task.wait(0.5) until Fluent.Unloaded --! DO NOT WRITE ANY CODE THAT IS NOT ABOUT UNLOADING --> !!BELOW!! <-- . IT WILL NOT WORK
+g.n7 = nil

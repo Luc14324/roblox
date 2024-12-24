@@ -21,7 +21,7 @@ local games = {
     [3411100258] = 'load("bordr_autofarm.lua")',
     [394773622] = 'workspace.DoShopPurchase:InvokeServer(game.Players.LocalPlayer.leaderstats.Coins, -945986745698454679,"skill3")',
 }
-local broken = {6999691637--[[Ride a Box Down a Slide]], 15214140740--[[Ultimate Town Sandbox]]}
+local broken = {15214140740--[[Ultimate Town Sandbox]]}
 local supported = false
 for k, _ in pairs(games) do
     if k == id then
