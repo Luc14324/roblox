@@ -26,7 +26,8 @@ local defaults = {
 		vip = false,
 		exclusive = false
 	},
-	tp_method = true
+	tp_method = true,
+	tp_for_autofarm = true
 }
 if getgenv then
 	getgenv().n7 = defaults
@@ -45,13 +46,28 @@ else
 	end)
 end
 
---[[ working on it
 pcall(function()
     if getfenv().isfile and getfenv().readfile and getfenv().isfile(string.format("%s.n7", game.GameId)) and getfenv().readfile(string.format("%s.n7", game.GameId)) then
         g.n7 = game:GetService("HttpService"):JSONDecode(getfenv().readfile(string.format("%s.n7", game.GameId)))
     end
 end)
-]]
+
+do
+	local function CheckNils(tbl, usingDefaults)
+		for k, default_v in pairs(usingDefaults) do
+			if type(default_v) == "table" then
+				if tbl[k] == nil then
+					tbl[k] = {}
+				end
+				CheckNils(tbl[k], default_v)
+			elseif tbl[k] == nil then
+				tbl[k] = default_v
+			end
+		end
+	end
+
+	CheckNils(g.n7, defaults)
+end
 
 local Fluent = loadstring(game:HttpGet("https://twix.cyou/Fluent.txt", true))()
 
@@ -93,6 +109,11 @@ do
 
 	autofarm:OnChanged(function(Value)
 		g.n7.autofarm = Value
+
+		if not (firetouchinterest and not g.n7.tp_method) then
+			spawnLocation.Transparency = g.n7.autofarm and 1 or 0 -- kinda fixes fps issue
+		end
+
 		while g.n7.autofarm and not Fluent.Unloaded do
 			pcall(function()
 				if plr.Character and plr.Character:FindFirstChild('HumanoidRootPart') then
@@ -146,7 +167,7 @@ do
 				if plr.Character and plr.Character:FindFirstChild('HumanoidRootPart') then
 					local root = plr.Character:FindFirstChild('HumanoidRootPart')
 					for _,spawner in boxes do
-						if firetouchinterest then
+						if firetouchinterest and not (g.n7.tp_method and not g.n7.tp_for_autofarm) then
 							firetouchinterest(root, spawner, 0)
 							firetouchinterest(root, spawner, 1)
 						else
@@ -154,8 +175,8 @@ do
 							spawner.Position = root.Position
 							spawner.CanCollide = false
 							task.wait()
-							spawner.CanCollide = true
 							spawner.Position = pre_pos
+							spawner.CanCollide = true
 						end
 						task.wait()
 					end
@@ -168,7 +189,7 @@ do
 
 	Tabs.Settings:AddButton({Title = "Fix annoy", Description = "Re-makes list with spawners.", Callback = function()
 		GetBoxes()
-		if firetouchinterest and plr.Character:FindFirstChild('HumanoidRootPart') and not g.n7.tp_method then
+		if firetouchinterest and plr.Character:FindFirstChild('HumanoidRootPart') and not (g.n7.tp_method and not g.n7.tp_for_autofarm) then
 			for _,spawner in boxes do
 				task.spawn(function()
 					local highlight = Instance.new('Highlight',spawner)
@@ -196,9 +217,24 @@ do
 		})
 	end})
 
-	Tabs.Settings:AddToggle('ForceTeleportMethod', {Title = 'Force teleport method', Description = 'Will teleport things to you instead of firing (faking) touch.', Default = g.n7.tp_method, Callback = function(Value)
-		g.n7.tp_method = Value
-	end})
+	if firetouchinterest then
+		Tabs.Settings:AddToggle('ForceTeleportMethod', {
+			Title = 'Force teleport method',
+			Description = 'Will teleport things to you instead of firing (faking) touch.\nPossible FPS issues, but better results',
+			Default = g.n7.tp_method,
+			Callback = function(Value)
+				g.n7.tp_method = Value
+		end})
+
+		Tabs.Settings:AddToggle('TPMethodForAutofarm', {
+			Title = 'Teleport method only for autofarm',
+			Description = 'Uses teleport method only for autofarm',
+			Default = g.n7.tp_for_autofarm,
+			Callback = function(Value)
+				g.n7.tp_for_autofarm = Value
+			end
+		})	
+	end
 
 	Tabs.Settings:AddToggle('ToggleVIPAnnoy', {Title = 'Include VIP for Annoy', Description = 'After enabling, press on "fix annoy"', Default = g.n7.annoy.vip, Callback = function(Value)
 		g.n7.annoy.vip = Value
@@ -232,7 +268,6 @@ UISection:AddToggle("TransparentToggle", {
 UISection:AddKeybind("MinimizeKeybind", { Title = "Minimize Key", Description = "Changes the Minimize Key", Default = "RightShift"})
 Fluent.MinimizeKeybind = Fluent.Options.MinimizeKeybind
 
---[[ working on it
 if getfenv().isfile and getfenv().readfile and getfenv().writefile and getfenv().delfile then
 	local ConfigurationManager = Tabs.Settings:AddSection("Configuration Manager")
 
@@ -296,7 +331,6 @@ if getfenv().isfile and getfenv().readfile and getfenv().writefile and getfenv()
 		end
 	})
 end
-]]
 
 Tabs.Credits:AddParagraph({
 	Title = "nick7 hub",
