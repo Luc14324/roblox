@@ -10,7 +10,7 @@
     <br />
     Helped making scripts: <a href="https://github.com/ttwizz">ttwizz</a> and <a href="https://github.com/kosoor2">kosoor</a>
     <br />
-    <a href="https://discord.gg/6tgCfU2fX8"><strong>Join discord server »</strong></a>
+    <a href="https://discord.gg/NGAaby4y4b"><strong>Join discord server »</strong></a>
   </p>
 </div>
 

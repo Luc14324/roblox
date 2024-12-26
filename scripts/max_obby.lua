@@ -101,7 +101,7 @@ if setclipboard then
 		Title = "Copy discord invite",
 		Description = "nick7 community",
 		Callback = function()
-			setclipboard("https://discord.gg/6tgCfU2fX8")
+			setclipboard("https://discord.gg/NGAaby4y4b")
 		end
 	})
 else
@@ -110,7 +110,7 @@ else
 		Description = "nick7 community",
 		Callback = function()
 			Fluent:Notify({
-				Title = "https://discord.gg/6tgCfU2fX8",
+				Title = "https://discord.gg/NGAaby4y4b",
 				Content = "nick7 discord invite",
 				Duration = 20
 			})

@@ -621,7 +621,7 @@ if setclipboard then
 		Title = "Copy discord invite",
 		Description = "nick7 community",
 		Callback = function()
-			setclipboard("https://discord.gg/6tgCfU2fX8")
+			setclipboard("https://discord.gg/NGAaby4y4b")
 		end
 	})
 else
@@ -631,7 +631,7 @@ else
 		Callback = function()
 			ui:Notify({
 				Title = "nick7 hub | Info",
-				Content = "https://discord.gg/6tgCfU2fX8",
+				Content = "https://discord.gg/NGAaby4y4b",
 				Duration = 15
 			})
 		end

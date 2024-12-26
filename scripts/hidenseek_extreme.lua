@@ -289,7 +289,7 @@ credits:AddButton({
 	Title = "Copy discord invite",
 	Description = "nick7 community",
 	Callback = function()
-		setclipboard("https://discord.gg/6tgCfU2fX8")
+		setclipboard("https://discord.gg/NGAaby4y4b")
 	end
 })
 
