@@ -663,7 +663,7 @@ XPFarmToggle:OnChanged(function(Value)
 				Duration = 5
 			})
 		end
-		status:SetTitle("")
+		status:SetTitle("Autofarm status will be here")
 		status:SetDesc("")
 	end
 end)

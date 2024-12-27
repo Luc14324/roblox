@@ -15,6 +15,7 @@ local games = {
     [32331218] = 'load("mmrp-autofarm.lua")',
     [2882332175] = 'load("bdfs.lua")',
     [6999691637] = 'load("rbds.lua")',
+    [10660791703] = 'load("cran.lua")',
     [230362888] = 'load("normal_elevator.lua")',
     [15410077867] = 'load("superhero_obby.lua")',
     [2537430692] = 'load("bnp.lua")',

@@ -26,6 +26,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main
 - bordr gam: [Features](#bordr-gam) · [Game link](https://www.roblox.com/games/3411100258/)
 - be dead forever simulator: [Features](#be-dead-forever-simulator) · [Game link](https://www.roblox.com/games/2882332175/)
 - Ride a Box Down a Slide: [Features](#ride-a-box-down-a-slide) · [Game link](https://www.roblox.com/games/6999691637/)
+- cart ride around nothing: [Features](#cart-ride-around-nothing) · [Game link](https://www.roblox.com/games/10660791703/)
 - Max's Glitch Per Difficulty Chart Obby: [Features](#maxs-glitch-per-difficulty-chart-obby) · [Game link](https://www.roblox.com/games/9647190122/)
 - The Normal Elevator: [Features](#the-normal-elevator) · [Game link](https://www.roblox.com/games/230362888/)
 - Super Hero Obby: [Features](#super-hero-obby) · [Game link](https://www.roblox.com/games/15410077867/)
@@ -108,6 +109,11 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main
 - Annoy - spam spawns boxes
 
 [Source code](https://github.com/nick7-hub/roblox/blob/main/scripts/rbds.lua) · [Game link](https://www.roblox.com/games/6999691637/)
+## cart ride around nothing
+- Anti-AFK
+- Auto-complete
+
+[Source code](https://github.com/nick7-hub/roblox/blob/main/scripts/cran.lua) · [Game link](https://www.roblox.com/games/10660791703/)
 ## Max's Glitch Per Difficulty Chart Obby
 - Autofarm rebirth
 
