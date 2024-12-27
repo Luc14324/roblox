@@ -1,46 +1,59 @@
-if game.PlaceId ~= 3411100258 then
-	warn("Game is not supported!")
-	wait(604800)
-end
-
-
 local PathfindingService = game:GetService("PathfindingService")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local player = game.Players.LocalPlayer
 
-do -- protection in case if wiggles is smarter than a rock
-	if getfenv().getconnections then
-		for _, Connection in next, getfenv().getconnections(game:GetService("ScriptContext").Error) do
-			Connection:Disable()
-		end
-		for _, Connection in next, getfenv().getconnections(game:GetService("LogService").MessageOut) do
-			Connection:Disable()
-		end
-	end
+if game.PlaceId ~= 3411100258 then
+	warn("Game is not supported!")
+	player:Kick("(nick7 hub) Game is not supported!")
 end
 
-local GC = getconnections or get_signal_cons
+task.spawn(function()
+	if getgenv then
+		local msg = Instance.new("Hint", workspace)
+		msg.Text = "Started loading nick7 hub, please wait.. // bordr gam"
+		task.wait(5)
+		msg:Destroy()
+	else
+		warn("getgenv is not supported!	")
+		player:Kick("(nick7 hub) getgenv is not supported!")
+	end
+end)
+
+local GC = getfenv().getconnections or get_signal_cons
+
 if GC then
-	for i,v in pairs(GC(game.Players.LocalPlayer.Idled)) do
-		if v["Disable"] then
-			v["Disable"](v)
-		elseif v["Disconnect"] then
-			v["Disconnect"](v)
-		end
-	end
+    --[[ removed, pointless until wiggles and his team (if he has) fights back.
+	for _, Connection in next, GC(game:GetService("ScriptContext").Error) do
+        Connection:Disable()
+    end
+	
+    for _, Connection in next, GC(game:GetService("LogService").MessageOut) do
+        Connection:Disable()
+    end]]
+
+    for i, v in pairs(GC(game.Players.LocalPlayer.Idled)) do
+        if v["Disable"] then
+            v["Disable"](v)
+        elseif v["Disconnect"] then
+            v["Disconnect"](v)
+        end
+    end
 else
-	game.Players.LocalPlayer.Idled:Connect(function()
-		local VirtualUser = game:GetService("VirtualUser")
-		VirtualUser:CaptureController()
-		VirtualUser:ClickButton2(Vector2.new())
-	end)
+    game.Players.LocalPlayer.Idled:Connect(function()
+        local VirtualUser = game:GetService("VirtualUser")
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end)
 end
 
---
+local g = getgenv()
 
-getgenv().n7 = {
+g.n7 = {
 	saveable = {
+		potions = {
+			multiplier = 1
+		},
 		check_admins = true,
 		webhook = {
 			use = false,
@@ -62,10 +75,12 @@ getgenv().n7 = {
 	},
 	autofarm = false,
 	fish = false,
+	xpfarm = false,
     cage = CFrame.new(0,0,0),
 }
+
 function getAvatarUrl(user)
-	local thumbnail_request = string.format("https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds=%d&size=48x48&format=png", user.UserId)
+	local thumbnail_request = `https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds={user.UserId}&size=48x48&format=png`
 	local response = request({
 		Url = thumbnail_request,
 		Method = "GET"
@@ -76,7 +91,7 @@ end
 local local_pfp = getAvatarUrl(player)
 function SendMessage(message)
 	if not request then return end
-	local url = getgenv().n7.saveable.webhook.link
+	local url = g.n7.saveable.webhook.link
 	if url ~= "" or url ~= " " then
 		local http = HttpService
 		local headers = {
@@ -88,7 +103,7 @@ function SendMessage(message)
 			["avatar_url"] = local_pfp
 		}
 		local body = http:JSONEncode(data)
-		local response = request({
+		request({
 			Url = url,
 			Method = "POST",
 			Headers = headers,
@@ -109,36 +124,29 @@ function SendWarn(admin, was)
 	elseif not was then
 		_was = "**joined**"
 	end
-	local url = getgenv().n7.saveable.webhook.link
+	local url = g.n7.saveable.webhook.link
 	if url ~= "" or url ~= " " then
 		local http = HttpService
 		local headers = {
 			["Content-Type"] = "application/json"
 		}
 		local data = {
-			["content"] = getgenv().n7.saveable.webhook.cfg.ping.." Admin ".._was.." the server! Kicked `"..player.Name.."`.",
-			["username"] = player.Name,
-			["avatar_url"] = local_pfp
+			content = `{g.n7.saveable.webhook.cfg.ping} Admin {_was} the server! Kicked \`{player.Name}\``,
+			username = player.Name,
+			avatar_url = local_pfp,
 		}
 		if needEmbed then
-			data = {
-				["content"] = getgenv().n7.saveable.webhook.cfg.ping.." Admin ".._was.." the server! Kicked `"..player.Name.."`.",
-				["username"] = player.Name,
-				["avatar_url"] = local_pfp,
-				["embeds"] = {
-					{
-						["title"] = "Admin that joined",
-						["description"] = "Admins [profile](https://www.roblox.com/users/"..admin.UserId.."/profile)\nDisplay: "..admin.DisplayName.."\nUsername: "..admin.Name,
-						["color"] = 16711680,
-						["thumbnail"] = {
-						["url"] = getAvatarUrl(admin)
-						}
-					}
+			data.embeds = {
+				{
+					title = "Admin that joined",
+					description = string.format("Admins [profile](https://www.roblox.com/users/%d/profile)\nDisplay: %s\nUsername: %s", admin.UserId, admin.DisplayName, admin.Name),
+					color = 16711680,
+					thumbnail = { url = getAvatarUrl(admin) }
 				}
 			}
 		end
 		local body = http:JSONEncode(data)
-		local response = request({
+		request({
 			Url = url,
 			Method = "POST",
 			Headers = headers,
@@ -149,17 +157,18 @@ end
 
 pcall(function()
     if getfenv().isfile and getfenv().readfile and getfenv().isfile(string.format("%s.n7", game.GameId)) and getfenv().readfile(string.format("%s.n7", game.GameId)) then
-        getgenv().n7.saveable = HttpService:JSONDecode(getfenv().readfile(string.format("%s.n7", game.GameId)))
+        g.n7.saveable = HttpService:JSONDecode(getfenv().readfile(string.format("%s.n7", game.GameId)))
     end
 end)
-function cage()
+function cage():CFrame
 	if workspace:FindFirstChild("Cage (nick7hub)") then workspace:FindFirstChild("Cage (nick7hub)"):Destroy() end
 	local folder = Instance.new("Folder", workspace)
 	folder.Name = "Cage (nick7hub)"
-	local _color = Color3.fromRGB(79, 79, 79)
-	local _offset = Vector3.new(math.random(-100000, 10000), 6, math.random(-100000,10000))
+
+	local color = Color3.fromRGB(79, 79, 79)
+	local offset = Vector3.new(math.random(-100000, 10000), 6, math.random(-100000,10000))
+
 	--+ Creating
-	local parts = {}
 	local floor = Instance.new("Part", folder)
 	local wall1 = Instance.new("Part", folder)
 	local wall2 = Instance.new("Part", folder)
@@ -171,16 +180,16 @@ function cage()
 	for _,v in pairs(parts) do
 		v.Anchored = true
 		v.Transparency = 0.4
-		v.Color = _color
+		v.Color = color
 		v.Name = "discord.gg/6tgCfU2fX8"
 	end
 	--+ Position
-	floor.Position = Vector3.new(0, 0, 0) + _offset
-	wall1.Position = Vector3.new(5, 5, 0) + _offset
-	wall2.Position = Vector3.new(-5, 5, 0) + _offset
-	wall3.Position = Vector3.new(0, 5, -5) + _offset
-	wall4.Position = Vector3.new(0, 5, 5) + _offset
-	ceiling.Position = Vector3.new(0, 10, 0) + _offset
+	floor.Position = Vector3.new(0, 0, 0) + offset
+	wall1.Position = Vector3.new(5, 5, 0) + offset
+	wall2.Position = Vector3.new(-5, 5, 0) + offset
+	wall3.Position = Vector3.new(0, 5, -5) + offset
+	wall4.Position = Vector3.new(0, 5, 5) + offset
+	ceiling.Position = Vector3.new(0, 10, 0) + offset
 	--+ Size
 	floor.Size = Vector3.new(10,1,10)
 	wall1.Size = Vector3.new(1, 10, 10)
@@ -189,19 +198,50 @@ function cage()
 	wall4.Size = Vector3.new(10, 10, 1)
 	ceiling.Size = Vector3.new(10,1,10)
 	--
-	local frame = _offset + Vector3.new(0,4,0)
-	getgenv().n7.cage = CFrame.new(frame)
+	local frame = offset + Vector3.new(0,2,0)
+	g.n7.cage = CFrame.new(frame)
 	return CFrame.new(frame)
 end
 
 cage()
 
+local funny_floor -- strange unusable name for funny & so I wouldn't use it on accident
+
+function randomString()
+	local length = math.random(10,20)
+	local array = {}
+	for i = 1, length do
+		array[i] = string.char(math.random(32, 126))
+	end
+	return table.concat(array)
+end
+
+local platform = {
+	['Init'] = function()
+		local part = Instance.new("Part", workspace)
+		part.Anchored = true
+		part.Size = Vector3.new(10,1,10)
+		part.Color = Color3.fromRGB(79, 79, 79)
+		part.Transparency = 0.4
+		part.Name = randomString()
+		funny_floor = part
+		return part
+	end,
+	['Forget'] = function()
+		if funny_floor then
+			funny_floor:Destroy()
+		end
+		funny_floor = nil
+	end
+}
+
 local Fluent = loadstring(game:HttpGet("https://twix.cyou/Fluent.txt", true))()
+
 Fluent.ShowCallbackErrors = true
 
 local Window = Fluent:CreateWindow({
 	Title = "nick7 hub",
-	SubTitle = "bordr | by stonifam",
+	SubTitle = "bordr gam | by stonifam",
 	TabWidth = 100,
 	Size = UDim2.fromOffset(470, 300),
 	Acrylic = false,
@@ -213,47 +253,59 @@ function get_exp()
 	local str = ""
 	local CargoInfo = game.ReplicatedStorage.CargoInfo
 	local island = 0
-	local list_brick = {CargoInfo.BricklandiaCargoTrader.Sell.coal, CargoInfo.BricklandiaCargoTrader.Sell.fish, CargoInfo.BricklandiaCargoTrader.Sell.gold, CargoInfo.BricklandiaCargoTrader.Sell.gunpowder, CargoInfo.BricklandiaCargoTrader.Sell.lumber, CargoInfo.BricklandiaCargoTrader.Sell.potions}
-	local list_far = {CargoInfo.FarlandsCargoTrader.Sell.chalices, CargoInfo.FarlandsCargoTrader.Sell.fish, CargoInfo.FarlandsCargoTrader.Sell.flowers, CargoInfo.FarlandsCargoTrader.Sell.gold, CargoInfo.FarlandsCargoTrader.Sell.gunpowder, CargoInfo.FarlandsCargoTrader.Sell.iron}
-	local list_pirate = {CargoInfo.PirateCargoTrader.Sell.chalices, CargoInfo.PirateCargoTrader.Sell.coal, CargoInfo.PirateCargoTrader.Sell.flowers, CargoInfo.PirateCargoTrader.Sell.iron, CargoInfo.PirateCargoTrader.Sell.lumber, CargoInfo.PirateCargoTrader.Sell.potions}
-	for i,v in pairs(list_brick) do
-		if v then
-			if v.Value > most then
-				most = v.Value
-				str = v.Name
-				island = 1
+	local lists = {} -- 1: bricklandia, 2: farlands, 3: pirates
+	for folderNumber,cargoFolder in {CargoInfo.BricklandiaCargoTrader, CargoInfo.FarlandsCargoTrader, CargoInfo.PirateCargoTrader} do
+		if cargoFolder:FindFirstChild('Sell') then
+			for _,sell in cargoFolder.Sell:GetChildren() do
+				if sell:IsA('NumberValue') then
+					lists[folderNumber] = {}
+					table.insert(lists[folderNumber], sell)
+				end
 			end
 		end
 	end
-	for i,v in pairs(list_far) do
-		if v.Value > most then
-			most = v.Value
-			str = v.Name
-			island = 2
+	for num, list in lists do
+		for _, cargo in list do
+			if cargo and cargo.Value > most then
+				most = cargo.Value
+				str = cargo.Name
+				island = num
+			end
 		end
 	end
-	for i,v in pairs(list_pirate) do
-		if v.Value > most then
-			most = v.Value
-			str = v.Name
-			island = 3
-		end
-	end
+
 	return str, island
 end
 
 function getRoot(char)
-	local rootPart = char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
-	return rootPart
+	return char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')
 end
 
 Farm = Window:AddTab({Title = "Farming", Icon = "carrot"})
+
+local status = Farm:AddParagraph({Title = "Autofarm status will be here", Content = ""})
+
 local FarmToggle = Farm:AddToggle("FarmToggle", { Title = "Cargo autofarm", Description = "Toggles money autofarm using cargo", Default = false })
 local FishFarmToggle = Farm:AddToggle("FishFarmToggle", { Title = "Fish autofarm", Description = "Toggles money autofarm using fishing", Default = false })
+local XPFarmToggle = Farm:AddToggle("XPFarmToggle", { Title = "XP autofarm", Description = "Toggles XP autofarm. Farms dough\nWorks faster with worker potion", Default = false })
 
-local status = Farm:AddParagraph({
-	Title = "Autofarm status will be here", Content = ""
-})
+function FindTool(name)
+	return player.Backpack:FindFirstChild(name) or player.Character:FindFirstChild(name)
+end
+
+function ToolsCountByName(name)
+	local count = 0
+	if FindTool(name) then
+		for _,instance in pairs({player.Backpack, player.Character}) do
+			for _,item in pairs(instance:GetChildren()) do
+				if item:IsA("Tool") and item.Name == name then
+					count += 1
+				end
+			end
+		end
+	end
+	return count
+end
 
 local cap = 1000000
 local gp_cap = player.Gamepasses:GetAttribute("CoinCap")
@@ -274,7 +326,7 @@ local function bar()
 			bar = bar .. empty_tile
 		end
 	end
-	return "[ "..bar.." ] "..string.format(" %d%%", percentage)
+	return `[ {bar} ] {string.format(" %d%%", percentage)}`
 end
 
 local function comma(Value) -- stolen from KDanHudds (YT)
@@ -290,12 +342,12 @@ local function comma(Value) -- stolen from KDanHudds (YT)
 end
 
 local function cap_check()
-	if getgenv().n7.saveable.webhook.use then
-		if getgenv().n7.saveable.webhook.cfg.on_cap then
+	if g.n7.saveable.webhook.use then
+		if g.n7.saveable.webhook.cfg.on_cap then
 			local coins = player.leaderstats.coins.Value
 			if coins > cap then
-				SendMessage(getgenv().n7.saveable.webhook.cfg.ping.." Hitted a coin cap!")
-				if getgenv().n7.saveable.webhook.cfg.on_cap_kick then
+				SendMessage(g.n7.saveable.webhook.cfg.ping.." Hitted a coin cap!")
+				if g.n7.saveable.webhook.cfg.on_cap_kick then
 					player:Kick("hitted coin cap.")
 				end
 			end
@@ -304,12 +356,12 @@ local function cap_check()
 end
 
 FarmToggle:OnChanged(function(Value)
-	getgenv().n7.autofarm = Value
-	if getgenv().n7.autofarm then
+	g.n7.autofarm = Value
+	if g.n7.autofarm then
 		if player.leaderstats.coins.Value >= 50 then
 			if player.Team.Name ~= "choosing" then
-				while getgenv().n7.autofarm do
-					if getgenv().n7.fish then
+				while g.n7.autofarm do
+					if g.n7.fish then
 						FarmToggle:SetValue(false)
 						Fluent:Notify({
 							Title = "nick7 hub | WARN",
@@ -326,13 +378,13 @@ FarmToggle:OnChanged(function(Value)
 						status:SetTitle("Waiting "..i.." seconds...")
 						status:SetDesc("")
 						task.wait(1)
-						if not getgenv().n7.autofarm then
+						if not g.n7.autofarm then
 							status:SetTitle("Finished farming!")
 							status:SetDesc("")
 							break
 						end
 					end
-					if not getgenv().n7.autofarm then
+					if not g.n7.autofarm then
 						break
 					end
 					local char = player.Character
@@ -350,13 +402,14 @@ FarmToggle:OnChanged(function(Value)
 					of = of +fs
 					if char and getRoot(char) then
 						pcall(function()
+							platform:Init().Position = of + Vector3.new(0,-2,0)
 							getRoot(char).CFrame = CFrame.new(of)
 							status:SetTitle("Teleported to selling point")
 							status:SetDesc("")
 							task.wait(.25)
 							local bef = player.leaderstats.coins.Value
 							game:GetService("ReplicatedStorage").Packages.Knit.Services.ShopService.RF.Shop:InvokeServer(exp, false, false)
-							if getgenv().n7.saveable.webhook.cfg.on_sale and getgenv().n7.saveable.webhook.use then
+							if g.n7.saveable.webhook.cfg.on_sale and g.n7.saveable.webhook.use then
 								local aft_money = player.leaderstats.coins.Value
 								SendMessage("[[!](<https://www.roblox.com/users/"..player.UserId..">)] Sold cargo for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."` | Progress: "..bar())
 							end
@@ -365,7 +418,8 @@ FarmToggle:OnChanged(function(Value)
 							task.wait(.01)
 							getRoot(char).AssemblyLinearVelocity = Vector3.new(0,0,0)
 							getRoot(char).AssemblyAngularVelocity = Vector3.new(0,0,0)
-							getRoot(char).CFrame = getgenv().n7.cage
+							getRoot(char).CFrame = g.n7.cage
+							platform:Forget()
 						end)
 					else
 						FarmToggle:SetValue(false)
@@ -399,8 +453,8 @@ FarmToggle:OnChanged(function(Value)
 end)
 
 FishFarmToggle:OnChanged(function(Value)
-	getgenv().n7.fish = Value
-	if getgenv().n7.fish then
+	g.n7.fish = Value
+	if g.n7.fish then
 		if not fireproximityprompt then
 			Fluent:Notify({
 				Title = "nick7 hub | WARN",
@@ -411,14 +465,14 @@ FishFarmToggle:OnChanged(function(Value)
 		end
 		local count = 0
 		local count_cap = 10
-		if not getgenv().n7.autofarm then
+		if not g.n7.autofarm then
 			if player.Team.Name ~= "choosing" then
 				if player.Backpack:FindFirstChild("fishing pol") or player.Character:FindFirstChild("fishing pol") then
 					if player.Character and getRoot(player.Character) then
-						getRoot(player.Character).CFrame = getgenv().n7.cage
+						getRoot(player.Character).CFrame = g.n7.cage
 					end
 					task.wait(1)
-					while getgenv().n7.fish do
+					while g.n7.fish do
 						if fireproximityprompt then
 							count = count + 1
 							status:SetDesc(count.."/"..count_cap.." until sale")
@@ -435,8 +489,8 @@ FishFarmToggle:OnChanged(function(Value)
 						end
 						for i=20,0,-1 do
 							task.wait(0.1)
-							status:SetTitle("Waiting 2 seconds... ("..i..")")
-							if not getgenv().n7.fish then status:SetTitle("Finished farming!");return end
+							status:SetTitle(`Waiting 2 seconds... ({i/10})`)
+							if not g.n7.fish then status:SetTitle("Finished farming!");return end
 						end
 						status:SetTitle("Waiting until bait moves...")
 						repeat task.wait() until bait.Position.Y ~= 5
@@ -461,8 +515,8 @@ FishFarmToggle:OnChanged(function(Value)
 									fireproximityprompt(sellFish, 0.3)
 									task.wait(0.3)
 								end
-								getRoot(player.Character).CFrame = getgenv().n7.cage
-								if getgenv().n7.saveable.webhook.cfg.on_sale and getgenv().n7.saveable.webhook.use then
+								getRoot(player.Character).CFrame = g.n7.cage
+								if g.n7.saveable.webhook.cfg.on_sale and g.n7.saveable.webhook.use then
 									local aft_money = player.leaderstats.coins.Value
 									SendMessage("[[!](<https://www.roblox.com/users/"..player.UserId.."/profile>)] Sold fish for `"..aft_money-bef.."`. Total coins: `"..comma(aft_money).."` | Progress: "..bar())
 								end
@@ -507,6 +561,113 @@ FishFarmToggle:OnChanged(function(Value)
 	end
 end)
 
+local stations = {} --Part with ProximityPrompt
+
+function UpdateDoughStations()
+	stations = {}
+	for _,v in workspace:GetDescendants() do
+		if v:IsA("ProximityPrompt") and v.Name == "Dough" and v.Parent.Parent.Name == "Dough Stand" then
+			table.insert(stations, v.Parent)
+		end
+	end
+end
+
+UpdateDoughStations()
+
+local TeamSpawns = {} --example: peasant:string = {SpawnLocation:SpawnLocation, SpawnLocation:SpawnLocation}...
+
+function TS_INIT() -- TeamSpawns init, adds all game spawns to TeamSpawns table
+    local spawners = {}
+
+    for _, object in ipairs(workspace:GetDescendants()) do
+        if object:IsA("SpawnLocation") then
+            table.insert(spawners, object)
+        end
+    end
+
+    for _, team: Team in ipairs(game:GetService("Teams"):GetTeams()) do
+        if team.Name ~= "choosing" then
+            local teamSpawns = {}
+            for _, spawner: SpawnLocation in ipairs(spawners) do
+                if spawner.TeamColor == team.TeamColor then
+                    table.insert(teamSpawns, spawner)
+                end
+            end
+            TeamSpawns[team.Name] = teamSpawns
+        end
+    end
+end
+
+
+XPFarmToggle:OnChanged(function(Value)
+	g.n7.xpfarm = Value
+	if g.n7.xpfarm then
+		if player.Team ~= game.Teams:FindFirstChild("choosing") then
+			TS_INIT()
+			if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+				xpcall(function()
+
+					local function GetStation():Part --example: workspace.Map.Islands.Bricklandia['Dough Stand'].Part.Dough
+						local Spawns = TeamSpawns[player.Team.Name]
+						local closest = {math.huge, nil}
+						for _,stand in ipairs(stations) do
+							for _,Spawn in ipairs(Spawns) do
+								if (Spawn.Position-stand.Position).Magnitude < closest[1] then
+									closest = {(Spawn.Position-stand.Position).Magnitude, stand}
+								end
+							end
+						end
+						return closest[2]
+					end
+					status:SetDesc("")
+					status:SetTitle("Getting station")
+					local stand = GetStation()
+
+					while g.n7.xpfarm and not Fluent.Unloaded do
+						pcall(function()
+							status:SetDesc("")
+							status:SetTitle("Waiting for character")
+							if player.Character then
+								local localRoot = player.Character:WaitForChild("HumanoidRootPart")
+								localRoot.CFrame = CFrame.new(stand.Position+Vector3.new(1,1,1))
+								task.wait(0.2)
+								status:SetTitle("Firing ProximityPrompt")
+								status:SetDesc("Making dough")
+								stand.Dough.HoldDuration = 0
+								repeat
+									fireproximityprompt(stand.Dough)
+									if (localRoot.Position-stand.Position).Magnitude > 4 then
+										localRoot.CFrame = CFrame.new(stand.Position+Vector3.new(1,1,1))
+									end
+									task.wait(0.3)
+								until stand ~= GetStation() or Fluent.Unloaded or not player.Character or not g.n7.xpfarm
+								status:SetTitle("Getting new station.")
+								status:SetDesc("")
+								stand = GetStation()
+								task.wait()
+							end
+						end)
+					end
+				end, function(err)
+					local fullTraceback = debug.traceback(err, 2)
+					local firstLine = string.match(fullTraceback, ":%d+:")
+					warn("Error: " .. err .. " at line " .. firstLine)
+				end)
+
+			end
+		else
+			Fluent:Notify({
+				Title = "nick7 hub | WARN",
+				Content = "You must choose a team first!",
+				SubContent = "bordr autofarm",
+				Duration = 5
+			})
+		end
+		status:SetTitle("")
+		status:SetDesc("")
+	end
+end)
+
 Farm:AddParagraph({
 	Title = "WARNING | Cargo autofarm",
 	Content = "Don't do anything crazy with: your position and your tools\nAutofarm will remove tool from your hands (not from inventory)\nAutofarm will teleport you"
@@ -541,112 +702,233 @@ UISection:AddButton({
 		end
 	end
 })
-if fireclickdetector then
-	UISection:AddButton({
-		Title = "Brew full belly potion",
-		Description = "Full belly potion will stop hunger from draining",
-		Callback = function()
-			if player.Team ~= game.Teams:FindFirstChild("choosing") then
-				local function getPotions()
-					local check = "full belly potin"
-					local all_tools = {}
-					for _,v in player.Character:GetChildren() do
-						if v:IsA("Tool") and v.Name == check then
-							table.insert(all_tools, v)
-						end
-					end
-					for _,v in player.Backpack:GetChildren() do
-						if v.Name == check then
-							table.insert(all_tools, v)
-						end
-					end
-					return #all_tools
-				end
-				local fbpc = getPotions() -- full belly potions count
-				local char = player.Character
-				local root = char:FindFirstChild("HumanoidRootPart")
-				if char and root then
-					local _last = root.CFrame
-					if not (player.Backpack:FindFirstChild("catapillah") and player.Backpack:FindFirstChild("bery") and player.Backpack:FindFirstChild("applee")) then
-						local crp
-						local arp
-						do
-							for _,v in workspace.Map.Islands.Farlands.catapillah:GetChildren() do
-								if v:FindFirstChild("ClickDetector") then
-									crp = v
-								end
+
+local recipe = { -- any names // format: COUNT#NAME,COUNT#NAME
+	['full belly'] = function()
+		return '1#catapillah,1#applee,1#bery'
+	end,
+	['worker'] = function()
+		return '3#bone'
+	end,
+	['buffie'] = function()
+		return '1#shinie_bar,1#catapillah,1#moony_rok'
+	end,
+	['disguise'] = function()
+		return '1#pink_flowa,1#catapillah,1#moony_rok'
+	end,
+	['heal'] = function()
+		return '1#pink_flowa,1#bone,1#applee'
+	end,
+	['jumppowah'] = function()
+		return '1#moony_rok,1#pink_flowa,1#bery'
+	end,
+	['speed'] = function()
+		return '1#moony_rok,1#shinie_bar,1#bone'
+	end,
+	['spoopy'] = function()
+		return '1#bone,1#bery,1#ghost_bricc'
+	end,
+	['stamina'] = function()
+		return '1#shinie_bar,1#pink_flowa,1#applee,1#catapillah'
+	end,
+	['regeneration'] = function()
+		return '2#pink_flowa,1#applee'
+	end
+}
+
+function Brew(potion)
+	local function GetIngredient(ingredient:string):ClickDetector
+		local bricklandia = workspace.Map.Islands.Bricklandia
+		local farlands = workspace.Map.Islands.Farlands
+		local known = {
+			['bone'] = function()
+				return bricklandia.bone.ClickDetector or farlands.bone.ClickDetector
+			end,
+			['applee'] = function()
+				for _,island in {bricklandia, farlands} do
+					if island:FindFirstChild('applee') then
+						for _,v in island.applee:GetChildren() do
+							if v:FindFirstChildOfClass("ClickDetector") then
+								return v:FindFirstChildOfClass("ClickDetector")
 							end
-							for _,v in workspace.Map.Islands.Farlands.applee:GetChildren() do
-								if v:FindFirstChild("ClickDetector") then
-									arp = v
-								end
+						end
+					end
+				end
+			end,
+			['catapillah'] = function()
+				for _,island in {bricklandia, farlands} do
+					if island:FindFirstChild('catapillah') then
+						for _,v in island.catapillah:GetChildren() do
+							if v:FindFirstChildOfClass("ClickDetector") then
+								return v:FindFirstChildOfClass("ClickDetector")
 							end
 						end
-						repeat
-							root.CFrame = crp.CFrame
-							fireclickdetector(crp.ClickDetector)
-							task.wait()
-						until player.Backpack:FindFirstChild("catapillah")
-						task.wait(0.1)
-						repeat
-							root.CFrame = workspace.Map.Islands.Farlands.bery.Part.CFrame
-							fireclickdetector(workspace.Map.Islands.Farlands.bery.Part.ClickDetector)
-							task.wait()
-						until player.Backpack:FindFirstChild("bery")
-						task.wait(0.1)
-						repeat
-							root.CFrame = arp.CFrame
-							fireclickdetector(arp.ClickDetector)
-							task.wait()
-						until player.Backpack:FindFirstChild("applee")
 					end
-					task.wait(0.1)
-					root.CFrame = CFrame.new(-172, 12, 339)
-					repeat
-						game:GetService("ReplicatedStorage").Remotes.BrewPotion:FireServer("FullBelly")
-						task.wait(0.1)
-					until getPotions() > fbpc
-					root.CFrame = _last
 				end
-			else
-				Fluent:Notify({
-					Title = "nick7 hub | WARN",
-					Content = "You must choose a team first!",
-					SubContent = "bordr autofarm",
-					Duration = 5
-				})
+			end,
+			['bery'] = function()
+				return bricklandia.bery.Part.ClickDetector or farlands.bery.Part.ClickDetector
+			end,
+			['shinie_bar'] = function()
+				return bricklandia["shinie bar"].ClickDetector or farlands["shinie bar"].ClickDetector
+			end,
+			['moony_rok'] = function()
+				return bricklandia["moony rok"].ClickDetector or farlands["moony rok"].ClickDetector
+			end,
+			['pink_flowa'] = function()
+				return bricklandia["pink flowa"].ClickDetector or farlands["pink flowa"].ClickDetector
+			end,
+			['ghost_bricc'] = function()
+				return bricklandia["ghost bricc"].ClickDetector or farlands["ghost bricc"].ClickDetector
 			end
+		}
+		if known[ingredient] then
+			return known[ingredient]()
 		end
-	})
+	end
+
+	if recipe[potion] then
+		if player.Character then
+			local localRoot = player.Character:FindFirstChild('HumanoidRootPart')
+
+			local lastPos = localRoot.CFrame
+
+			local function ParseIngredients(input)
+				local result = {}
+			
+				for part in string.gmatch(input, "([^,]+)") do
+					local number, ingredient = string.match(part, "(%d+)#(.+)")
+			
+					if number and ingredient then
+						number = tonumber(number)
+
+						if result[ingredient] then
+							table.insert(result[ingredient], number)
+						else
+							result[ingredient] = {number}
+						end
+					end
+				end
+				return result
+			end
+
+			local potion_todo = ParseIngredients(recipe[potion]())
+
+			for ingredient, quantities in pairs(potion_todo) do
+				for _, quantity in ipairs(quantities) do
+					for _ = 0,quantity do
+						local ingredient_spaced = string.gsub(ingredient, '_', ' ')
+						repeat
+							local clickDetector = GetIngredient(ingredient)
+							if clickDetector then
+								localRoot.CFrame = CFrame.new(clickDetector.Parent.Position+Vector3.new(0,2.5,0))
+								fireclickdetector(clickDetector)
+								task.wait()
+							end
+							game:GetService("RunService").RenderStepped:Wait()
+						until ToolsCountByName(ingredient_spaced) >= quantity or Fluent.Unloaded
+						task.wait()
+					end
+				end
+			end
+			local preBrewPotionCount = ToolsCountByName(`{potion} potin`)
+		
+			local function Convert(text:string)
+				local words = {}
+
+				for word in string.gmatch(text, "[^ ]+") do
+					table.insert(words, (word:sub(1, 1):upper() .. word:sub(2):lower()))
+				end
+
+				local pascalString = table.concat(words)
+				
+				return pascalString
+			end
+
+			localRoot.CFrame = CFrame.new(workspace.Map.Islands.Bricklandia["Witch Hut"].Cauldron:FindFirstChild("Part").Position+Vector3.new(0,2,0))
+
+			local beforeFiring = os.clock()
+
+			repeat
+				game:GetService("ReplicatedStorage").Remotes.BrewPotion:FireServer(Convert(potion))
+
+				task.wait(0.1)
+
+			until ToolsCountByName(`{potion} potin`) > preBrewPotionCount or Fluent.Unloaded or os.clock()>beforeFiring+30
+			localRoot.CFrame = lastPos
+		end
+	end
 end
+
+if fireclickdetector then
+	local potionNames = {}
+	for potion,_ in pairs(recipe) do
+		table.insert(potionNames, potion)
+	end
+	UISection:AddDropdown("Brewer", {
+        Title = "Potion brewer",
+        Description = "You can select multiple potions.",
+        Values = potionNames,
+        Multi = true,
+        Default = {}
+    })
+
+	UISection:AddInput("PotionCount", {
+        Title = "Potion count",
+		Description = "Brews selected number of potions",
+        Default = 1,
+        Placeholder = 1,
+        Numeric = true,
+        Finished = true,
+        Callback = function(Value)
+            g.n7.saveable.potions.multiplier = tonumber(Value) or 1
+        end
+    })
+
+	UISection:AddButton({Title = "Brew selected", Description = "Brews selected options in queue", Callback = function()
+		local msgg = Instance.new('Hint', workspace)
+		msgg.Text = 'Current queue: '..table.concat(Fluent.Options.Brewer.Value, ", ")
+		for selected,_ in Fluent.Options.Brewer.Value do
+			for i=1,g.n7.saveable.potions.multiplier or 1 do
+				msgg.Text = `Brewing {selected} potion{g.n7.saveable.potions.multiplier>1 and ` ({i}/{g.n7.saveable.potions.multiplier})` or ''}.`
+				Brew(selected)
+				task.wait(0.1)
+			end
+			task.wait(0.1)
+		end
+		msgg:Destroy()
+	end})
+	
+end
+
 if request then
 	Webhook = Window:AddTab({Title = "Webhook", Icon = "bell"})
-	local UseWebhook = Webhook:AddToggle("UseWebhook", { Title = "Use webhook", Description = "Will message on selected event(-s)", Default = getgenv().n7.saveable.webhook.use})
+	local UseWebhook = Webhook:AddToggle("UseWebhook", { Title = "Use webhook", Description = "Will message on selected event(-s)", Default = g.n7.saveable.webhook.use})
 	UseWebhook:OnChanged(function(Value)
-		getgenv().n7.saveable.webhook.use = Value
+		g.n7.saveable.webhook.use = Value
 	end)
 
 	Webhook:AddInput("WebhookLink", {
 		Title = "Webhook link",
 		Description = "After typing, press Enter",
-		Default = #getgenv().n7.saveable.webhook.link > 0 and getgenv().n7.saveable.webhook.link or "",
+		Default = #g.n7.saveable.webhook.link > 0 and g.n7.saveable.webhook.link or "",
 		Numeric = false,
 		Finished = true,
 		Placeholder = "https://discord.com/api/webhooks/*",
 		Callback = function(Value)
-			getgenv().n7.saveable.webhook.link = Value
+			g.n7.saveable.webhook.link = Value
 		end
 	})
 
 	Webhook:AddInput("WebhookPing", {
 		Title = "Mention text",
 		Description = "AKA ping",
-		Default = getgenv().n7.saveable.webhook.cfg.ping,
+		Default = g.n7.saveable.webhook.cfg.ping,
 		Numeric = false,
 		Finished = true,
 		Placeholder = "@everyone",
 		Callback = function(Value)
-			getgenv().n7.saveable.webhook.cfg.ping = Value
+			g.n7.saveable.webhook.cfg.ping = Value
 		end
 	})
 
@@ -660,25 +942,38 @@ if request then
 
 	local UISection = Webhook:AddSection("Events")
 
-	local EventAdmin = UISection:AddToggle("EventAdmin", { Title = "Admin join/exists", Description = "Will message when admin is on the server", Default = getgenv().n7.saveable.webhook.cfg.on_admin})
-	EventAdmin:OnChanged(function(Value)
-		getgenv().n7.saveable.webhook.cfg.on_admin = Value
-	end)
-
-	local EventSale = UISection:AddToggle("EventSale", { Title = "Sale", Description = "Will message when you sell cargo/fish (with autofarm)", Default = getgenv().n7.saveable.webhook.cfg.on_sale})
-	EventSale:OnChanged(function(Value)
-		getgenv().n7.saveable.webhook.cfg.on_sale = Value
-	end)
-
-	local EventCap = UISection:AddToggle("EventCap", { Title = "Cap", Description = "Will message when autofarm hits money cap", Default = getgenv().n7.saveable.webhook.cfg.on_cap})
-	EventCap:OnChanged(function(Value)
-		getgenv().n7.saveable.webhook.cfg.on_cap = Value
-	end)
-
-	local EventCapKick = UISection:AddToggle("EventCapKick", { Title = "(Cap) Kick after cap", Description = "Will kick you after autofarm hits money cap", Default = getgenv().n7.saveable.webhook.cfg.on_cap_kick})
-	EventCapKick:OnChanged(function(Value)
-		getgenv().n7.saveable.webhook.cfg.on_cap_kick = Value
-	end)
+	UISection:AddToggle("EventAdmin", {
+		Title = "Admin join/exists",
+		Description = "Will message when admin is on the server",
+		Default = g.n7.saveable.webhook.cfg.on_admin,
+		Callback = function(Value)
+			g.n7.saveable.webhook.cfg.on_admin = Value
+		end
+	})
+	UISection:AddToggle("EventSale", {
+		Title = "Sale",
+		Description = "Will message when you sell cargo/fish (with autofarm)",
+		Default = g.n7.saveable.webhook.cfg.on_sale,
+		Callback = function(Value)
+			g.n7.saveable.webhook.cfg.on_sale = Value
+		end
+	})
+	UISection:AddToggle("EventCap", {
+		Title = "Cap",
+		Description = "Will message when autofarm hits money cap",
+		Default = g.n7.saveable.webhook.cfg.on_cap,
+		Callback = function(Value)
+			g.n7.saveable.webhook.cfg.on_cap = Value
+		end
+	})
+	UISection:AddToggle("EventCapKick", {
+		Title = "(Cap) Kick after cap",
+		Description = "Will kick you after autofarm hits money cap",
+		Default = g.n7.saveable.webhook.cfg.on_cap_kick,
+		Callback = function(Value)
+			g.n7.saveable.webhook.cfg.on_cap_kick = Value
+		end
+	})
 end
 
 local Settings = Window:AddTab({ Title = "Settings", Icon = "cog"})
@@ -722,13 +1017,13 @@ local function check_3()
 	return false
 end
 
-local AdminCheck = UISection:AddToggle("AdminCheck", { Title = "Check for admins", Description = "Checks for admins while you play", Default = getgenv().n7.saveable.check_admins})
+local AdminCheck = UISection:AddToggle("AdminCheck", { Title = "Check for admins", Description = "Checks for admins while you play", Default = g.n7.saveable.check_admins})
 AdminCheck:OnChanged(function(Value)
-	getgenv().n7.saveable.check_admins = Value
+	g.n7.saveable.check_admins = Value
     task.spawn(function()
 		task.wait(.1)
 		local warned = false
-		if getgenv().n7.saveable.check_admins then
+		if g.n7.saveable.check_admins then
 			local plrs = game.Players:GetPlayers()
 			local cb = false
 			local code = false
@@ -754,7 +1049,7 @@ AdminCheck:OnChanged(function(Value)
 				cb = check_3()
 			end
 			if cb then
-				if getgenv().n7.saveable.webhook.use and request then
+				if g.n7.saveable.webhook.use and request then
 					if not warned then
 						SendWarn(admin, code)
 						warned = true
@@ -766,7 +1061,7 @@ AdminCheck:OnChanged(function(Value)
 end)
 
 game.Players.PlayerAdded:Connect(function(plr)
-	if getgenv().n7.saveable.check_admins then
+	if g.n7.saveable.check_admins then
 		local cb = false
 		local admin = plr
 		local code = false
@@ -778,7 +1073,7 @@ game.Players.PlayerAdded:Connect(function(plr)
 			cb = check_3()
 		end
 		if cb then
-			if getgenv().n7.saveable.webhook.use and request then
+			if g.n7.saveable.webhook.use and request then
 				SendWarn(admin, code)
 			end
 		end
@@ -849,7 +1144,7 @@ if getfenv().isfile and getfenv().readfile and getfenv().writefile and getfenv()
 		Description = "Overwrites the Game Configuration File",
 		Callback = function()
 			xpcall(function()
-				local ExportedConfiguration = HttpService:JSONEncode(getgenv().n7.saveable)
+				local ExportedConfiguration = HttpService:JSONEncode(g.n7.saveable)
 
 				getfenv().writefile(string.format("%s.n7", game.GameId), ExportedConfiguration)
 				Window:Dialog({
@@ -922,9 +1217,9 @@ if getfenv().isfile and getfenv().readfile and getfenv().writefile and getfenv()
 		Title = "About | After loading",
 		Content = "Script will execute the actions selected below after it was loaded again.\nDon't forget to export config to save changes!"
 	})
-	local al = AfterLoading:AddToggle("ToggleAfterLoading", {Title = "Toggle", Description = "Toggles after loading", Default = getgenv().n7.saveable.afterloading.enabled or false})
+	local al = AfterLoading:AddToggle("ToggleAfterLoading", {Title = "Toggle", Description = "Toggles after loading", Default = g.n7.saveable.afterloading.enabled or false})
 	al:OnChanged(function(Value)
-		getgenv().n7.saveable.afterloading.enabled = Value
+		g.n7.saveable.afterloading.enabled = Value
     end)
 	local Step1 = AfterLoading:AddDropdown("Step1", {
         Title = "Step 1 | Team (neutrals)",
@@ -940,10 +1235,10 @@ if getfenv().isfile and getfenv().readfile and getfenv().writefile and getfenv()
 				if team == "pirate" then return workspace.Map.Islands["Choosing Island"].TeamChangers.Pirate.TeamPad.Transparency == 0 end
 			end
 			if string.lower(Value) == "none" then
-				getgenv().n7.saveable.afterloading.step1 = Value
+				g.n7.saveable.afterloading.step1 = Value
 			else
 				if check_team(Value) then
-					getgenv().n7.saveable.afterloading.step1 = Value
+					g.n7.saveable.afterloading.step1 = Value
 				end
 			end
 		end
@@ -952,30 +1247,34 @@ if getfenv().isfile and getfenv().readfile and getfenv().writefile and getfenv()
 	if not fireclickdetector then
 		xc = " | UNSUPPORTED"
 	end
-	local Step2 = AfterLoading:AddToggle("Step2", { Title = "Step 2 | Full belly potion" .. xc, Description = "Brew full belly potion after team was chosen.\nIgnored if step 1 wasn't selected", Default = getgenv().n7.saveable.afterloading.step2})
+	local Step2 = AfterLoading:AddToggle("Step2", { Title = "Step 2 | Full belly potion" .. xc, Description = "Brew full belly potion after team was chosen.\nIgnored if step 1 wasn't selected", Default = g.n7.saveable.afterloading.step2})
 	Step2:OnChanged(function(Value)
 		if Value ~= nil then
-			getgenv().n7.saveable.afterloading.step2 = Value
+			g.n7.saveable.afterloading.step2 = Value
 		end
 	end)
 	local Step3 = AfterLoading:AddDropdown("Step3", {
         Title = "Step 3 | Farm",
 		Description = "Ignored if step 1 wasn't selected.",
-        Values = {"None", "Cargo autofarm", "Fish autofarm"},
+        Values = {"None", "Cargo autofarm", "Fish autofarm", "XP autofarm"},
         Multi = false,
-        Default = getgenv().n7.saveable.afterloading.step3,
+        Default = g.n7.saveable.afterloading.step3,
     })
     Step3:OnChanged(function(Value)
 		if Value ~= nil then
-			getgenv().n7.saveable.afterloading.step3 = Value
+			g.n7.saveable.afterloading.step3 = Value
 		end
     end)
 end
 
+local credit_text = [[Main script is made by Stonifam with ttwiz_zs help
+XP autofarm idea & how-to-make by @darktraja
+Using forked Fluent UI lib by @ttwiz_z]]
+
 Credits = Window:AddTab({Title = "Credits", Icon = "person-standing"})
 Credits:AddParagraph({
 	Title = "nick7 hub",
-	Content = "Main script is made by Stonifam with ttwiz_zs help\nUsing forked Fluent UI lib by @ttwiz_z"
+	Content = credit_text
 })
 Credits:AddButton({
 	Title = "Copy discord invite",
@@ -988,21 +1287,21 @@ Credits:AddButton({
 Window:SelectTab(1)
 -- After loading part :P
 
-if getgenv().n7.saveable.afterloading.enabled then
+if g.n7.saveable.afterloading.enabled then
 	Fluent:Notify({
 		Title = "nick7 hub | Welcome!",
 		Content = "Afterloading is enabled, wait until it will finish.",
 		SubContent = "bordr autofarm",
-		Duration = 5
+		Duration = 10
 	})
-	if getgenv().n7.saveable.afterloading.step1 ~= "None" and getgenv().n7.saveable.afterloading.step1 == "peasant" or getgenv().n7.saveable.afterloading.step1 == "pirate" and player.Team.Name == "choosing" then
+	if g.n7.saveable.afterloading.step1 ~= "None" and g.n7.saveable.afterloading.step1 == "peasant" or g.n7.saveable.afterloading.step1 == "pirate" and player.Team.Name == "choosing" then
 		local sign:Part
 		if not player.Character and not player.Character:FindFirstChild("Humanoid") then
 			repeat task.wait(0.2) until player.Character and player.Character:FindFirstChild("Humanoid")
 		end
-		if getgenv().n7.saveable.afterloading.step1 == "peasant" then
+		if g.n7.saveable.afterloading.step1 == "peasant" then
 			sign = workspace.Map.Islands["Choosing Island"].TeamChangers.Peasent.TeamPad
-		elseif getgenv().n7.saveable.afterloading.step1 == "pirate" then
+		elseif g.n7.saveable.afterloading.step1 == "pirate" then
 			sign = workspace.Map.Islands["Choosing Island"].TeamChangers.Pirate.TeamPad
 		end
 		if player.Team == game.Teams:FindFirstChild("choosing") then
@@ -1019,80 +1318,31 @@ if getgenv().n7.saveable.afterloading.enabled then
 			end
 		end
 		task.wait(3)
-		if getgenv().n7.saveable.afterloading.step2 and fireclickdetector then
-			local function getPotions()
-				local check = "full belly potin"
-				local all_tools = {}
-				for _,v in player.Character:GetChildren() do
-					if v:IsA("Tool") and v.Name == check then
-						table.insert(all_tools, v)
-					end
-				end
-				for _,v in player.Backpack:GetChildren() do
-					if v.Name == check then
-						table.insert(all_tools, v)
-					end
-				end
-				return #all_tools
-			end
-			local fbpc = getPotions() -- full belly potions count
-			local char = player.Character
-			local root = char:FindFirstChild("HumanoidRootPart")
-			if char and root then
-				local _last = root.CFrame
-				if not (player.Backpack:FindFirstChild("catapillah") and player.Backpack:FindFirstChild("bery") and player.Backpack:FindFirstChild("applee")) then
-					local crp
-					local arp
-					do
-						for _,v in workspace.Map.Islands.Farlands.catapillah:GetChildren() do
-							if v:FindFirstChild("ClickDetector") then
-								crp = v
-							end
-						end
-						for _,v in workspace.Map.Islands.Farlands.applee:GetChildren() do
-							if v:FindFirstChild("ClickDetector") then
-								arp = v
-							end
-						end
-					end
-					repeat
-						root.CFrame = crp.CFrame
-						fireclickdetector(crp.ClickDetector)
-						task.wait()
-					until player.Backpack:FindFirstChild("catapillah")
-					task.wait(0.1)
-					repeat
-						root.CFrame = workspace.Map.Islands.Farlands.bery.Part.CFrame
-						fireclickdetector(workspace.Map.Islands.Farlands.bery.Part.ClickDetector)
-						task.wait()
-					until player.Backpack:FindFirstChild("bery")
-					task.wait(0.1)
-					repeat
-						root.CFrame = arp.CFrame
-						fireclickdetector(arp.ClickDetector)
-						task.wait()
-					until player.Backpack:FindFirstChild("applee")
-				end
-				task.wait(0.1)
-				root.CFrame = CFrame.new(-172, 12, 339)
-				repeat
-					game:GetService("ReplicatedStorage").Remotes.BrewPotion:FireServer("FullBelly")
-					task.wait(0.1)
-				until getPotions() > fbpc
-				root.CFrame = _last
-				local potion = player.Backpack:FindFirstChild("full belly potin")
+		if g.n7.saveable.afterloading.step2 and fireclickdetector then
+			if player.Character then
+				Brew('full belly')
+				
+				local potion = FindTool("full belly potin")
 				potion.Parent = player.Character
-				task.wait(0.05)
 				potion:Activate()
-				task.wait(0.2)
 				potion.Parent = player.Backpack
 			end
 		end
-		if getgenv().n7.saveable.afterloading.step3 ~= "None" and getgenv().n7.saveable.afterloading.step3 == "Fish autofarm" or getgenv().n7.saveable.afterloading.step3 ~= "Cargo autofarm" then
-			if getgenv().n7.saveable.afterloading.step3 == "Cargo autofarm" then
+		if g.n7.saveable.afterloading.step3 ~= "None" then
+			if g.n7.saveable.afterloading.step3 == "Cargo autofarm" then
 				FarmToggle:SetValue(true)
-			elseif getgenv().n7.saveable.afterloading.step3 == "Fish autofarm" then
+			elseif g.n7.saveable.afterloading.step3 == "Fish autofarm" then
 				FishFarmToggle:SetValue(true)
+			elseif g.n7.saveable.afterloading.step3 == "XP autofarm" then
+				Brew('worker')
+
+				local potion = FindTool("worker potin")
+				potion.Parent = player.Character
+				potion:Activate()
+				
+				task.wait(0.2)
+
+				XPFarmToggle:SetValue(true)
 			end
 		end
 	end

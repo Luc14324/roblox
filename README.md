@@ -80,7 +80,8 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main
 - Admin check - kicks player after admin is spotted (enabled by default)
 - After loading - executes selected steps (example: become peasant, brew full belly potion, start coin autofarm)
 - Autofarm
-  * Cargo, fish
+  * Cargo, fish, xp
+- Potion brewing - brew potions easily (buggy on server/game side)
 - Cage (client-side safe place)
 - Webhook
   * On admin - messages & pings after admin check spotted admin
