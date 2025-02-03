@@ -40,7 +40,7 @@ if supported then
 else
     print("--=(nick7 hub)=--")
     warn(`Game ({id}) is not supported by nick7 hub!`)
-    print("If game IS supported, create a ticket in our discord: discord.gg/6tgCfU2fX8")
+    print("If game IS supported, create a ticket in our discord: discord.gg/NGAaby4y4b")
     print("--=(nick7 hub)=--")
     local notif = loadstring(game:HttpGet("https://raw.githubusercontent.com/laagginq/ui-libraries/main/dxhooknotify/src.lua", true))()
     notif:Notify("nick7 hub","Game is not supported! Check \"/console\"",20)

@@ -5,8 +5,11 @@ local localPlayer = Players.LocalPlayer
 task.spawn(function()
 	if fireclickdetector then
 		local msg = Instance.new("Hint", workspace)
-		msg.Text = "Started loading nick7 hub, please wait.. // "..game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+
+		msg.Text = "Started loading nick7 hub, please wait... // "..game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name or "be dead forever simulator"
+
 		task.wait(5)
+
 		msg:Destroy()
 	else
 		localPlayer:Kick("(nick7 hub) Your exploit doesn't support fireclickdetector!")
@@ -107,7 +110,7 @@ function CageGen()
 		part.Transparency = 0.4
 		part.Position = offset
 		part.Color = Color3.fromRGB(79, 79, 79)
-		part.Name = "discord.gg/6tgCfU2fX8"
+		part.Name = "discord.gg/NGAaby4y4b"
 	end
 	
 	floor.Position += Vector3.new(0, 0, 0)

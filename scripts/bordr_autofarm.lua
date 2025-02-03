@@ -11,7 +11,7 @@ end
 task.spawn(function()
 	if getgenv then
 		local msg = Instance.new("Hint", workspace)
-		msg.Text = "Started loading nick7 hub, please wait.. // bordr gam"
+		msg.Text = "Started loading nick7 hub, please wait... // ".. game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name or "bordr gam"
 		task.wait(5)
 		msg:Destroy()
 	else
@@ -181,7 +181,7 @@ function cage():CFrame
 		v.Anchored = true
 		v.Transparency = 0.4
 		v.Color = color
-		v.Name = "discord.gg/6tgCfU2fX8"
+		v.Name = "discord.gg/NGAaby4y4b"
 	end
 	--+ Position
 	floor.Position = Vector3.new(0, 0, 0) + offset

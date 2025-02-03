@@ -1,7 +1,7 @@
 --' Script made by Stonifam. Thanks for at least viewing source code xd
 task.spawn(function()
 	local msg = Instance.new("Hint", workspace)
-    msg.Text = "Started loading nick7 hub, please wait.. // BABFT"
+    msg.Text = "Started loading nick7 hub, please wait... // "..game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name or "Build A Boat For Treasure"
     task.wait(5)
     msg:Destroy()
 end)

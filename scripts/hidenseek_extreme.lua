@@ -53,7 +53,7 @@ for _,v in pairs(parts) do
 	v.Anchored = true
 	v.Transparency = 0.4
 	v.Color = _color
-	v.Name = "discord.gg/6tgCfU2fX8"
+	v.Name = "discord.gg/NGAaby4y4b"
 end
 --+ Position
 floor.Position = Vector3.new(0, 0, 0) + _offset
