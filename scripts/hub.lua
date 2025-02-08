@@ -22,7 +22,7 @@ local games = {
     [537413528] = 'load("babft.lua")',
     [3411100258] = 'load("bordr_autofarm.lua")',
     [394773622] = 'workspace.DoShopPurchase:InvokeServer(game.Players.LocalPlayer.leaderstats.Coins, -945986745698454679,"skill3")',
-    [15214140740] = 'load("UltimateTownSandbox.lua")'
+    [18725604807] = 'load("UltimateTownSandbox.lua")'
 }
 local broken = {}
 local supported = false
