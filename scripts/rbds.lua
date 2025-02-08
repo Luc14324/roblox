@@ -1,4 +1,4 @@
--- made by nick7 with <3
+-- made by stonifam with <3
 
 local plr = game:GetService("Players").LocalPlayer
 local GC = getconnections or get_signal_cons

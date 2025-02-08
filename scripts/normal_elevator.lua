@@ -1,7 +1,59 @@
-local plr = game.Players.LocalPlayer
-function getRoot(char)return char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')end
+local plr = game:GetService("Players").LocalPlayer
+
+function getRoot(char)return char:FindFirstChild('HumanoidRootPart')end
+
 local cage
-do--[[CAGE]]if workspace:FindFirstChild("Cage (nick7hub)")then workspace:FindFirstChild("Cage (nick7hub)"):Destroy()end;local a=Instance.new("Folder",workspace)a.Name="Cage (nick7hub)"local b=Color3.fromRGB(79,79,79)local c=Vector3.new(math.random(-100000,100000),math.random(-50,1500),math.random(-100000,100000))local d=Instance.new("Part",a)local e=Instance.new("Part",a)local f=Instance.new("Part",a)local g=Instance.new("Part",a)local h=Instance.new("Part",a)local i=Instance.new("Part",a)local j={d,e,f,g,h,i}for k,l in pairs(j)do l.Anchored=true;l.Transparency=0.4;l.Color=b;l.Name="discord.gg/NGAaby4y4b"end;d.Position=Vector3.new(0,0,0)+c;e.Position=Vector3.new(5,5,0)+c;f.Position=Vector3.new(-5,5,0)+c;g.Position=Vector3.new(0,5,-5)+c;h.Position=Vector3.new(0,5,5)+c;i.Position=Vector3.new(0,10,0)+c;d.Size=Vector3.new(10,1,10)e.Size=Vector3.new(1,10,10)f.Size=Vector3.new(1,10,10)g.Size=Vector3.new(10,10,1)h.Size=Vector3.new(10,10,1)i.Size=Vector3.new(10,1,10)local m=c+Vector3.new(0,4,0)cage=CFrame.new(m)end
+
+do
+	local folder = Instance.new("Folder", workspace)
+	folder.Name = "Cage (nick7hub)"
+
+	cageModel = folder
+
+	local offset = Vector3.new(math.random(-100000, 100000), math.random(-50,1500), math.random(-100000,100000))
+	local floor = Instance.new("Part", folder)
+	local wall1 = Instance.new("Part", folder)
+	local wall2 = Instance.new("Part", folder)
+	local wall3 = Instance.new("Part", folder)
+	local wall4 = Instance.new("Part", folder)
+	local ceiling = Instance.new("Part", folder)
+	local light = Instance.new("PointLight", ceiling)
+
+	local parts = {floor, wall1, wall2, wall3, wall4, ceiling}
+
+	for _, part in ipairs(parts) do
+		part.Anchored = true
+		part.Transparency = 0.4
+		part.Position = offset
+		part.Color = Color3.fromRGB(79, 79, 79)
+		part.Name = "discord.gg/NGAaby4y4b"
+	end
+
+	floor.Position += Vector3.new(0, 0, 0)
+	floor.Size = Vector3.new(10,1,10)
+
+	wall1.Position += Vector3.new(5, 5, 0)
+	wall1.Size = Vector3.new(1, 10, 10)
+
+	wall2.Position += Vector3.new(-5, 5, 0)
+	wall2.Size = Vector3.new(1, 10, 10)
+
+	wall3.Position += Vector3.new(0, 5, -5)
+	wall3.Size = Vector3.new(10, 10, 1)
+
+	wall4.Position += Vector3.new(0, 5, 5)
+	wall4.Size = Vector3.new(10, 10, 1)
+
+	ceiling.Position += Vector3.new(0, 10, 0)
+	ceiling.Size = Vector3.new(10,1,10)
+
+	light.Range = 20
+	light.Brightness = 10
+	light.Shadows = false
+
+	local frame = offset + Vector3.new(0,4,0)
+	CagePosition = CFrame.new(frame)
+end
 
 local GC = getconnections or get_signal_cons
 if GC then

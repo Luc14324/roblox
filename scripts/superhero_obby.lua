@@ -1,28 +1,8 @@
-local GC = getconnections or get_signal_cons
-if GC then
-	for i,v in pairs(GC(game.Players.LocalPlayer.Idled)) do
-		if v["Disable"] then
-			v["Disable"](v)
-		elseif v["Disconnect"] then
-			v["Disconnect"](v)
-		end
-	end
-else
-	game.Players.LocalPlayer.Idled:Connect(function()
-		local VirtualUser = game:GetService("VirtualUser")
-		VirtualUser:CaptureController()
-		VirtualUser:ClickButton2(Vector2.new())
-	end)
-end
-
-function getRoot(char)return char:FindFirstChild('HumanoidRootPart') or char:FindFirstChild('Torso') or char:FindFirstChild('UpperTorso')end
-
-local _levels = game:GetService("Workspace").PointFolder:GetChildren()
-
 local plr = game:GetService("Players").LocalPlayer
+
 local GC = getconnections or get_signal_cons
 if GC then
-	for _,v in pairs(GC(plr.Idled)) do
+	for i,v in pairs(GC(plr.Idled)) do
 		if v["Disable"] then
 			v["Disable"](v)
 		elseif v["Disconnect"] then
@@ -36,6 +16,8 @@ else
 		VirtualUser:ClickButton2(Vector2.new())
 	end)
 end
+
+local levels = workspace.PointFolder:GetChildren()
 
 local g = {}
 local defaults = {autofarm = false}
@@ -73,24 +55,36 @@ local Tabs = {
 	Credits = Window:AddTab({ Title = "Credits", Icon = "person-standing"})
 }
 
-Tabs.Main:AddButton({ Title = "Finish obby", Callback = function()
-	local char = game.Players.LocalPlayer.Character
-	if char and getRoot(char) then
-		getRoot(char).CFrame = game:GetService("Workspace").PointFolder:FindFirstChild(tostring(#_levels - 1)).CFrame	
+function FinishObby()
+	local char = plr.Character
+
+	if char then
+
+		if char:FindFirstChild('HumanoidRootPart') or char:WaitForChild('HumanoidRootPart') then
+
+			char.HumanoidRootPart.CFrame = workspace.PointFolder:FindFirstChild(tostring(#levels - 1)).CFrame
+
+		end
+
 	end
-end})
+end
+
+Tabs.Main:AddButton({ Title = "Finish obby", Callback =  FinishObby})
 
 local autofarm = Tabs.Main:AddToggle("Autofarm", { Title = "Autofarm rebirths", Default = false})
+
 autofarm:OnChanged(function(Value)
 	g.n7.autofarm = Value
+
 	while g.n7.autofarm do
-		local char = game.Players.LocalPlayer.Character
-		if char and getRoot(char) then
-			getRoot(char).CFrame = game:GetService("Workspace").PointFolder:FindFirstChild(tostring(#_levels - 1)).CFrame
-			game.ReplicatedStorage.Rebirth:FireServer("Actual")
-		end
+
+		pcall(FinishObby)
+
+		game:GetService("ReplicatedStorage").Rebirth:FireServer("Actual")
+
 		task.wait()
 	end
+
 end)
 
 local UISection = Tabs.Settings:AddSection("UI")

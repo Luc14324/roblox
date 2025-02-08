@@ -4,7 +4,7 @@
 
   <h3 align="center">nick7 hub</h3>
   <p align="center">
-    keyless and open-source scripts for roblox games!
+    keyless and <i>mostly</i> open-source scripts for roblox games!
     <br /><br />
     Founder and main developer - Stonifam (aka nick7)
     <br />
@@ -32,6 +32,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main
 - Super Hero Obby: [Features](#super-hero-obby) · [Game link](https://www.roblox.com/games/15410077867/)
 - Blocks n' Props: [Features](#blocks-n-props) · [Game link](https://www.roblox.com/games/2537430692/)
 - REVENGE OF THE SLIMES: [Features](#revenge-of-the-slimes) · [Game link](https://www.roblox.com/games/394773622/)
+- Ultimate Town Sandbox: [Features](#ultimate-town-sandbox-beta) · [Game link](https://www.roblox.com/games/2882332175/)
 
 ## Hide and Seek Extreme
 - Anti-AFK
@@ -138,5 +139,24 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main
 - Gives player inf money (without farming or any loops!)
 
 [Source code](https://github.com/nick7-hub/roblox/blob/main/scripts/hub.lua#L22) · [Game link](https://www.roblox.com/games/394773622/REVENGE-OF-THE-SLIMES)
-## Outdated
-- Ultimate Town Sandbox (dropped) [Source code](https://github.com/nick7-hub/roblox/blob/main/scripts/UltimateTownSandbox.lua) · [Game link](https://www.roblox.com/games/15214140740/)
+## Ultimate Town Sandbox (beta)
+- Closed-source (!!)
+- Character:
+  * Unlock all characters (works until rejoin, semi-client-sided)
+  * God mode
+- Farming:
+  * Spills
+  * Berries
+  * Pizzas (unstable)
+  * Loot money from dead NPCs (Kill NPCs)
+- World:
+  * Kill NPCs
+- Mood:
+  * Toggle mood overlays
+  * Show upgrades menu
+  * +100 to every mood ($24.99)
+  * Sleep
+- Teleports
+
+
+[Game link](https://www.roblox.com/games/15214140740/)

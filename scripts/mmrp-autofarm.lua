@@ -62,13 +62,19 @@ local Tabs = {
 }
 
 local autofarm = Tabs.Main:AddToggle("Autofarm", { Title = "Autofarm credits", Default = false})
+
 autofarm:OnChanged(function(Value)
 	g.n7.autofarm = Value
+	
 	while g.n7.autofarm do
 		local char = plr.Character
+
 		if char and getRoot(char) then
-			getRoot(char).CFrame = game:GetService("Workspace").Movers.Begining["Touch Me To Go to Spawn Area"].Head.CFrame
+
+			getRoot(char).CFrame = workspace.Movers.Begining["Touch Me To Go to Spawn Area"].Head.CFrame
+
 		end
+
 		task.wait()
 	end
 end)

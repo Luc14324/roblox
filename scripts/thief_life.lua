@@ -1,5 +1,7 @@
 local RunService = game:GetService("RunService")
+
 local lp = game:GetService("Players").LocalPlayer
+
 local GC = getconnections or get_signal_cons
 if GC then
 	for i,v in pairs(GC(lp.Idled)) do

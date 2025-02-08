@@ -64,8 +64,15 @@ local defaults = {
 	garbagefarm = true,
 	burgerfarm = not not fireproximityprompt,
 	burgerfarmcage = true,
-	burger_minimum = 0
+	burger_minimum = 0,
+	ignore_joy = false,
+	mute_related = false,
 	--avoid = true,
+	farm_status = {
+		trash = false,
+		monitor = false,
+		burger = false,
+	}
 }
 local g = {}
 if getgenv then
@@ -220,125 +227,153 @@ player:AddButton({Title = "Clear cages", Description = "Don't clear cages while 
 	until not (workspace:FindFirstChild("Cage (nick7hub)"))
 end})
 
-autofarm:OnChanged(function(Value)
-	g.n7.autofarm = Value
-	task.spawn(function() -- garbage autofarm
-		if g.n7.garbagefarm then
-			local mhb = workspace.Buildings.DeadBurger.DumpsterMoneyMaker.MoneyHitbox
-			while g.n7.autofarm and not Fluent.Unloaded do
-				pcall(function()
-					if localPlayer.Character and localPlayer.Character.Values.Joy.Value >= 50 then
-						repeat
-							trash.ClickDetector.MaxActivationDistance = math.huge
-							fireclickdetector(trash.ClickDetector, 1)
-							task.wait()
-						until localPlayer.Backpack:FindFirstChild("Garbage Bag") or localPlayer.Character:FindFirstChild("Garbage Bag") or Fluent.Unloaded or not g.n7.autofarm
-						if localPlayer.Backpack:FindFirstChild("Garbage Bag") or localPlayer.Character:FindFirstChild("Garbage Bag") then
-							if not localPlayer.Character:FindFirstChild("Garbage Bag") then
-								local garbage = localPlayer.Backpack:FindFirstChild("Garbage Bag") or localPlayer.Character:FindFirstChild("Garbage Bag")
-								garbage.Parent = localPlayer.Character
-							end
-							repeat
-								trash.ClickDetector.MaxActivationDistance = math.huge
-								fireclickdetector(trash.ClickDetector, 1)
-								mhb.Position = localPlayer.Character.HumanoidRootPart.Position
-								task.wait()
-								mhb.Position = localPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 15, 0)
-								task.wait()
-							until not localPlayer.Character:FindFirstChild("Garbage Bag") or Fluent.Unloaded or not g.n7.autofarm
-						else
-							repeat
-								trash.ClickDetector.MaxActivationDistance = math.huge
-								fireclickdetector(trash.ClickDetector, 1)
-								task.wait()
-							until localPlayer.Backpack:FindFirstChild("Garbage Bag") or localPlayer.Character:FindFirstChild("Garbage Bag") or Fluent.Unloaded or not g.n7.autofarm
-						end
-					end
-				end)
-				task.wait()
-			end
-		end
-	end)
-	task.spawn(function() -- monitor clicker
-		while g.n7.autofarm and not Fluent.Unloaded do
-			local click = {workspace.Buildings["Green House"].Computer.Monitor.Part.ClickDetector}
-			for _,v in workspace.Buildings.CleaningServices:GetDescendants() do
-				if v:IsA("ClickDetector") and v.Parent.Parent.Parent.Name == "Computer" then
-					table.insert(click, v)
-				end
-			end
-			pcall(function()
-				for _,v in pairs(click) do
-					fireclickdetector(v, 1)
-				end
-			end)
-			task.wait()
-		end
-	end)
-	if USE_BETA_FEATURES then
-		task.spawn(function() -- burger autofarm | beta
-			if g.n7.burgerfarm and localPlayer.Character.Values.Joy.Value > 50 then
-				while g.n7.autofarm and not Fluent.Unloaded do
-					if workspace.Buildings.DeadBurger.DumpsterMoneyMaker.NumberOfBags.Value >= g.n7.burger_minimum or 0 then
-						repeat
-							if localPlayer.Character and fireproximityprompt and firesignal then
-								if not (localPlayer.Backpack:FindFirstChild("FoodBox") or localPlayer.Character:FindFirstChild("FoodBox")) then
-									repeat
-										positionToCheck = workspace.Buildings.DeadBurger.DumpsterMoneyMaker.FoodBox.Position
-										localPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = workspace.Buildings.DeadBurger.DumpsterMoneyMaker.FoodBox.CFrame
-										fireproximityprompt(workspace.Buildings.DeadBurger.DumpsterMoneyMaker.FoodBox.ProximityPrompt)
-										ifdanger()
-										task.wait()
-									until localPlayer.Backpack:FindFirstChild("FoodBox") or localPlayer.Character:FindFirstChild("FoodBox") or Fluent.Unloaded or not g.n7.autofarm or localPlayer.Character.Values.Joy.Value < 50
-									positionToCheck = nil
-								end
-								if not (localPlayer.Backpack:FindFirstChild("MadeBurger") or localPlayer.Character:FindFirstChild("MadeBurger")) then
-									local FoodMakeInteract = workspace.Buildings.DeadBurger.FoodMakeInteract
-									FoodMakeInteract.ProximityPrompt.HoldDuration = 0.001
+local DumpsterMoneyMaker = workspace.Buildings.DeadBurger.DumpsterMoneyMaker.MoneyHitbox
 
-									repeat
-										positionToCheck = FoodMakeInteract.Position
-										local tool = localPlayer.Backpack:FindFirstChild("FoodBox") or localPlayer.Character:FindFirstChild("FoodBox")
-										tool.Parent = localPlayer.Character
-										FoodMakeInteract.ProximityPrompt:InputHoldBegin()
-										ifdanger()
-										task.wait(0.2)
-									until localPlayer.Backpack:FindFirstChild("MadeBurger") or localPlayer.Character:FindFirstChild("MadeBurger") or Fluent.Unloaded or not g.n7.autofarm
-									positionToCheck = nil
-								end
-								local tool = localPlayer.Backpack:FindFirstChild("MadeBurger") or localPlayer.Character:FindFirstChild("MadeBurger")
-								if tool then
-									tool.Parent = localPlayer.Character
-									localPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = workspace.Buildings.DeadBurger.Tray.CFrame
-									repeat
-										positionToCheck = workspace.Buildings.DeadBurger.Tray.Position
-										local tool = localPlayer.Backpack:FindFirstChild("MadeBurger") or localPlayer.Character:FindFirstChild("MadeBurger")
-										tool.Parent = localPlayer.Character
-										fireproximityprompt(workspace.Buildings.DeadBurger.Tray.ProximityPrompt)
-										ifdanger()
-										task.wait()
-									until not (localPlayer.Backpack:FindFirstChild("MadeBurger") or localPlayer.Character:FindFirstChild("MadeBurger")) or Fluent.Unloaded or not g.n7.autofarm
-									positionToCheck = nil
-								end
-							elseif not fireproximityprompt then
-								warn("fireproximityprompt is unsupported! Skipping burger autofarm")
-								break
-							end
-							task.wait()
-						until workspace.Buildings.DeadBurger.DumpsterMoneyMaker.NumberOfBags.Value <= 0 or Fluent.Unloaded or not g.n7.autofarm or not localPlayer.Character
-					else
-						if localPlayer.Character and g.n7.burgerfarmcage then
-							localPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = CagePosition
-						end
-					end
+local farms = {
+	['trash'] = function()
+		pcall(function()
+			if localPlayer.Character and (localPlayer.Character.Values.Joy.Value >= 50 and not g.n7.ignore_joy) then
+				repeat
+					trash.ClickDetector.MaxActivationDistance = math.huge
+					fireclickdetector(trash.ClickDetector, 1)
 					task.wait()
+				until localPlayer.Backpack:FindFirstChild("Garbage Bag") or localPlayer.Character:FindFirstChild("Garbage Bag") or Fluent.Unloaded or not g.n7.autofarm
+				if localPlayer.Backpack:FindFirstChild("Garbage Bag") or localPlayer.Character:FindFirstChild("Garbage Bag") then
+					if not localPlayer.Character:FindFirstChild("Garbage Bag") then
+						local garbage = localPlayer.Backpack:FindFirstChild("Garbage Bag") or localPlayer.Character:FindFirstChild("Garbage Bag")
+						garbage.Parent = localPlayer.Character
+					end
+					repeat
+						trash.ClickDetector.MaxActivationDistance = math.huge
+						fireclickdetector(trash.ClickDetector, 1)
+						DumpsterMoneyMaker.Position = localPlayer.Character.HumanoidRootPart.Position
+						task.wait()
+						DumpsterMoneyMaker.Position = localPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 15, 0)
+						task.wait()
+					until not localPlayer.Character:FindFirstChild("Garbage Bag") or Fluent.Unloaded or not g.n7.autofarm
+				else
+					repeat
+						trash.ClickDetector.MaxActivationDistance = math.huge
+						fireclickdetector(trash.ClickDetector, 1)
+						task.wait()
+					until localPlayer.Backpack:FindFirstChild("Garbage Bag") or localPlayer.Character:FindFirstChild("Garbage Bag") or Fluent.Unloaded or not g.n7.autofarm
 				end
 			end
 		end)
+	end,
+
+	['monitor'] = function()
+		local click = {workspace.Buildings["Green House"].Computer.Monitor.Part.ClickDetector}
+		for _,v in workspace.Buildings.CleaningServices:GetDescendants() do
+			if v:IsA("ClickDetector") and v.Parent.Parent.Parent.Name == "Computer" then
+				table.insert(click, v)
+			end
+		end
+		pcall(function()
+			for _,v in pairs(click) do
+				fireclickdetector(v, 1)
+			end
+		end)
+	end,
+
+	['burger'] = function()
+		if (workspace.Buildings.DeadBurger.DumpsterMoneyMaker.NumberOfBags.Value >= g.n7.burger_minimum or 0) and (localPlayer.Character.Values.Joy.Value > 50) then
+			repeat
+				if localPlayer.Character and fireproximityprompt and firesignal then
+					if not (localPlayer.Backpack:FindFirstChild("FoodBox") or localPlayer.Character:FindFirstChild("FoodBox")) then
+						repeat
+							positionToCheck = workspace.Buildings.DeadBurger.DumpsterMoneyMaker.FoodBox.Position
+							localPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = workspace.Buildings.DeadBurger.DumpsterMoneyMaker.FoodBox.CFrame
+							fireproximityprompt(workspace.Buildings.DeadBurger.DumpsterMoneyMaker.FoodBox.ProximityPrompt)
+							ifdanger()
+							task.wait()
+						until localPlayer.Backpack:FindFirstChild("FoodBox") or localPlayer.Character:FindFirstChild("FoodBox") or Fluent.Unloaded or not g.n7.autofarm or localPlayer.Character.Values.Joy.Value < 50
+						positionToCheck = nil
+					end
+					if not (localPlayer.Backpack:FindFirstChild("MadeBurger") or localPlayer.Character:FindFirstChild("MadeBurger")) then
+						local FoodMakeInteract = workspace.Buildings.DeadBurger.FoodMakeInteract
+						FoodMakeInteract.ProximityPrompt.HoldDuration = 0.001
+
+						repeat
+							positionToCheck = FoodMakeInteract.Position
+							local tool = localPlayer.Backpack:FindFirstChild("FoodBox") or localPlayer.Character:FindFirstChild("FoodBox")
+							tool.Parent = localPlayer.Character
+							FoodMakeInteract.ProximityPrompt:InputHoldBegin()
+							ifdanger()
+							task.wait(0.2)
+						until localPlayer.Backpack:FindFirstChild("MadeBurger") or localPlayer.Character:FindFirstChild("MadeBurger") or Fluent.Unloaded or not g.n7.autofarm
+						positionToCheck = nil
+					end
+					local tool = localPlayer.Backpack:FindFirstChild("MadeBurger") or localPlayer.Character:FindFirstChild("MadeBurger")
+					if tool then
+						tool.Parent = localPlayer.Character
+						localPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = workspace.Buildings.DeadBurger.Tray.CFrame
+						repeat
+							positionToCheck = workspace.Buildings.DeadBurger.Tray.Position
+							local tool = localPlayer.Backpack:FindFirstChild("MadeBurger") or localPlayer.Character:FindFirstChild("MadeBurger")
+							tool.Parent = localPlayer.Character
+							fireproximityprompt(workspace.Buildings.DeadBurger.Tray.ProximityPrompt)
+							ifdanger()
+							task.wait()
+						until not (localPlayer.Backpack:FindFirstChild("MadeBurger") or localPlayer.Character:FindFirstChild("MadeBurger")) or Fluent.Unloaded or not g.n7.autofarm
+						positionToCheck = nil
+					end
+				elseif not fireproximityprompt then
+					warn("fireproximityprompt is unsupported! Skipping burger autofarm")
+					break
+				end
+				task.wait()
+			until workspace.Buildings.DeadBurger.DumpsterMoneyMaker.NumberOfBags.Value <= 0 or Fluent.Unloaded or not g.n7.autofarm or not localPlayer.Character
+		else
+			if localPlayer.Character and g.n7.burgerfarmcage then
+				localPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = CagePosition
+			end
+		end
 	end
-end)
+}
+
+local farm_handle = {
+	['Init'] = function(Value)
+		g.n7.autofarm = Value
+		task.spawn(function() -- garbage autofarm
+			if g.n7.garbagefarm and not g.n7.farm_status.trash then
+				g.n7.farm_status.trash = Value
+				while g.n7.autofarm and not Fluent.Unloaded and g.n7.farm_status.trash do
+					farms['trash']()
+					task.wait()
+				end
+				g.n7.farm_status.trash = false
+			end
+		end)
+		task.spawn(function() -- monitor clicker
+			if not g.n7.farm_status.monitor then
+				g.n7.farm_status.monitor = Value
+				while g.n7.autofarm and not Fluent.Unloaded and g.n7.farm_status.monitor do
+					farms['monitor']()
+					task.wait()
+				end
+				g.n7.farm_status.monitor = false
+			end
+		end)
+		if USE_BETA_FEATURES then
+			task.spawn(function() -- burger autofarm | beta
+				if g.n7.burgerfarm then
+					g.n7.farm_status.burger = Value
+					while g.n7.autofarm and not Fluent.Unloaded and g.n7.burgerfarm do
+						farms['burger']()
+						task.wait()
+					end
+					g.n7.farm_status.burger = false
+				end
+			end)
+		end
+	end
+}
+
+autofarm:OnChanged(farm_handle['Init'])
 
 workspace.Buildings.DeadBurger.burgre.ClickDetector.MaxActivationDistance = math.huge
+
 local eatworking = false
 eat:OnChanged(function(Value)
 	g.n7.eat = Value
@@ -353,6 +388,7 @@ eat:OnChanged(function(Value)
 				end
 				if localPlayer.Backpack:FindFirstChild("Burger") or localPlayer.Character:FindFirstChild("Burger") and not eatworking and localPlayer.PlayerGui.Hunger.Hunger.Value <= 100 then
 					local burger = localPlayer.Backpack:FindFirstChild("Burger") or localPlayer.Character:FindFirstChild("Burger")
+					burger.Handle.EAT.Volume = 0 and g.n7.mute_related or 0.5
 					burger.Parent = localPlayer.Character
 					if tcount(localPlayer.Character,'Burger') == 1 and tcount(localPlayer.Backpack,'Burger') == 0 then
 						burger:Activate()
@@ -510,12 +546,39 @@ end)]]
 
 local UISection = Tabs.Settings:AddSection("Farm")
 
+UISection:AddToggle("MuteRelated", {
+	Title = "Mute related sounds",
+	Description = "Mutes sounds that are related to autofarm.",
+	Default = g.n7.mute_related,
+	Callback = function(Value)
+		g.n7.mute_related = Value
+		DumpsterMoneyMaker.ching.Volume = 0 and g.n7.mute_related or 1.5
+		if localPlayer.Character then
+			localPlayer.Character.what.Volume = 0 and g.n7.mute_related or 0.25
+		end
+	end
+})
+
+UISection:AddToggle("IgnoreJoy", {
+	Title = "Ignore joy",
+	Description = "Trash and burger autofarms will ignore joy value.",
+	Default = g.n7.mute_related,
+	Callback = function(Value)
+		g.n7.mute_related = Value
+		if localPlayer.Character then
+			localPlayer.Character.what.Volume = 0 and g.n7.mute_related or 0.25
+			DumpsterMoneyMaker.ching.Volume = 0 and g.n7.mute_related or 1.5
+		end
+	end
+})
+
 UISection:AddToggle("GarbageFarm", {
 	Title = "Include garbage farm",
 	Description = "When enabled, will farm garbage\nRequires 50+ joy.",
 	Default = g.n7.garbagefarm,
 	Callback = function(Value)
 		g.n7.garbagefarm = Value
+		farm_handle['Init'](g.n7.autofarm)
 	end
 })
 
@@ -526,6 +589,7 @@ if fireproximityprompt and USE_BETA_FEATURES then
 		Default = g.n7.burgerfarm,
 		Callback = function(Value)
 			g.n7.burgerfarm = Value
+			farm_handle['Init'](g.n7.autofarm)
 		end
 	})
 

@@ -338,7 +338,10 @@ function gold()
 		t(1,`(Loop restart) {statustext}`)
 		saved_gold = gold_path.Value
 		plr.CharacterAdded:Wait()
-		repeat game:GetService("RunService").RenderStepped:Wait() until plr.Character:FindFirstChild("HumanoidRootPart") and not plr.Character.Humanoid:HasTag("PreDeathN7N7N7yk") and plr.Character.Humanoid.Health > 20
+		repeat
+			game:GetService("RunService").RenderStepped:Wait()
+			task.wait() -- attempt to save from complete client freeze
+		until plr.Character:FindFirstChild("HumanoidRootPart") and not plr.Character.Humanoid:HasTag("PreDeathN7N7N7yk") and plr.Character.Humanoid.Health > 20
  		if not n7.gb_only then -- ignore, function didn't worked correctly with `or`.
 			task.wait(0.1)
 			tx = os.clock()
