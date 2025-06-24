@@ -1,6 +1,14 @@
 --[[ nick7 hub ]]
 
-if getfenv().getconnections then for a,b in next,getfenv().getconnections(game:GetService("ScriptContext").Error)do b:Disable()end;for a,b in next,getfenv().getconnections(game:GetService("LogService").MessageOut)do b:Disable()end end
+if getfenv().getconnections then
+    for _,b in next,getfenv().getconnections(game:GetService("ScriptContext").Error) do
+        b:Disable()
+    end
+    for _,b in next,getfenv().getconnections(game:GetService("LogService").MessageOut) do
+        b:Disable()
+    end
+end
+
 local id = game.PlaceId
 function outdated_warn()
     warn("(nick7 hub) Script is outdated for this game!")
@@ -22,7 +30,8 @@ local games = {
     [537413528] = 'load("babft.lua")',
     [3411100258] = 'load("bordr_autofarm.lua")',
     [394773622] = 'workspace.DoShopPurchase:InvokeServer(game.Players.LocalPlayer.leaderstats.Coins, -945986745698454679,"skill3")',
-    [18725604807] = 'load("UltimateTownSandbox.lua")'
+    [18725604807] = 'load("UltimateTownSandbox.lua")',
+    [17295191183] = 'load("utm.lua")',
 }
 local broken = {}
 local supported = false
@@ -45,4 +54,4 @@ else
     print("--=(nick7 hub)=--")
     local notif = loadstring(game:HttpGet("https://raw.githubusercontent.com/laagginq/ui-libraries/main/dxhooknotify/src.lua", true))()
     notif:Notify("nick7 hub","Game is not supported! Check \"/console\"",20)
-end 
+end

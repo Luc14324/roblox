@@ -16,7 +16,7 @@
 
 Hub script - all supported games in one line
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main/scripts/hub.lua"))()
+loadstring(game:HttpGet("https://nick7.moderka.org/scripts/hub.lua"))()
 ```
 # Supported games and features
 - Hide and Seek Extreme: [Features](#hide-and-seek-extreme) · [Game link](https://www.roblox.com/games/205224386/)
@@ -33,6 +33,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main
 - Blocks n' Props: [Features](#blocks-n-props) · [Game link](https://www.roblox.com/games/2537430692/)
 - REVENGE OF THE SLIMES: [Features](#revenge-of-the-slimes) · [Game link](https://www.roblox.com/games/394773622/)
 - Ultimate Town Sandbox: [Features](#ultimate-town-sandbox-beta) · [Game link](https://www.roblox.com/games/2882332175/)
+- Ultimate Town Multiplayer: [Features](#ultimate-town-multiplayer) · [Game link](https://www.roblox.com/games/17295191183/) · [Showcase](https://files.catbox.moe/v7veoz.mp4)
 
 ## Hide and Seek Extreme
 - Anti-AFK
@@ -158,5 +159,39 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main
   * Sleep
 - Teleports
 
-
 [Game link](https://www.roblox.com/games/15214140740/)
+## Ultimate Town Multiplayer
+- Closed-source (!!)
+- Character:
+  * WalkSpeed slider
+  * Disable Ragdoll
+  * GUIs:
+    * Show accessories catalog
+    * Show clothing catalog
+    * Show barber catalog
+- Farming:
+  * Autofarm spills
+  * Autofarm foliage
+  * Autofarm pizza
+- World:
+  * Mute weather sounds (prevents weather from updating localy)
+  * Mute loot sound (getting money sound)
+  * Mute harvest sounds
+- Mood:
+  * Toggle mood overlay
+  * +100 to every mood
+  * Sleep
+- Teleports (4 Jobs ; 10 Misc)
+- Settings
+  * Farms:
+    * Proximity prompt Delay
+    * Foliage max attempts
+    * Toggle foliage distance sorting
+    * Auto-sell foliage
+    * Foliage sell point (x1/x2)
+  * UI:
+    * Theme
+    * Transparency
+    * Minimize key (default: RightShift)
+
+[Game link](https://www.roblox.com/games/17295191183/) · [Showcase](https://files.catbox.moe/v7veoz.mp4)
