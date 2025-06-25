@@ -44,8 +44,8 @@ local games = {
     [537413528] = 'load("babft.lua")',
     [3411100258] = 'load("bordr_autofarm.lua")',
     [394773622] = 'workspace.DoShopPurchase:InvokeServer(game.Players.LocalPlayer.leaderstats.Coins, -945986745698454679,"skill3")',
-    [18725604807] = 'load_obf("UltimateTownSandbox.lua")',
-    [17295191183] = 'load_obf("utm.lua")',
+    [18725604807] = 'load("UltimateTownSandbox.lua")',
+    [17295191183] = 'load("utm.lua")',
 }
 
 local broken = {}
