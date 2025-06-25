@@ -13,9 +13,23 @@ local id = game.PlaceId
 function outdated_warn()
     warn("(nick7 hub) Script is outdated for this game!")
 end
+
 function load(str)
     loadstring(game:HttpGet("https://raw.githubusercontent.com/nick7-hub/roblox/main/scripts/"..str))()
 end
+
+function obfuscation_warning()
+    return load('obfuscation_warning.lua')
+end
+
+function load_obf(text) -- load() wrapper
+    local gui:ScreenGui = obfuscation_warning()
+    task.wait(0.1)
+    game:GetService("RunService").RenderStepped:Wait()
+    load(text)
+    gui:Destroy()
+end
+
 local games = {
     [205224386] = 'load("hidenseek_extreme.lua")',
     [2693739238] = 'load("thief_life.lua")',
@@ -30,9 +44,10 @@ local games = {
     [537413528] = 'load("babft.lua")',
     [3411100258] = 'load("bordr_autofarm.lua")',
     [394773622] = 'workspace.DoShopPurchase:InvokeServer(game.Players.LocalPlayer.leaderstats.Coins, -945986745698454679,"skill3")',
-    [18725604807] = 'load("UltimateTownSandbox.lua")',
-    [17295191183] = 'load("utm.lua")',
+    [18725604807] = 'load_obf("UltimateTownSandbox.lua")',
+    [17295191183] = 'load_obf("utm.lua")',
 }
+
 local broken = {}
 local supported = false
 for k, _ in pairs(games) do
@@ -41,6 +56,7 @@ for k, _ in pairs(games) do
         break
     end
 end
+
 if supported then
     if not table.find(broken, id) then
         loadstring(games[id])()
