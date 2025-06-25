@@ -87,4 +87,4 @@ n7w["7"]["Text"] = [[Script is obfuscated using pixsec. Roblox might freeze up t
 n7w["7"]["Name"] = randomString();
 n7w["7"]["Position"] = UDim2.new(0.5, 0, 0.65184, 0);
 
-return n7w['1'], require;
+return n7w['1']
