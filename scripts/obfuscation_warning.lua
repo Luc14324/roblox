@@ -2,14 +2,6 @@
 
 local n7w = {};
 
-function missing(t, f, fallback)
-	if type(f) == t then return f end
-	return fallback or nil
-end
-
-cloneref = missing("function", cloneref, function(...) return ... end)
-COREGUI = cloneref(game:GetService("CoreGui"))
-
 function randomString()
 	local length = math.random(10,20)
 	local array = {}
@@ -19,43 +11,14 @@ function randomString()
 	return table.concat(array)
 end
 
-local e,v = pcall(function()
-	return COREGUI:FindFirstChild("RobloxGui")
-end)
-
-local PARENT = nil
-if get_hidden_gui or gethui then
-	local hiddenUI = get_hidden_gui or gethui
-	n7w["1"] = Instance.new("ScreenGui")
-	n7w["1"]["Parent"] = hiddenUI()
-	n7w["1"]["Name"] = randomString()
-	PARENT = n7w["1"]
-elseif (not is_sirhurt_closure) and (syn and syn.protect_gui) then
-	n7w["1"] = Instance.new("ScreenGui")
-	n7w["1"]["Name"] = randomString()
-	syn.protect_gui(n7w["1"])
-	n7w["1"].Parent = COREGUI
-	PARENT = n7w["1"]
-elseif e and v then
-	PARENT = COREGUI.RobloxGui
-else
-	local a,b = pcall(function()
-		n7w["1"] = Instance.new("ScreenGui")
-		n7w["1"]["Name"] = randomString()
-		n7w["1"]["Parent"] = COREGUI
-		PARENT = n7w["1"]
-	end)
-	if not a then
-		n7w["1"] = Instance.new("ScreenGui")
-		n7w["1"]["Name"] = randomString()
-		n7w["1"]["Parent"] = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-		PARENT = n7w["1"]
-	end
-end
+n7w["1"] = Instance.new("ScreenGui")
+n7w["1"]["Name"] = randomString()
+n7w["1"]["Parent"] = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+n7w["1"]["DisplayOrder"] = 99
 
 n7w["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling;
 
-n7w["2"] = Instance.new("CanvasGroup", PARENT);
+n7w["2"] = Instance.new("CanvasGroup", n7w["1"]);
 n7w["2"]["BorderSizePixel"] = 0;
 n7w["2"]["BackgroundColor3"] = Color3.fromRGB(30, 30, 30);
 n7w["2"]["Size"] = UDim2.new(0.28974, 0, 0.41975, 0);
@@ -124,4 +87,4 @@ n7w["7"]["Text"] = [[Script is obfuscated using pixsec. Roblox might freeze up t
 n7w["7"]["Name"] = randomString();
 n7w["7"]["Position"] = UDim2.new(0.5, 0, 0.65184, 0);
 
-return PARENT, require;
+return n7w['1'], require;
