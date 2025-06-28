@@ -20,10 +20,10 @@ end
 
 local n7w = nil
 
-do
+function n7w()
     n7w = {};
 
-    function randomString()
+    local function randomString()
         local length = math.random(10,20)
         local array = {}
         for i = 1, length do
@@ -110,6 +110,7 @@ do
 end
 
 function load_obf(text) -- load() wrapper
+    n7w()
     local gui:ScreenGui = n7w['1']
     task.wait(0.1)
     game:GetService("RunService").RenderStepped:Wait()
