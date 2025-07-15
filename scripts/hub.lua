@@ -1,14 +1,5 @@
 --[[ nick7 hub ]]
 
-if getfenv().getconnections then
-    for _,b in next,getfenv().getconnections(game:GetService("ScriptContext").Error) do
-        b:Disable()
-    end
-    for _,b in next,getfenv().getconnections(game:GetService("LogService").MessageOut) do
-        b:Disable()
-    end
-end
-
 local id = game.PlaceId
 function outdated_warn()
     warn("(nick7 hub) Script is outdated for this game!")
@@ -134,6 +125,7 @@ local games = {
     [394773622] = 'workspace.DoShopPurchase:InvokeServer(game.Players.LocalPlayer.leaderstats.Coins, -945986745698454679,"skill3")',
     [18725604807] = 'load_obf("UltimateTownSandbox.lua")',
     [17295191183] = 'load_obf("utm.lua")',
+    [72842684855320] = 'load("sonic-stay-alive.lua")',
 }
 
 local broken = {}

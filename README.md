@@ -34,6 +34,7 @@ loadstring(game:HttpGet("https://nick7.moderka.org/scripts/hub.lua"))()
 - REVENGE OF THE SLIMES: [Features](#revenge-of-the-slimes) · [Game link](https://www.roblox.com/games/394773622/)
 - Ultimate Town Sandbox: [Features](#ultimate-town-sandbox-beta) · [Game link](https://www.roblox.com/games/2882332175/)
 - Ultimate Town Multiplayer: [Features](#ultimate-town-multiplayer) · [Game link](https://www.roblox.com/games/17295191183/) · [Showcase](https://files.catbox.moe/v7veoz.mp4)
+- Sonic.EXE: Stay Alive: [Features](#sonicexe-stay-alive) · [Game link](https://www.roblox.com/games/72842684855320/)
 
 ## Hide and Seek Extreme
 - Anti-AFK
@@ -195,3 +196,40 @@ loadstring(game:HttpGet("https://nick7.moderka.org/scripts/hub.lua"))()
     * Minimize key (default: RightShift)
 
 [Game link](https://www.roblox.com/games/17295191183/) · [Showcase](https://files.catbox.moe/v7veoz.mp4)
+## Sonic.EXE: Stay Alive
+- Anti-AFK
+- Player
+  * WalkSpeed and JumpPower sliders
+  * Camera tilt toggle
+  * Mute music
+  * Force enable reset
+- Survivor
+  * Universal:
+    * Turn into EXE
+    * No jump cooldown
+  * *All survivors:
+    * No cooldown
+    * Punch without Punching (kill aura)
+    * Spam tool
+- EXE
+  * Universal:
+    * No jump cooldown
+    * Kill all toggle (with EXE filter)
+  * *All EXEs:
+    * No cooldown
+    * Punch without Punching (kill aura)
+    * Spam tool
+- Teleports
+  * Lobbies:
+    * Main lobby
+    * Survivors lobby
+    * EXEs lobby
+  * Maps:
+    * Kind And Fair
+    * Bingo Forest
+    * TestZone
+- Settings
+  * Client:
+    * Rejoin and Server hop
+  * UI
+    * Themes changer, toggle UI keybind and Unload GUI button
