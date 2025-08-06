@@ -48,22 +48,28 @@ loadstring(game:HttpGet("https://nick7.moderka.org/scripts/hub.lua"))()
 ## THIEF LIFE Simulator
 - Anti-AFK
 - (client-side) Free VIP zone
+- Sell everything / including guns
+- Get starter money
 - Autofarm
   * Money (clears your inventory)
   * XP
-- Club (_aka_ guild)
-  * Club creation with custom color, custom image (works strange)
+- Player
+  * WalkSpeed and JumpPower sliders
+  * Camera fixer
+  * Purchasing
+    * Buy best - buys best tools, pet, backpack
+    * Buy best armor
+    * Buy weapon
+    * Unlock all zones
+- Club
+  * Club creation with custom color, custom image (works strangely)
   * Auto-leave
-- Target (**Player** or **all players**)
-  * Kill / Loop included
-  * Force trade / Loop included
-  * Force club member (until target rejoins) / Loop included
-- Request loot - opens container by ID (example: 502)
-- Unlock all zones
-- Purchasing
-  * Buy best - buys best tools, pet, backpack
-  * Buy best armor
-  * Buy weapon
+- Targeting (**Player** or **all players**)
+  * Crash Server - breaks servers and stops normal players from playing
+  * Kill / with loop (requires a gun OR $100)
+  * Force trade / with loop
+  * Force club member (until target rejoins) / with loop
+- Teleports
 
 [Source code](https://github.com/nick7-hub/roblox/blob/main/scripts/thief_life.lua) · [Game link](https://www.roblox.com/games/2693739238/)
 ## Mega Marble Run Pit
