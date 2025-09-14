@@ -240,9 +240,8 @@ loadstring(game:HttpGet("https://nick7.moderka.org/scripts/hub.lua"))()
     * Rejoin and Server hop
   * UI
     * Themes changer, toggle UI keybind and Unload GUI button
-
-[Game link]((https://www.roblox.com/games/5987989452/))
-## monke game 🙉🥵
+[Game link](https://www.roblox.com/games/5987989452/)
+## monke game
 - Anti-AFK
 - Player
   * WalkSpeed and JumpPower sliders
