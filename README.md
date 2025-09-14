@@ -35,7 +35,8 @@ loadstring(game:HttpGet("https://nick7.moderka.org/scripts/hub.lua"))()
 - Ultimate Town Sandbox: [Features](#ultimate-town-sandbox-beta) · [Game link](https://www.roblox.com/games/2882332175/)
 - Ultimate Town Multiplayer: [Features](#ultimate-town-multiplayer) · [Game link](https://www.roblox.com/games/17295191183/) · [Showcase](https://files.catbox.moe/v7veoz.mp4)
 - Sonic.EXE: Stay Alive: [Features](#sonicexe-stay-alive) · [Game link](https://www.roblox.com/games/72842684855320/)
-
+- Sonic.EXE: Stay Alive: [Features](#monke-game) · [Game link](https://www.roblox.com/games/5987989452/)
+  
 ## Hide and Seek Extreme
 - Anti-AFK
 - Autofarm
@@ -234,6 +235,30 @@ loadstring(game:HttpGet("https://nick7.moderka.org/scripts/hub.lua"))()
     * Kind And Fair
     * Bingo Forest
     * TestZone
+- Settings
+  * Client:
+    * Rejoin and Server hop
+  * UI
+    * Themes changer, toggle UI keybind and Unload GUI button
+
+[Game link]((https://www.roblox.com/games/5987989452/))
+## monke game 🙉🥵
+- Anti-AFK
+- Player
+  * WalkSpeed and JumpPower sliders
+  * Force enable reset
+  * Vent Spam (only works if monke)
+  * Reset if monke
+  * Remove Cooldown Scripts (jump, item switch)
+  * Instant Proximity Prompts (grab alpha sample instantly!) 
+- Visual
+  * Fullbright
+  * Remove Pink Transformation UI
+  * ESP (items, players)
+- Infection
+  * Toggle infection from puddles
+  * Toggle killzones
+  * Infect yourself (Brown, Blue, Green and Orange)
 - Settings
   * Client:
     * Rejoin and Server hop
