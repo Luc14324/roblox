@@ -35,7 +35,7 @@ loadstring(game:HttpGet("https://nick7.moderka.org/scripts/hub.lua"))()
 - Ultimate Town Sandbox: [Features](#ultimate-town-sandbox-beta) · [Game link](https://www.roblox.com/games/2882332175/)
 - Ultimate Town Multiplayer: [Features](#ultimate-town-multiplayer) · [Game link](https://www.roblox.com/games/17295191183/) · [Showcase](https://files.catbox.moe/v7veoz.mp4)
 - Sonic.EXE: Stay Alive: [Features](#sonicexe-stay-alive) · [Game link](https://www.roblox.com/games/72842684855320/)
-- Sonic.EXE: Stay Alive: [Features](#monke-game) · [Game link](https://www.roblox.com/games/5987989452/)
+- monke game 🙉🥵: [Features](#monke-game) · [Game link](https://www.roblox.com/games/5987989452/)
   
 ## Hide and Seek Extreme
 - Anti-AFK
