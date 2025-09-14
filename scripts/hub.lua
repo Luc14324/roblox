@@ -126,6 +126,7 @@ local games = {
     [18725604807] = 'load_obf("UltimateTownSandbox.lua")',
     [17295191183] = 'load_obf("utm.lua")',
     [72842684855320] = 'load("sonic-stay-alive.lua")',
+    [5987989452] = 'load("monkegame.lua")',
 }
 
 local broken = {}
